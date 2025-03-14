@@ -1,22 +1,11 @@
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import * as React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import AppStack from './navigation/AppStack';
 
 export default function App() {
-  const [value, setValue] = useState('');
-  const [isHidden, setIsHidden] = useState(true);
-
   return (
-    <View style={styles.container}>
-
-    </View>
+    <NavigationContainer>
+      <AppStack />
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
-});
