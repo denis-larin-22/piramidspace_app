@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppStack";
 import Loader from "../components/ui/Loader";
 import ErrorNotification from "../components/ui/ErrorNotification";
+import { Fonts } from "../theme/fonts";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LoginScreen'>;
 
@@ -14,6 +15,8 @@ function LoginScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
 
     const [loginError, setLoginError] = useState<boolean>(false);
     const [passwordError, setPasswordError] = useState<boolean>(false);
+
+    const [isPasswordHide, setIsPasswordHide] = useState<boolean>(false);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -82,20 +85,38 @@ function LoginScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
                 />
 
                 <Text style={styles.label}>Пароль</Text>
-                <TextInput
-                    onChangeText={(text) => {
-                        setPasswordError(false);
-                        setPasswordValue(text);
-                    }}
-                    value={passwordValue}
-                    placeholder="Введіть свій пароль"
-                    placeholderTextColor={Colors.gray}
-                    style={{
-                        ...styles.input,
-                        borderColor: passwordError ? Colors.red : Colors.pale,
-                        marginBottom: 10
-                    }}
-                />
+                <View>
+                    <TextInput
+                        onChangeText={(text) => {
+                            setPasswordError(false);
+                            setPasswordValue(text);
+                        }}
+                        value={passwordValue}
+                        placeholder="Введіть свій пароль"
+                        placeholderTextColor={Colors.gray}
+                        secureTextEntry={isPasswordHide}
+                        style={{
+                            ...styles.input,
+                            borderColor: passwordError ? Colors.red : Colors.pale,
+                            marginBottom: 10,
+                        }}
+                    />
+                    <TouchableOpacity
+                        onPress={() => { setIsPasswordHide(!isPasswordHide) }}
+                        style={styles.hidePasswordButton}>
+                        {isPasswordHide ?
+                            <Image
+                                source={require('../assets/login-screen/open-eye.png')}
+                                style={styles.openEyeImage}
+                            />
+                            :
+                            <Image
+                                source={require('../assets/login-screen/close-eye.png')}
+                                style={styles.closeEyeImage}
+                            />
+                        }
+                    </TouchableOpacity>
+                </View>
 
                 <Text style={styles.forgotPassword}>Забули пароль?</Text>
 
@@ -154,15 +175,15 @@ const styles = StyleSheet.create({
     loginHeadText: {
         color: Colors.blue,
         textTransform: "uppercase",
+        fontFamily: Fonts.comfortaa700,
         fontSize: 26,
-        fontWeight: "700",
         textAlign: "center",
         marginBottom: 15
     },
     loginText: {
         color: "#2B2548",
         fontSize: 14,
-        fontWeight: 400,
+        fontFamily: Fonts.openSans400,
         textAlign: "center",
         marginBottom: 55
     },
@@ -170,7 +191,7 @@ const styles = StyleSheet.create({
         marginLeft: 16,
         marginBottom: 6,
         fontSize: 16,
-        fontWeight: 700
+        fontFamily: Fonts.comfortaa700
     },
     input: {
         backgroundColor: "white",
@@ -180,6 +201,27 @@ const styles = StyleSheet.create({
         borderRadius: 31,
         marginBottom: 21,
         borderWidth: 1,
+        fontFamily: Fonts.openSans400,
+        fontSize: 14
+    },
+    hidePasswordButton: {
+        width: 26,
+        height: 15,
+        position: 'absolute',
+        right: 13,
+        top: '25%'
+    },
+    openEyeImage: {
+        height: 15,
+        width: 24,
+        resizeMode: 'center'
+    },
+    closeEyeImage: {
+        height: 22,
+        width: 22,
+        resizeMode: 'stretch',
+        position: 'relative',
+        top: -5
     },
     decorImage: {
         position: "absolute",
@@ -197,8 +239,8 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: "white",
-        fontSize: 18,
-        fontWeight: "semibold",
+        fontSize: 16,
+        fontFamily: Fonts.comfortaa600,
         width: '100%',
         paddingVertical: 12,
         textAlign: "center"
@@ -207,6 +249,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: Colors.blue,
         opacity: 0.8,
-        textAlign: "right"
+        textAlign: "right",
+        fontFamily: Fonts.openSans400,
     },
 });
