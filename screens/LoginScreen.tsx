@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, Image, Dimensions, ImageBackground, StyleSheet, ButtonProps, Modal, Alert, Pressable } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image, Dimensions, ImageBackground, StyleSheet, ButtonProps, Modal, Alert, Pressable, Keyboard } from "react-native";
 import { Colors } from "../theme/colors";
 import { useState } from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -6,49 +6,53 @@ import { RootStackParamList } from "../navigation/AppStack";
 import Loader from "../components/ui/Loader";
 import ErrorNotification from "../components/ui/ErrorNotification";
 import { Fonts } from "../theme/fonts";
+import { formatToLowerCase } from "../lib/utils";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LoginScreen'>;
 
 function LoginScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
-    const [loginValue, setLoginValue] = useState<string>("");
-    const [passwordValue, setPasswordValue] = useState<string>("");
+    const [loginValue, setLoginValue] = useState<string>(""); // Login input
+    const [passwordValue, setPasswordValue] = useState<string>(""); // Password input
 
-    const [loginError, setLoginError] = useState<boolean>(false);
-    const [passwordError, setPasswordError] = useState<boolean>(false);
+    const [loginError, setLoginError] = useState<boolean>(false); // If login input is empty
+    const [passwordError, setPasswordError] = useState<boolean>(false); // If password input is empty
 
-    const [isPasswordHide, setIsPasswordHide] = useState<boolean>(false);
+    const [isPasswordHide, setIsPasswordHide] = useState<boolean>(true); // Hide password button state
 
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false); // Loading auth state
 
-    const [modalErrorVisible, setModalErrorVisible] = useState(false);
+    const [modalErrorVisible, setModalErrorVisible] = useState(false); // Error notification state
 
     const loginButtonHandler = () => {
-        const value = 'test';
+        const keyValue = 'test'; // temporary
 
+        // If input fields are empty
         if (loginValue.length === 0) {
             setLoginError(true);
         }
-
         if (passwordValue.length === 0) {
             setPasswordError(true);
         }
-
         if (loginValue.length === 0 || passwordValue.length === 0) return;
+
+        // Start auth
         setIsLoading(true);
+        Keyboard.dismiss(); // hide keyboard
 
+        const login = formatToLowerCase(loginValue);
+        const password = formatToLowerCase(passwordValue);
 
-        if (loginValue === value && passwordValue === value) {
+        if (login === keyValue && password === keyValue) {
             setTimeout(() => {
                 setLoginValue("");
                 setPasswordValue("");
                 setIsLoading(false);
-                navigation.navigate('MainScreen');
+                navigation.navigate('CatalogScreen');
             }, 1500)
         } else {
             setTimeout(() => {
                 setLoginError(true);
                 setPasswordError(true);
-                console.log("Error!");
                 setIsLoading(false);
                 setModalErrorVisible(true);
             }, 1500);
@@ -135,13 +139,15 @@ function LoginScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
 
             <ErrorNotification
                 isVissible={modalErrorVisible}
-                message="Перевірте логін або пароль"
+                message="Перевірте значення логіна і паролю"
             />
         </View>
     )
 }
 
 export default LoginScreen;
+
+// UI
 
 function LoginButton(loginButtonProps: ButtonProps) {
     return (
@@ -158,6 +164,7 @@ function LoginButton(loginButtonProps: ButtonProps) {
     )
 }
 
+// Styles
 
 const styles = StyleSheet.create({
     container: {

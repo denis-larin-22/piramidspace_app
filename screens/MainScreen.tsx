@@ -16,7 +16,7 @@ function MainScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
             }}
         >
             <Image
-                source={require("../assets/icon.png")}
+                source={require("../assets/icon-img.png")}
                 style={{
                     width: 150,
                     resizeMode: "center",
