@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, Image, Dimensions, ImageBackground, StyleSheet, ButtonProps, Modal, Alert, Pressable, Keyboard } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, StyleSheet, ButtonProps, Keyboard, StatusBar } from "react-native";
 import { Colors } from "../theme/colors";
 import { useState } from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -8,9 +8,9 @@ import ErrorNotification from "../components/ui/ErrorNotification";
 import { Fonts } from "../theme/fonts";
 import { formatToLowerCase } from "../lib/utils";
 
-type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LoginScreen'>;
+type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LoginScreen'>;
 
-function LoginScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
+function LoginScreen({ navigation }: { navigation: LoginScreenNavigationProp }) {
     const [loginValue, setLoginValue] = useState<string>(""); // Login input
     const [passwordValue, setPasswordValue] = useState<string>(""); // Password input
 
@@ -65,6 +65,8 @@ function LoginScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
 
     return (
         <View style={styles.container}>
+            <StatusBar hidden={true} />
+
             <View style={styles.loginForm}>
                 <Text style={styles.loginHeadText}>
                     Привіт, Партнере!

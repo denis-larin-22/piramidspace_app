@@ -3,8 +3,12 @@ import { Colors } from "../theme/colors";
 import CatalogItem from "../components/catalog-screen/CatalogItem";
 import { catalogList } from "../lib/catalog-list";
 import Logo from "../components/ui/Logo";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/AppStack";
 
-function CatalogScreen() {
+export type CatalogScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "CatalogScreen">;
+
+function CatalogScreen({ navigation }: { navigation: CatalogScreenNavigationProp }) {
     return (
         <View
             style={{
@@ -32,9 +36,9 @@ function CatalogScreen() {
                 renderItem={({ item }) => (
                     <CatalogItem
                         product={item}
+                        navigation={navigation}
                     />
                 )}
-
             />
         </View>
     )

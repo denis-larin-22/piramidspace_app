@@ -2,12 +2,15 @@ import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from
 import { IProductItem } from "../../lib/types";
 import { Fonts } from "../../theme/fonts";
 import { Colors } from "../../theme/colors";
+import { getAvailabilityTextColor } from "../../lib/utils";
+import { CatalogScreenNavigationProp } from "../../screens/CatalogScreen";
 
 interface IProps {
-    product: IProductItem
+    product: IProductItem,
+    navigation: CatalogScreenNavigationProp
 }
 
-function CatalogItem({ product }: IProps) {
+function CatalogItem({ product, navigation }: IProps) {
     const imageUrl = product.images_url[0] as string;
     const isTopProduct = Boolean(product.sort_order);
     const saleValue = product.price.sale;
@@ -16,6 +19,9 @@ function CatalogItem({ product }: IProps) {
         <TouchableOpacity
             key={product.id}
             style={style.cardWrap}
+            onPress={() => {
+                navigation.navigate('CatalogItemScreen');
+            }}
         >
             {isTopProduct &&
                 <Image
@@ -80,19 +86,6 @@ function SaleMark({ saleValue }: { saleValue: string }) {
             <Text style={style.saleText}>Акція {saleValue}%</Text>
         </View >
     )
-};
-
-// util
-function getAvailabilityTextColor(availabilityValue: string) {
-    const value = availabilityValue.toLowerCase();
-
-    return value === "в наявності" ?
-        Colors.green
-        :
-        value === "немає" ?
-            Colors.red
-            :
-            Colors.orange
 };
 
 // styles

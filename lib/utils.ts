@@ -1,3 +1,17 @@
+import { Colors } from "../theme/colors";
+
+export function getAvailabilityTextColor(availabilityValue: string) {
+    const value = availabilityValue.toLowerCase();
+
+    return value === "в наявності" ?
+        Colors.green
+        :
+        value === "немає" ?
+            Colors.red
+            :
+            Colors.orange
+};
+
 export function formatToLowerCase(word: string) {
     return word.split('').map((letter) => {
         return letter.toLowerCase();
