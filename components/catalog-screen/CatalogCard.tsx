@@ -3,14 +3,14 @@ import { IProductItem } from "../../lib/types";
 import { Fonts } from "../../theme/fonts";
 import { Colors } from "../../theme/colors";
 import { getAvailabilityTextColor } from "../../lib/utils";
-import { CatalogScreenNavigationProp } from "../../screens/CatalogScreen";
 
 interface IProps {
     product: IProductItem,
-    navigation: CatalogScreenNavigationProp
+    onPressHandler: (productId: number) => void
 }
 
-function CatalogItem({ product, navigation }: IProps) {
+
+function CatalogCard({ product, onPressHandler }: IProps) {
     const imageUrl = product.images_url[0] as string;
     const isTopProduct = Boolean(product.sort_order);
     const saleValue = product.price.sale;
@@ -19,9 +19,7 @@ function CatalogItem({ product, navigation }: IProps) {
         <TouchableOpacity
             key={product.id}
             style={style.cardWrap}
-            onPress={() => {
-                navigation.navigate('CatalogItemScreen');
-            }}
+            onPress={() => onPressHandler(product.id)}
         >
             {isTopProduct &&
                 <Image
@@ -71,7 +69,7 @@ function CatalogItem({ product, navigation }: IProps) {
     )
 };
 
-export default CatalogItem;
+export default CatalogCard;
 
 // ui
 function SaleMark({ saleValue }: { saleValue: string }) {

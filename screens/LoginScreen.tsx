@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, StyleSheet, ButtonProps, Keyboard, StatusBar } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, StyleSheet, ButtonProps, Keyboard, SafeAreaView } from "react-native";
 import { Colors } from "../theme/colors";
 import { useState } from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -39,15 +39,15 @@ function LoginScreen({ navigation }: { navigation: LoginScreenNavigationProp }) 
         setIsLoading(true);
         Keyboard.dismiss(); // hide keyboard
 
-        const login = formatToLowerCase(loginValue);
-        const password = formatToLowerCase(passwordValue);
+        const login = formatToLowerCase(loginValue).trim();
+        const password = passwordValue.trim();
 
         if (login === keyValue && password === keyValue) {
             setTimeout(() => {
                 setLoginValue("");
                 setPasswordValue("");
                 setIsLoading(false);
-                navigation.navigate('CatalogScreen');
+                navigation.navigate('CatalogMenuScreen');
             }, 1500)
         } else {
             setTimeout(() => {
@@ -65,9 +65,7 @@ function LoginScreen({ navigation }: { navigation: LoginScreenNavigationProp }) 
 
     return (
         <View style={styles.container}>
-            <StatusBar hidden={true} />
-
-            <View style={styles.loginForm}>
+            <SafeAreaView style={styles.loginForm}>
                 <Text style={styles.loginHeadText}>
                     Привіт, Партнере!
                 </Text>
@@ -130,7 +128,7 @@ function LoginScreen({ navigation }: { navigation: LoginScreenNavigationProp }) 
                     title="Увійти"
                     onPress={loginButtonHandler}
                 />
-            </View>
+            </SafeAreaView >
 
             <Image
                 source={require('../assets/login-circles.png')}

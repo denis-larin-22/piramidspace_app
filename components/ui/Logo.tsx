@@ -1,14 +1,14 @@
-import { Image } from "react-native";
+import { Image, ImageProps } from "react-native";
 
-function Logo() {
+function Logo(props: ImageProps) {
     return (
         <Image
             source={require('../../assets/logo.png')}
-            style={{
+            style={[{
                 width: 129,
                 height: 30,
-                resizeMode: 'center'
-            }}
+                resizeMode: 'center',
+            }, props.style]}
         />
     )
 }

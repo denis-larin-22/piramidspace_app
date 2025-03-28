@@ -1,14 +1,15 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../screens/LoginScreen';
-import HelloScreen from '../screens/MainScreen';
 import CatalogScreen from '../screens/CatalogScreen';
 import CatalogItemScreen from '../screens/CatalogItemScreen';
+import CatalogMenuScreen from '../screens/CatalogMenuScreen';
 
 export type RootStackParamList = {
     LoginScreen: undefined;
     MainScreen: undefined;
-    CatalogScreen: undefined;
-    CatalogItemScreen: undefined;
+    CatalogMenuScreen: undefined;
+    CatalogScreen: { activeCategoryId: string };
+    CatalogItemScreen: { activeProductId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -21,6 +22,13 @@ export default function AppStack() {
                 component={LoginScreen}
                 options={{
                     headerShown: false,
+                }}
+            />
+            <Stack.Screen
+                name="CatalogMenuScreen"
+                component={CatalogMenuScreen}
+                options={{
+                    headerShown: false
                 }}
             />
             <Stack.Screen
@@ -39,4 +47,4 @@ export default function AppStack() {
             />
         </Stack.Navigator>
     );
-}
+};
