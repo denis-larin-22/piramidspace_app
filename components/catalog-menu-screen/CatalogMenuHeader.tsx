@@ -31,7 +31,7 @@ export default CatalogMenuHeader;
 const styles = StyleSheet.create({
     topWrap: {
         flexDirection: "row",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
     },
     mainText: {
         maxWidth: "100%",

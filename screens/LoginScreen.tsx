@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, StyleSheet, ButtonProps, Keyboard, SafeAreaView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, StyleSheet, ButtonProps, Keyboard, SafeAreaView, StatusBar } from "react-native";
 import { Colors } from "../theme/colors";
 import { useState } from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -65,6 +65,8 @@ function LoginScreen({ navigation }: { navigation: LoginScreenNavigationProp }) 
 
     return (
         <View style={styles.container}>
+            <StatusBar hidden={true} />
+
             <SafeAreaView style={styles.loginForm}>
                 <Text style={styles.loginHeadText}>
                     Привіт, Партнере!

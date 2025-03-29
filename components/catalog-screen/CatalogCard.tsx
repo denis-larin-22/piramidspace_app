@@ -18,7 +18,10 @@ function CatalogCard({ product, onPressHandler }: IProps) {
     return (
         <TouchableOpacity
             key={product.id}
-            style={style.cardWrap}
+            style={{
+                ...style.cardWrap,
+                opacity: product.availability === "Немає" || product.availability === "Виробництво припинено" ? 0.7 : 1,
+            }}
             onPress={() => onPressHandler(product.id)}
         >
             {isTopProduct &&

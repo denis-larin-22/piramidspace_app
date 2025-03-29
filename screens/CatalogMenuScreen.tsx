@@ -1,4 +1,4 @@
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from "react-native";
 import { Colors } from "../theme/colors";
 import { useEffect, useState } from "react";
 import { ICategory, IProductItem } from "../lib/types";
@@ -32,6 +32,8 @@ function CatalogMenuScreen({ navigation }: { navigation: CatalogMenuScreenNaviga
 
     return (
         <View style={styles.wrap}>
+            <StatusBar hidden={false} />
+
             <CatalogMenuHeader backButtonPressHandler={() => navigation.navigate("LoginScreen")} />
 
             {isLoading ?
@@ -61,7 +63,7 @@ export default CatalogMenuScreen;
 
 const styles = StyleSheet.create({
     wrap: {
-        marginTop: 50,
+        marginTop: 20,
         paddingHorizontal: 10
     },
     loaderWrap: {

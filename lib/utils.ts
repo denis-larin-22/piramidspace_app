@@ -107,3 +107,12 @@ export function getCorrectWordDeclension(numberValue: number, word: DetailsWords
         return declensions[word][2]; // "пропозицій", "кольорів", "колекцій"
     }
 }
+
+export function sortArray<T extends string | number>(arr: T[]): T[] {
+    return arr.slice().sort((a, b) => {
+        if (typeof a === "number" && typeof b === "number") {
+            return a - b;
+        }
+        return String(a).localeCompare(String(b));
+    });
+}

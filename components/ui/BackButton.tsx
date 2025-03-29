@@ -1,4 +1,4 @@
-import { Image, Text, TouchableOpacity, TouchableOpacityProps } from "react-native"
+import { Image, Text, TouchableOpacity } from "react-native"
 import { Fonts } from "../../theme/fonts"
 import { Colors } from "../../theme/colors"
 
@@ -11,7 +11,7 @@ function BackButton({ text, onPressAction }: IProps) {
     return (
         <TouchableOpacity
             style={{
-                paddingBottom: 6,
+                paddingBottom: 4,
                 paddingRight: 16,
                 paddingLeft: 8,
                 borderRadius: 23,

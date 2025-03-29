@@ -31,7 +31,7 @@ function CatalogItem({ product, navigation }: IProps) {
             <View
                 style={{
                     position: "absolute",
-                    top: 20,
+                    top: 50,
                     left: 10,
                     zIndex: 30,
                 }}
@@ -39,7 +39,7 @@ function CatalogItem({ product, navigation }: IProps) {
                 <BackButton
                     text="Назад"
                     onPressAction={() => {
-                        navigation.navigate('CatalogScreen', { activeCategoryId: String(product.category_id) })
+                        navigation.goBack();
                     }}
                 />
             </View>
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
         height: 35,
         resizeMode: 'contain',
         position: 'absolute',
-        top: 20,
+        top: 50,
         right: 10,
         zIndex: 30
     },
