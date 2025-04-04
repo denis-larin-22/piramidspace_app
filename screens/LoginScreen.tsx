@@ -11,8 +11,8 @@ import { formatToLowerCase } from "../lib/utils";
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LoginScreen'>;
 
 function LoginScreen({ navigation }: { navigation: LoginScreenNavigationProp }) {
-    const [loginValue, setLoginValue] = useState<string>(""); // Login input
-    const [passwordValue, setPasswordValue] = useState<string>(""); // Password input
+    const [loginValue, setLoginValue] = useState<string>("test"); // Login input
+    const [passwordValue, setPasswordValue] = useState<string>("test"); // Password input
 
     const [loginError, setLoginError] = useState<boolean>(false); // If login input is empty
     const [passwordError, setPasswordError] = useState<boolean>(false); // If password input is empty
@@ -47,7 +47,7 @@ function LoginScreen({ navigation }: { navigation: LoginScreenNavigationProp }) 
                 setLoginValue("");
                 setPasswordValue("");
                 setIsLoading(false);
-                navigation.navigate('CatalogMenuScreen');
+                navigation.navigate('MainScreen');
             }, 1500)
         } else {
             setTimeout(() => {

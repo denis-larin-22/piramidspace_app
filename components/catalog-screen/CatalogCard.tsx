@@ -1,8 +1,9 @@
-import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { IProductItem } from "../../lib/types";
 import { Fonts } from "../../theme/fonts";
 import { Colors } from "../../theme/colors";
 import { getAvailabilityTextColor } from "../../lib/utils";
+import { useState } from "react";
 
 interface IProps {
     product: IProductItem,
@@ -14,6 +15,8 @@ function CatalogCard({ product, onPressHandler }: IProps) {
     const imageUrl = product.images_url[0] as string;
     const isTopProduct = Boolean(product.sort_order);
     const saleValue = product.price.sale;
+
+    const [isBgImageloading, setIsBgImageloading] = useState<boolean>(true);
 
     return (
         <TouchableOpacity
@@ -33,7 +36,11 @@ function CatalogCard({ product, onPressHandler }: IProps) {
             <ImageBackground
                 source={{ uri: imageUrl }}
                 style={style.bgImage}
+                onLoad={() => setIsBgImageloading(false)}
             >
+                {isBgImageloading && (
+                    <ActivityIndicator size="large" color={Colors.blue} style={style.bgLoader} />
+                )}
                 <View
                     style={{
                         ...style.infoWrap,
@@ -175,6 +182,12 @@ const style = StyleSheet.create({
         marginLeft: 30,
         fontFamily: Fonts.comfortaa700,
         fontSize: 10
+    },
+    bgLoader: {
+        position: "absolute",
+        alignSelf: "center",
+        top: '25%',
+        zIndex: 1,
     }
 });
 

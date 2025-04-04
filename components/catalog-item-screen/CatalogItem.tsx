@@ -1,4 +1,4 @@
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { useState } from "react";
@@ -6,6 +6,7 @@ import { getAvailabilityTextColor } from "../../lib/utils";
 import { IProductItem } from "../../lib/types";
 import { CatalogItemScreenNavigationProp } from "../../screens/CatalogItemScreen";
 import BackButton from "../ui/BackButton";
+import Loader from "../ui/Loader";
 
 interface IProps {
     product: Omit<IProductItem, 'price'>,
@@ -15,6 +16,8 @@ interface IProps {
 function CatalogItem({ product, navigation }: IProps) {
     const [isInfoHide, setIsInfoHide] = useState<boolean>(false);
     const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
+    // image loading
+    const [isImageLoading, setIsImageLoading] = useState<boolean>(true);
 
     const technicalInformation = [
         { item: "Затемнення", info: product.technical_info.transparency },
@@ -58,6 +61,9 @@ function CatalogItem({ product, navigation }: IProps) {
                     setIsInfoHide(!isInfoHide);
                 }}
             >
+                {isImageLoading && (
+                    <ActivityIndicator size="large" color={Colors.blue} style={styles.loader} />
+                )}
                 <Image
                     source={{ uri: product.images_url[activeImageIndex] as string }}
                     style={{
@@ -65,6 +71,7 @@ function CatalogItem({ product, navigation }: IProps) {
                         ...styles.fullWidth,
                         resizeMode: isInfoHide ? "contain" : "cover"
                     }}
+                    onLoad={() => setIsImageLoading(false)}
                 />
             </TouchableOpacity>
 
@@ -290,5 +297,11 @@ const styles = StyleSheet.create({
         marginLeft: 35,
         fontFamily: Fonts.comfortaa700,
         fontSize: 12
+    },
+    loader: {
+        position: "absolute",
+        alignSelf: "center",
+        top: '45%',
+        zIndex: 1,
     },
 });

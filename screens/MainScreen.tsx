@@ -2,10 +2,20 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Button, Image, Text, View } from "react-native";
 import { RootStackParamList } from "../navigation/AppStack";
 import { Colors } from "../theme/colors";
+import { useEffect } from "react";
+import { getDataCatalogCategories, getDataCatalogList } from "../lib/appDataHandler";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "MainScreen">;
 
 function MainScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
+
+    useEffect(() => {
+        // IMPORTANT! Loading data for further work of the catalog!
+        getDataCatalogList(); // loading Catalog list
+        getDataCatalogCategories(); // loading Catalog categories list
+
+    }, []);
+
     return (
         <View
             style={{
@@ -40,9 +50,9 @@ function MainScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
                 Сторінка головного меню
             </Text>
             <Button
-                title="Логин"
+                title="Меню каталогу"
                 onPress={() => {
-                    navigation.navigate("LoginScreen");
+                    navigation.navigate("CatalogMenuScreen");
                 }}
             />
         </View>

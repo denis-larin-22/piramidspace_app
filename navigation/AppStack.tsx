@@ -3,6 +3,7 @@ import LoginScreen from '../screens/LoginScreen';
 import CatalogScreen from '../screens/CatalogScreen';
 import CatalogItemScreen from '../screens/CatalogItemScreen';
 import CatalogMenuScreen from '../screens/CatalogMenuScreen';
+import MainScreen from '../screens/MainScreen';
 
 export type RootStackParamList = {
     LoginScreen: undefined;
@@ -20,6 +21,13 @@ export default function AppStack() {
             <Stack.Screen
                 name="LoginScreen"
                 component={LoginScreen}
+                options={{
+                    headerShown: false,
+                }}
+            />
+            <Stack.Screen
+                name="MainScreen"
+                component={MainScreen}
                 options={{
                     headerShown: false,
                 }}

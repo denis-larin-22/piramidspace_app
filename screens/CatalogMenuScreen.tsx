@@ -7,34 +7,36 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppStack";
 import CateforiesList from "../components/catalog-menu-screen/CategoriesList";
 import CatalogMenuHeader from "../components/catalog-menu-screen/CatalogMenuHeader";
+import { ASYNC_STORAGE_CATALOG_DATA_KEY, ASYNC_STORAGE_CATEGORIES_DATA_KEY, getDataFromAcyncStorage } from "../lib/acyncStorage";
+import { getDataCatalogCategories, getDataCatalogList } from "../lib/appDataHandler";
 
 type CatalogMenuScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'CatalogMenuScreen'>;
 
 function CatalogMenuScreen({ navigation }: { navigation: CatalogMenuScreenNavigationProp }) {
-    const [categoriesList, setCategoriesList] = useState<ICategory[] | null>(null);
     const [catalogList, setCatalogList] = useState<IProductItem[] | null>(null);
+    const [categoriesList, setCategoriesList] = useState<ICategory[] | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
-        async function getCategories() {
-            setIsLoading(true);
-            const categoriesRes = await fetchCategories();
-            const catalogList = await fetchProductsList();
-
-
-            setCatalogList(catalogList);
-            setCategoriesList(categoriesRes);
-            setIsLoading(false);
-        }
-
-        getCategories();
+        getCategoriesAndCatalogList();
     }, []);
+
+    async function getCategoriesAndCatalogList() {
+        setIsLoading(true);
+        const catalogListData = await getDataCatalogList();
+        const categoriesListData = await getDataCatalogCategories();
+
+        setCatalogList(catalogListData);
+        setCategoriesList(categoriesListData);
+
+        setIsLoading(false);
+    };
 
     return (
         <View style={styles.wrap}>
             <StatusBar hidden={false} />
 
-            <CatalogMenuHeader backButtonPressHandler={() => navigation.navigate("LoginScreen")} />
+            <CatalogMenuHeader backButtonPressHandler={() => navigation.navigate("MainScreen")} />
 
             {isLoading ?
                 <View style={styles.loaderWrap}>

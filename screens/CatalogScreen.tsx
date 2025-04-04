@@ -10,80 +10,76 @@ import { IProductItem } from "../lib/types";
 import { fetchProductsList } from "../lib/api";
 import { RouteProp } from "@react-navigation/native";
 import { Fonts } from "../theme/fonts";
+import { ASYNC_STORAGE_CATALOG_DATA_KEY, getDataFromAcyncStorage, removeData, saveDataToAcyncStorage } from "../lib/acyncStorage";
+import { getDataCatalogList } from "../lib/appDataHandler";
 
 export type CatalogScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "CatalogScreen">;
 type CatalogScreenRouteProp = RouteProp<RootStackParamList, "CatalogScreen">;
 
-const ITEMS_PER_PAGE = 20;
-
 function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigationProp, route: CatalogScreenRouteProp }) {
+
     const { activeCategoryId } = route.params;
-
     const [catalogList, setCatalogList] = useState<IProductItem[]>([]);
-
-    const [page, setPage] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [hasMore, setHasMore] = useState(true);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
-        loadMoreItems();
-    }, []);
+        getCatalogList();
+    }, [])
 
-    async function loadMoreItems() {
-        if (loading || !hasMore) return;
-        setLoading(true);
-        const productList = await fetchProductsList();
-        const filteredList = sortByName(productList.filter((product) => product.category_id === +activeCategoryId));
-        const nextItems = filteredList.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+    async function getCatalogList() {
+        setIsLoading(true);
 
-        if (nextItems.length > 0) {
-            setCatalogList((prev) => [...prev, ...nextItems]);
-            setPage((prev) => prev + 1);
-        } else {
-            setHasMore(false);
-        }
-        setLoading(false);
+        const catalogListData = await getDataCatalogList();
+
+        const filtredListByCategory = catalogListData.filter((product) => product.category_id === +activeCategoryId);
+        const sortedList = sortByName(filtredListByCategory);
+
+        setCatalogList(sortedList);
+
+        setIsLoading(false);
     }
 
     return (
         <View style={styles.screenWrap}>
-            <StatusBar hidden={false} />
+
 
             <View style={styles.backButtonWrap}>
                 <BackButton
                     text="Усі категорії"
-                    onPressAction={() => navigation.navigate("CatalogMenuScreen")}
+                    onPressAction={() => navigation.goBack()}
                 />
+
                 <Logo />
             </View>
 
-            <FlatList
-                data={catalogList}
-                horizontal={false}
-                numColumns={2}
-                keyExtractor={(product, index) => product.id.toString() + index}
-                columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 20 }}
-                contentContainerStyle={{ paddingHorizontal: 10 }}
-                renderItem={({ item }) => (
-                    <CatalogCard
-                        product={item}
-                        onPressHandler={(productId: number) => {
-                            navigation.navigate("CatalogItemScreen", { activeProductId: String(productId) })
-                        }}
+            {isLoading ?
+                <View style={styles.loaderWrap}>
+                    <ActivityIndicator
+                        color={Colors.blue}
+                        size={"large"}
                     />
-                )}
-                onEndReached={loadMoreItems}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={
-                    loading ?
-                        <PaginationLoader catalogList={catalogList} />
-                        :
-                        !hasMore ?
-                            <Text style={styles.endMessage}>Ви досягли кінця списку</Text>
-                            :
-                            null
-                }
-            />
+                </View>
+                :
+                <FlatList
+                    data={catalogList}
+                    horizontal={false}
+                    numColumns={2}
+                    keyExtractor={(product) => product.id.toString()}
+                    columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 10 }}
+                    contentContainerStyle={{ paddingHorizontal: 15 }}
+                    renderItem={({ item }) => (
+                        <CatalogCard
+                            product={item}
+                            onPressHandler={(productId: number) => {
+                                navigation.navigate("CatalogItemScreen", { activeProductId: String(productId) })
+                            }}
+                        />
+                    )}
+                    style={{
+                        paddingBottom: 150
+                    }}
+                />
+            }
         </View>
     )
 };
