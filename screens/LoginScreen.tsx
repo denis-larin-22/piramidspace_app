@@ -7,22 +7,33 @@ import Loader from "../components/ui/Loader";
 import ErrorNotification from "../components/ui/ErrorNotification";
 import { Fonts } from "../theme/fonts";
 import { formatToLowerCase } from "../lib/utils";
+import { useInput } from "../lib/hooks/useInput";
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LoginScreen'>;
 
 function LoginScreen({ navigation }: { navigation: LoginScreenNavigationProp }) {
-    const [loginValue, setLoginValue] = useState<string>("test"); // Login input
-    const [passwordValue, setPasswordValue] = useState<string>("test"); // Password input
-
-    const [loginError, setLoginError] = useState<boolean>(false); // If login input is empty
-    const [passwordError, setPasswordError] = useState<boolean>(false); // If password input is empty
-
+    //   login value
+    const {
+        value: loginValue,
+        onChange: onLoginChange,
+        error: loginError,
+        setError: setLoginError,
+    } = useInput("test");
+    // password value
+    const {
+        value: passwordValue,
+        onChange: onPasswordChange,
+        error: passwordError,
+        setError: setPasswordError,
+    } = useInput("test");
+    // hide password value
     const [isPasswordHide, setIsPasswordHide] = useState<boolean>(true); // Hide password button state
-
+    // loading
     const [isLoading, setIsLoading] = useState<boolean>(false); // Loading auth state
-
+    // error notif.
     const [modalErrorVisible, setModalErrorVisible] = useState(false); // Error notification state
 
+    // Button handler
     const loginButtonHandler = () => {
         const keyValue = 'test'; // temporary
 
@@ -44,8 +55,8 @@ function LoginScreen({ navigation }: { navigation: LoginScreenNavigationProp }) 
 
         if (login === keyValue && password === keyValue) {
             setTimeout(() => {
-                setLoginValue("");
-                setPasswordValue("");
+                onLoginChange("");
+                onPasswordChange("");
                 setIsLoading(false);
                 navigation.navigate('MainScreen');
             }, 1500)
@@ -79,7 +90,7 @@ function LoginScreen({ navigation }: { navigation: LoginScreenNavigationProp }) 
                 <TextInput
                     onChangeText={(text) => {
                         setLoginError(false);
-                        setLoginValue(text);
+                        onLoginChange(text);
                     }}
                     value={loginValue}
                     placeholder="Введіть свій логін"
@@ -95,7 +106,7 @@ function LoginScreen({ navigation }: { navigation: LoginScreenNavigationProp }) 
                     <TextInput
                         onChangeText={(text) => {
                             setPasswordError(false);
-                            setPasswordValue(text);
+                            onPasswordChange(text);
                         }}
                         value={passwordValue}
                         placeholder="Введіть свій пароль"

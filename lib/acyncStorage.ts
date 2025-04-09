@@ -13,7 +13,6 @@ export async function saveDataToAcyncStorage(key: string, data: string) {
     }
 };
 
-
 export async function getDataFromAcyncStorage(key: string) {
     try {
         const data = await AsyncStorage.getItem(key);

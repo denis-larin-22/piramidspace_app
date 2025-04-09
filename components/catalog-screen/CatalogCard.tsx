@@ -93,7 +93,7 @@ function SaleMark({ saleValue }: { saleValue: string }) {
 const style = StyleSheet.create({
     cardWrap: {
         position: "relative",
-        width: "48%",
+        width: "100%",
         height: 231,
         borderRadius: 12,
         overflow: "hidden",

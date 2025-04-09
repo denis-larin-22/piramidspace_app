@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     },
     imageListButton: {
         width: 46,
-        height: 46,
+        height: 46
     },
     imageListImage: {
         width: "100%",

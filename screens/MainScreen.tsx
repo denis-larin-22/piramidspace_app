@@ -13,7 +13,6 @@ function MainScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
         // IMPORTANT! Loading data for further work of the catalog!
         getDataCatalogList(); // loading Catalog list
         getDataCatalogCategories(); // loading Catalog categories list
-
     }, []);
 
     return (

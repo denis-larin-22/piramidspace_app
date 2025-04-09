@@ -7,7 +7,7 @@ function Logo(props: ImageProps) {
             style={[{
                 width: 129,
                 height: 30,
-                resizeMode: 'contain',
+                resizeMode: 'center',
             }, props.style]}
         />
     )

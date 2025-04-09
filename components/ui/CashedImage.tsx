@@ -1,5 +1,6 @@
 import { ActivityIndicator, Image, ImageStyle, View } from "react-native";
 import { useCachedImage } from "../../lib/hooks/useCachedImage";
+import { Colors } from "../../theme/colors";
 
 interface CachedImageProps {
     source: string;
@@ -13,7 +14,7 @@ export const CachedImage = ({ source, style, loadingIndicatorSize = 'small' }: C
     if (isLoading) {
         return (
             <View style={[{ justifyContent: 'center', alignItems: 'center' }, style]}>
-                <ActivityIndicator size={loadingIndicatorSize} />
+                <ActivityIndicator size={loadingIndicatorSize} color={Colors.blue} />
             </View>
         );
     }

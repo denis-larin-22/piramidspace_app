@@ -1,34 +1,17 @@
 import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from "react-native";
 import { Colors } from "../theme/colors";
-import { useEffect, useState } from "react";
-import { ICategory, IProductItem } from "../lib/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppStack";
 import CateforiesList from "../components/catalog-menu-screen/CategoriesList";
 import CatalogMenuHeader from "../components/catalog-menu-screen/CatalogMenuHeader";
-import { getDataCatalogCategories, getDataCatalogList } from "../lib/appDataHandler";
+import { useCatalogList } from "../lib/hooks/useCatalogList";
+import { useCatalogCategories } from "../lib/hooks/useCatalogCategories";
 
 type CatalogMenuScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'CatalogMenuScreen'>;
 
 function CatalogMenuScreen({ navigation }: { navigation: CatalogMenuScreenNavigationProp }) {
-    const [catalogList, setCatalogList] = useState<IProductItem[] | null>(null);
-    const [categoriesList, setCategoriesList] = useState<ICategory[] | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-
-    useEffect(() => {
-        getCategoriesAndCatalogList();
-    }, []);
-
-    async function getCategoriesAndCatalogList() {
-        setIsLoading(true);
-        const catalogListData = await getDataCatalogList();
-        const categoriesListData = await getDataCatalogCategories();
-
-        setCatalogList(catalogListData);
-        setCategoriesList(categoriesListData);
-
-        setIsLoading(false);
-    };
+    const { catalogList, isLoading: isCatalogLoading } = useCatalogList();
+    const { categoriesList, isLoading: isCategoriesLoading } = useCatalogCategories();
 
     return (
         <View style={styles.wrap}>
@@ -36,7 +19,7 @@ function CatalogMenuScreen({ navigation }: { navigation: CatalogMenuScreenNaviga
 
             <CatalogMenuHeader backButtonPressHandler={() => navigation.navigate("MainScreen")} />
 
-            {isLoading ?
+            {(isCatalogLoading && isCategoriesLoading) ?
                 <View style={styles.loaderWrap}>
                     <ActivityIndicator
                         color={Colors.blue}
