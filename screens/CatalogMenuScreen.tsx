@@ -2,12 +2,10 @@ import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from "react-nati
 import { Colors } from "../theme/colors";
 import { useEffect, useState } from "react";
 import { ICategory, IProductItem } from "../lib/types";
-import { fetchCategories, fetchProductsList } from "../lib/api";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppStack";
 import CateforiesList from "../components/catalog-menu-screen/CategoriesList";
 import CatalogMenuHeader from "../components/catalog-menu-screen/CatalogMenuHeader";
-import { ASYNC_STORAGE_CATALOG_DATA_KEY, ASYNC_STORAGE_CATEGORIES_DATA_KEY, getDataFromAcyncStorage } from "../lib/acyncStorage";
 import { getDataCatalogCategories, getDataCatalogList } from "../lib/appDataHandler";
 
 type CatalogMenuScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'CatalogMenuScreen'>;
@@ -57,7 +55,7 @@ function CatalogMenuScreen({ navigation }: { navigation: CatalogMenuScreenNaviga
                         }}
                     />
             }
-        </View >
+        </View>
     )
 };
 

@@ -12,10 +12,8 @@ import { ASYNC_STORAGE_CATALOG_DATA_KEY, getDataFromAcyncStorage } from "../lib/
 export type CatalogItemScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "CatalogItemScreen">;
 type CatalogItemScreenRouteProp = RouteProp<RootStackParamList, "CatalogItemScreen">;
 
-
 function CatalogItemScreen({ navigation, route }: { navigation: CatalogItemScreenNavigationProp, route: CatalogItemScreenRouteProp }) {
     const { activeProductId } = route.params;
-
     const [productItem, setProductItem] = useState<IProductItem | null | undefined>(null);
 
     useEffect(() => {

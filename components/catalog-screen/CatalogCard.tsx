@@ -1,22 +1,19 @@
-import { ActivityIndicator, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { IProductItem } from "../../lib/types";
 import { Fonts } from "../../theme/fonts";
 import { Colors } from "../../theme/colors";
 import { getAvailabilityTextColor } from "../../lib/utils";
-import { useState } from "react";
+import { CachedImage } from "../ui/CashedImage";
 
 interface IProps {
     product: IProductItem,
     onPressHandler: (productId: number) => void
 }
 
-
 function CatalogCard({ product, onPressHandler }: IProps) {
     const imageUrl = product.images_url[0] as string;
     const isTopProduct = Boolean(product.sort_order);
     const saleValue = product.price.sale;
-
-    const [isBgImageloading, setIsBgImageloading] = useState<boolean>(true);
 
     return (
         <TouchableOpacity
@@ -27,54 +24,50 @@ function CatalogCard({ product, onPressHandler }: IProps) {
             }}
             onPress={() => onPressHandler(product.id)}
         >
+            <CachedImage
+                source={imageUrl}
+                style={style.productImage}
+            />
+
             {isTopProduct &&
                 <Image
                     source={require('../../assets/catalog-screen/top-product.png')}
                     style={style.topProductItem}
                 />}
-
-            <ImageBackground
-                source={{ uri: imageUrl }}
-                style={style.bgImage}
-                onLoad={() => setIsBgImageloading(false)}
+            <View
+                style={{
+                    ...style.infoWrap,
+                    backgroundColor: isTopProduct ? Colors.blue : 'white',
+                }}
             >
-                {isBgImageloading && (
-                    <ActivityIndicator size="large" color={Colors.blue} style={style.bgLoader} />
-                )}
-                <View
+                {saleValue && <SaleMark saleValue={saleValue} />}
+
+                <Text
                     style={{
-                        ...style.infoWrap,
-                        backgroundColor: isTopProduct ? Colors.blue : 'white',
+                        color: isTopProduct ? "white" : "#AEB1BA",
+                        ...style.infoCollection
                     }}
                 >
-                    {saleValue && <SaleMark saleValue={saleValue} />}
-
-                    <Text
-                        style={{
-                            color: isTopProduct ? "white" : "#AEB1BA",
-                            ...style.infoCollection
-                        }}
-                    >
-                        {product.technical_info.collection?.toUpperCase()}
-                    </Text>
-                    <Text
-                        style={{
-                            color: isTopProduct ? "white" : "#0E0050",
-                            ...style.infoName
-                        }}
-                    >
-                        {product.name}
-                    </Text>
-                    <Text
-                        style={{
-                            color: getAvailabilityTextColor(product.availability),
-                            ...style.infoAvailability,
-                        }}
-                    >
-                        {product.availability.toLowerCase()}
-                    </Text>
-                </View>
-            </ImageBackground>
+                    {product.technical_info.collection?.toUpperCase()}
+                </Text>
+                <Text
+                    style={{
+                        color: isTopProduct ? "white" : "#0E0050",
+                        ...style.infoName
+                    }}
+                >
+                    {product.name}
+                </Text>
+                <Text
+                    style={{
+                        color: getAvailabilityTextColor(product.availability),
+                        ...style.infoAvailability,
+                    }}
+                >
+                    {product.availability.toLowerCase()}
+                </Text>
+            </View>
+            {/* </ImageBackground> */}
         </TouchableOpacity >
     )
 };
@@ -104,6 +97,7 @@ const style = StyleSheet.create({
         height: 231,
         borderRadius: 12,
         overflow: "hidden",
+        justifyContent: 'flex-end',
 
         // iOS shadow
         shadowColor: "#000",
@@ -122,12 +116,15 @@ const style = StyleSheet.create({
         right: 6,
         zIndex: 10
     },
-    bgImage: {
-        width: "100%",
+    productImage: {
         height: "100%",
-        borderRadius: 12,
-        overflow: "hidden",
-        justifyContent: 'flex-end'
+        width: "100%",
+        position: "absolute",
+        zIndex: 0,
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0
     },
     infoWrap: {
         margin: 8,

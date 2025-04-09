@@ -1,4 +1,4 @@
-import { ActivityIndicator, FlatList, StatusBar, StyleSheet, View, Text } from "react-native";
+import { ActivityIndicator, FlatList, StyleSheet, View, Text } from "react-native";
 import { Colors } from "../theme/colors";
 import CatalogCard from "../components/catalog-screen/CatalogCard";
 import Logo from "../components/ui/Logo";
@@ -7,10 +7,8 @@ import { RootStackParamList } from "../navigation/AppStack";
 import BackButton from "../components/ui/BackButton";
 import { useEffect, useState } from "react";
 import { IProductItem } from "../lib/types";
-import { fetchProductsList } from "../lib/api";
 import { RouteProp } from "@react-navigation/native";
 import { Fonts } from "../theme/fonts";
-import { ASYNC_STORAGE_CATALOG_DATA_KEY, getDataFromAcyncStorage, removeData, saveDataToAcyncStorage } from "../lib/acyncStorage";
 import { getDataCatalogList } from "../lib/appDataHandler";
 
 export type CatalogScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "CatalogScreen">;
@@ -41,8 +39,6 @@ function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigat
 
     return (
         <View style={styles.screenWrap}>
-
-
             <View style={styles.backButtonWrap}>
                 <BackButton
                     text="Усі категорії"

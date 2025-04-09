@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import AppStack from "./navigation/AppStack";
 import { useFonts, Comfortaa_400Regular, Comfortaa_600SemiBold, Comfortaa_700Bold } from "@expo-google-fonts/comfortaa";
 import { OpenSans_400Regular, OpenSans_700Bold } from "@expo-google-fonts/open-sans";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { Colors } from "./theme/colors";
 
 export default function App() {
@@ -29,3 +29,5 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
+

@@ -1,4 +1,4 @@
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { useState } from "react";
@@ -6,18 +6,18 @@ import { getAvailabilityTextColor } from "../../lib/utils";
 import { IProductItem } from "../../lib/types";
 import { CatalogItemScreenNavigationProp } from "../../screens/CatalogItemScreen";
 import BackButton from "../ui/BackButton";
-import Loader from "../ui/Loader";
+import { CachedImage } from "../ui/CashedImage";
 
 interface IProps {
     product: Omit<IProductItem, 'price'>,
     navigation: CatalogItemScreenNavigationProp,
 }
 
+const PIRAMIDSPACE_DEFAULT_PRODUCT_IMAGE = "https://api.piramidspace.com/storage/default.jpg";
+
 function CatalogItem({ product, navigation }: IProps) {
     const [isInfoHide, setIsInfoHide] = useState<boolean>(false);
     const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
-    // image loading
-    const [isImageLoading, setIsImageLoading] = useState<boolean>(true);
 
     const technicalInformation = [
         { item: "Затемнення", info: product.technical_info.transparency },
@@ -61,38 +61,38 @@ function CatalogItem({ product, navigation }: IProps) {
                     setIsInfoHide(!isInfoHide);
                 }}
             >
-                {isImageLoading && (
-                    <ActivityIndicator size="large" color={Colors.blue} style={styles.loader} />
-                )}
-                <Image
-                    source={{ uri: product.images_url[activeImageIndex] as string }}
+                <CachedImage
+                    source={product.images_url[activeImageIndex] as string}
                     style={{
                         ...styles.fullHeight,
                         ...styles.fullWidth,
                         resizeMode: isInfoHide ? "contain" : "cover"
                     }}
-                    onLoad={() => setIsImageLoading(false)}
                 />
             </TouchableOpacity>
 
             <View style={styles.imageList}>
-                {product.images_url.map((_, index) => (
-                    <TouchableOpacity
-                        key={index}
-                        style={styles.imageListButton}
-                        onPress={() => {
-                            setActiveImageIndex(index)
-                        }}
-                    >
-                        <Image
-                            source={{ uri: product.images_url[index] as string }}
-                            style={{
-                                ...styles.imageListImage,
-                                borderColor: activeImageIndex === index ? Colors.blueDark : "transparent"
+                {product.images_url.map((path, index) => {
+                    if (path === PIRAMIDSPACE_DEFAULT_PRODUCT_IMAGE || path === null) return null;
+
+                    return (
+                        <TouchableOpacity
+                            key={index}
+                            style={styles.imageListButton}
+                            onPress={() => {
+                                setActiveImageIndex(index)
                             }}
-                        />
-                    </TouchableOpacity>
-                ))}
+                        >
+                            <CachedImage
+                                source={path}
+                                style={{
+                                    ...styles.imageListImage,
+                                    borderColor: activeImageIndex === index ? Colors.blueDark : "transparent"
+                                }}
+                            />
+                        </TouchableOpacity>
+                    )
+                })}
             </View>
 
             {!isInfoHide &&
