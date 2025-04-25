@@ -3,6 +3,8 @@ import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { ICategory, IProductItem } from "../../lib/types";
 import { getCorrectWordDeclension } from "../../lib/utils";
+import { SYSTEM_SALE_CATEGORY_ID, SYSTEM_TOP_CATEGORY_ID } from "../../lib/hooks/useCatalogCategories";
+import AnimatedCardWrapper from "../ui/AnimatedCardWrapper";
 
 interface IProps {
     categoriesList: ICategory[],
@@ -10,39 +12,44 @@ interface IProps {
     cardPressHandler: (categoryId: string) => void
 }
 
-function CateforiesList({ categoriesList, catalogList, cardPressHandler }: IProps) {
+function CategoriesList({ categoriesList, catalogList, cardPressHandler }: IProps) {
     return (
         <ScrollView style={styles.listContainer}>
             <View style={styles.listWrap}>
                 {categoriesList.map((category, index) => (
-                    <TouchableOpacity
-                        key={category.name + index}
+                    <AnimatedCardWrapper
+                        key={index + category.name}
+                        index={index}
                         style={styles.categoryItem}
-                        onPress={() => cardPressHandler(String(category.id))}
                     >
-                        <View style={{ height: "100%", width: "100%" }}>
-                            <ImageBackground
-                                source={getCategoryBcgCardImage(category.name)}
-                                resizeMode="cover"
-                                style={styles.categoryBcgImage}
-                            >
-                                <DetailsCount
-                                    catalogList={catalogList}
-                                    categoryId={category.id}
-                                />
-                            </ImageBackground>
-                            <Text style={styles.categoryName}>
-                                {category.name}
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            // style={}
+                            onPress={() => cardPressHandler(String(category.id))}
+                        >
+                            <View style={{ height: "100%", width: "100%" }}>
+                                <ImageBackground
+                                    source={getCategoryBcgCardImage(category.name)}
+                                    resizeMode="cover"
+                                    style={styles.categoryBcgImage}
+                                >
+                                    <DetailsCount
+                                        catalogList={catalogList}
+                                        categoryId={category.id}
+                                    />
+                                </ImageBackground>
+                                <Text style={styles.categoryName}>
+                                    {category.name}
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    </AnimatedCardWrapper>
                 ))}
             </View>
         </ScrollView>
     )
 };
 
-export default CateforiesList;
+export default CategoriesList;
 
 //  styles
 const styles = StyleSheet.create({
@@ -59,13 +66,14 @@ const styles = StyleSheet.create({
     categoryItem: {
         height: 272,
         width: "48%",
-        marginBottom: 50,
+        marginBottom: 30,
     },
     categoryBcgImage: {
         height: "100%",
         width: "100%",
         borderRadius: 11,
         overflow: "hidden",
+        backgroundColor: Colors.blue,
         // iOS shadow
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
@@ -78,23 +86,32 @@ const styles = StyleSheet.create({
     categoryName: {
         fontFamily: Fonts.openSans400,
         fontSize: 16,
-        color: "#09022A",
+        color: "white",
         textAlign: "center",
-        marginTop: 8
+        position: "absolute",
+        bottom: 0,
+        borderBottomLeftRadius: 11,
+        borderTopRightRadius: 11,
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        backgroundColor: Colors.blue,
+        borderTopWidth: 2,
+        borderRightWidth: 2,
+        borderColor: 'white'
     },
     detailsCountText: {
         fontFamily: Fonts.comfortaa600,
         fontSize: 10,
         backgroundColor: Colors.blue,
         position: "absolute",
-        bottom: 0,
+        top: 0,
         right: 0,
         paddingBottom: 8,
         paddingTop: 6,
         paddingHorizontal: 8,
-        borderTopLeftRadius: 11,
+        borderBottomLeftRadius: 11,
         color: "white",
-        borderTopWidth: 2,
+        borderBottomWidth: 2,
         borderLeftWidth: 2,
         borderColor: Colors.pale,
     },
@@ -124,16 +141,28 @@ function getCategoryBcgCardImage(categoryName: string) {
         return require("../../assets/catalog-screen/vertical-blinds.png")
     } else if (categoryName === "Комплектуючі") {
         return require("../../assets/catalog-screen/components.png")
+    } else if (categoryName === "Акція") {
+        return require("../../assets/catalog-screen/sale.png")
+    } else if (categoryName === "Топ-продукція") {
+        return require("../../assets/catalog-screen/top-product.png")
     } else {
         return require("../../assets/catalog-screen/advertising-products.png")
     }
 };
 
 function getCategoryListCount(categoryId: number, catalogList: IProductItem[] | null): number {
-    if (catalogList === null) return 0;
+    let count: number;
 
-    const filtredList = catalogList.filter((product) => product.category_id === categoryId);
+    if (catalogList === null) {
+        count = 0;
+    } else if (categoryId === SYSTEM_SALE_CATEGORY_ID) {
+        count = catalogList.filter((product) => product.price.sale !== null).length;
+    } else if (categoryId === SYSTEM_TOP_CATEGORY_ID) {
+        count = catalogList.filter((product) => product.sort_order === 1).length;
+    } else {
+        count = catalogList.filter((product) => product.category_id === categoryId).length;
+    }
 
-    return filtredList.length;
+    return count;
 };
 

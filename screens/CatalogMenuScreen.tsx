@@ -2,7 +2,7 @@ import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from "react-nati
 import { Colors } from "../theme/colors";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppStack";
-import CateforiesList from "../components/catalog-menu-screen/CategoriesList";
+import CategoriesList from "../components/catalog-menu-screen/CategoriesList";
 import CatalogMenuHeader from "../components/catalog-menu-screen/CatalogMenuHeader";
 import { useCatalogList } from "../lib/hooks/useCatalogList";
 import { useCatalogCategories } from "../lib/hooks/useCatalogCategories";
@@ -13,9 +13,15 @@ function CatalogMenuScreen({ navigation }: { navigation: CatalogMenuScreenNaviga
     const { catalogList, isLoading: isCatalogLoading } = useCatalogList();
     const { categoriesList, isLoading: isCategoriesLoading } = useCatalogCategories();
 
+
     return (
         <View style={styles.wrap}>
-            <StatusBar hidden={false} />
+            <StatusBar
+                hidden={false}
+                translucent={false}
+                barStyle="dark-content"
+                backgroundColor={Colors.pale}
+            />
 
             <CatalogMenuHeader backButtonPressHandler={() => navigation.navigate("MainScreen")} />
 
@@ -30,7 +36,7 @@ function CatalogMenuScreen({ navigation }: { navigation: CatalogMenuScreenNaviga
                 categoriesList === null ?
                     <Text>Щось пішло не так...</Text>
                     :
-                    <CateforiesList
+                    <CategoriesList
                         categoriesList={categoriesList}
                         catalogList={catalogList}
                         cardPressHandler={(categoryId: string) => {

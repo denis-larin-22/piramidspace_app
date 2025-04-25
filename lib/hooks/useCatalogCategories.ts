@@ -3,8 +3,13 @@ import { ASYNC_STORAGE_CATEGORIES_DATA_KEY, getDataFromAcyncStorage, saveDataToA
 import { ICategory } from "../types";
 import { fetchCategories } from "../api";
 
+// Reserved category IDs (not from backend)
+export const SYSTEM_SALE_CATEGORY_ID = 101;  // Special category: "Sale"
+export const SYSTEM_TOP_CATEGORY_ID = 102; // Special category: "Top"
+
 // Checks the cache for saved Catalog categories list data, if there is no saved data, gets it via API and saves it to the cache / show loading status
 export function useCatalogCategories() {
+
     const [categoriesList, setCategoriesList] = useState<ICategory[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -21,6 +26,22 @@ export function useCatalogCategories() {
                 } else {
                     data = JSON.parse(dataFromStorage);
                 }
+
+                // Add categories Sale and Top to default categories list
+                data = [
+                    // Sale category
+                    {
+                        id: SYSTEM_SALE_CATEGORY_ID,
+                        name: 'Акція'
+                    },
+                    // Top category
+                    {
+                        id: SYSTEM_TOP_CATEGORY_ID,
+                        name: 'Топ-продукція'
+                    },
+                    // Default API categories
+                    ...data
+                ];
 
                 setCategoriesList(data);
             } catch (error) {

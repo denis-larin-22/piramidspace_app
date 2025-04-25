@@ -18,25 +18,33 @@ function BackButton({ text, onPressAction }: IProps) {
                 backgroundColor: Colors.blue,
                 flexDirection: 'row',
                 alignItems: "center",
-                gap: 10
+                gap: 10,
+                // iOS shadow
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+
+                // Android shadow
+                elevation: 5,
             }}
             onPress={onPressAction}
         >
             <Image
                 source={require('../../assets/arrow-back.png')}
                 style={{
-                    width: 16,
-                    height: 16,
+                    width: 12,
+                    height: 12,
                     resizeMode: "contain",
                     position: "relative",
-                    top: 2
+                    top: 1,
                 }}
             />
             <Text
                 style={{
                     color: "white",
                     fontFamily: Fonts.comfortaa700,
-                    fontSize: 14,
+                    fontSize: 12,
                 }}
             >
                 {text}

@@ -9,7 +9,7 @@ import BackButton from "../ui/BackButton";
 import { CachedImage } from "../ui/CashedImage";
 
 interface IProps {
-    product: Omit<IProductItem, 'price'>,
+    product: IProductItem,
     navigation: CatalogItemScreenNavigationProp,
 }
 
@@ -98,7 +98,6 @@ function CatalogItem({ product, navigation }: IProps) {
             {!isInfoHide &&
                 <ScrollView style={styles.info}>
 
-
                     <View style={styles.infoWrap}>
                         <Text style={styles.infoCollection}>
                             {product.category.name} / {product.technical_info.collection}
@@ -117,7 +116,7 @@ function CatalogItem({ product, navigation }: IProps) {
                         {product.name}
                     </Text>
 
-                    {/* {product.price.sale && <SaleMark saleValue={product.price.sale} />} */}
+                    {product.price.sale && <SaleMark saleValue={product.price.sale} />}
 
                     <Text
                         style={{

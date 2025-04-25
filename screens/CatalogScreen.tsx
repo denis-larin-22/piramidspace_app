@@ -1,4 +1,4 @@
-import { ActivityIndicator, FlatList, StyleSheet, View, Animated } from "react-native";
+import { ActivityIndicator, FlatList, StyleSheet, View, Animated, StatusBar } from "react-native";
 import { Colors } from "../theme/colors";
 import CatalogCard from "../components/catalog-screen/CatalogCard";
 import Logo from "../components/ui/Logo";
@@ -9,17 +9,46 @@ import { IProductItem } from "../lib/types";
 import { RouteProp } from "@react-navigation/native";
 import { Fonts } from "../theme/fonts";
 import { useCatalogList } from "../lib/hooks/useCatalogList";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import Filters from "../components/catalog-screen/Filters";
+import { SYSTEM_SALE_CATEGORY_ID, SYSTEM_TOP_CATEGORY_ID } from "../lib/hooks/useCatalogCategories";
+import AnimatedCardWrapper from "../components/ui/AnimatedCardWrapper";
 
 export type CatalogScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "CatalogScreen">;
 type CatalogScreenRouteProp = RouteProp<RootStackParamList, "CatalogScreen">;
+
+export interface ICatalogListByCategory {
+    initList: IProductItem[],
+    renderList: IProductItem[]
+}
 
 function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigationProp, route: CatalogScreenRouteProp }) {
     const { activeCategoryId } = route.params;
     const { catalogList, isLoading } = useCatalogList();
 
+    const [catalogListByCategory, setCatalogListByCategory] = useState<ICatalogListByCategory>({
+        initList: [],
+        renderList: []
+    });
+
+    useEffect(() => {
+        const filtredByCategory = getFiltredCatalogBySelectedCategory(+activeCategoryId, catalogList);
+
+        setCatalogListByCategory({
+            initList: filtredByCategory,
+            renderList: filtredByCategory
+        });
+    }, [catalogList]);
+
     return (
         <View style={styles.screenWrap}>
+            <StatusBar
+                hidden={false}
+                translucent={false}
+                barStyle="dark-content"
+                backgroundColor={Colors.pale}
+            />
+
             <View style={styles.backButtonWrap}>
                 <BackButton
                     text="Усі категорії"
@@ -37,24 +66,38 @@ function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigat
                     />
                 </View>
                 :
-                <FlatList
-                    data={catalogList.filter((product) => product.category_id === +activeCategoryId)}
-                    horizontal={false}
-                    numColumns={2}
-                    keyExtractor={(product) => product.id.toString()}
-                    columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 10 }}
-                    contentContainerStyle={{ paddingHorizontal: 15 }}
-                    renderItem={({ item, index }) => (
-                        <FlatItem
-                            navigation={navigation}
-                            item={item}
-                            index={index}
-                        />
-                    )}
-                    style={{
-                        paddingBottom: 150
-                    }}
-                />
+                <>
+                    <Filters
+                        catalogList={catalogListByCategory}
+                        setCatalogList={setCatalogListByCategory}
+                    />
+                    <FlatList
+                        data={catalogListByCategory.renderList}
+                        horizontal={false}
+                        numColumns={2}
+                        keyExtractor={(product) => product.id.toString()}
+                        columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 10 }}
+                        contentContainerStyle={{ paddingHorizontal: 15 }}
+                        renderItem={({ item, index }) => (
+                            <AnimatedCardWrapper
+                                index={index}
+                                style={{
+                                    width: '48%'
+                                }}
+                            >
+                                <CatalogCard
+                                    product={item}
+                                    onPressHandler={(productId: number) => {
+                                        navigation.navigate("CatalogItemScreen", { activeProductId: String(productId) });
+                                    }}
+                                />
+                            </AnimatedCardWrapper>
+                        )}
+                        style={{
+                            paddingBottom: 150
+                        }}
+                    />
+                </>
             }
         </View>
     )
@@ -62,6 +105,7 @@ function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigat
 
 export default CatalogScreen;
 
+// ui
 function FlatItem({
     navigation,
     item,
@@ -79,13 +123,13 @@ function FlatItem({
             Animated.timing(fadeAnim, {
                 toValue: 1,
                 duration: 500,
-                delay: 20 * index,
+                delay: 20 * (index === 0 ? 0.5 : index),
                 useNativeDriver: true,
             }),
             Animated.timing(translateY, {
                 toValue: 0,
                 duration: 500,
-                delay: 20 * index,
+                delay: 20 * (index === 0 ? 0.5 : index),
                 useNativeDriver: true,
             }),
         ]).start();
@@ -99,18 +143,28 @@ function FlatItem({
             marginRight: index % 2 === 0 ? 10 : 0,
             maxWidth: '48%'
         }}>
-            <CatalogCard
-                product={item}
-                onPressHandler={(productId: number) => {
-                    navigation.navigate("CatalogItemScreen", { activeProductId: String(productId) });
-                }}
-            />
+
         </Animated.View>
     );
 }
 
 
+// utils
+function getFiltredCatalogBySelectedCategory(activeCategoryId: number, catalogList: IProductItem[]) {
+    let filtredList: IProductItem[];
 
+    if (activeCategoryId === SYSTEM_SALE_CATEGORY_ID) {
+        filtredList = catalogList.filter((product) => product.price.sale !== null);
+    } else if (activeCategoryId === SYSTEM_TOP_CATEGORY_ID) {
+        filtredList = catalogList.filter((product) => product.sort_order === 1);
+    } else {
+        filtredList = catalogList.filter((product) => product.category_id === +activeCategoryId);
+    }
+
+    return filtredList;
+}
+
+// styles
 const styles = StyleSheet.create({
     screenWrap: {
         marginTop: 20,

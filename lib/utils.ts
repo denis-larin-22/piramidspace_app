@@ -116,3 +116,15 @@ export function sortArray<T extends string | number>(arr: T[]): T[] {
         return String(a).localeCompare(String(b));
     });
 }
+
+export const getGreetingUA = (): string => {
+    const hour = new Date().getHours();
+
+    if (hour >= 5 && hour < 10) {
+        return 'Доброго ранку';
+    } else if (hour >= 10 && hour < 17) {
+        return 'Доброго дня';
+    } else {
+        return 'Доброго вечора';
+    }
+};

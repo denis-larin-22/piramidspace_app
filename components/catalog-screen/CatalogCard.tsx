@@ -40,6 +40,10 @@ function CatalogCard({ product, onPressHandler }: IProps) {
                     backgroundColor: isTopProduct ? Colors.blue : 'white',
                 }}
             >
+                {product.availability === "Закінчується" &&
+                    product.low_stock_meters &&
+                    <BalanceStock balanceValue={product.low_stock_meters} />
+                }
                 {saleValue && <SaleMark saleValue={saleValue} />}
 
                 <Text
@@ -88,6 +92,15 @@ function SaleMark({ saleValue }: { saleValue: string }) {
         </View >
     )
 };
+
+function BalanceStock({ balanceValue }: { balanceValue: string }) {
+    return (
+        <Text
+            style={style.balanceStock}
+        > Лишилось {balanceValue ? balanceValue : ""} м.
+        </Text>
+    )
+}
 
 // styles
 const style = StyleSheet.create({
@@ -185,6 +198,22 @@ const style = StyleSheet.create({
         alignSelf: "center",
         top: '25%',
         zIndex: 1,
+    },
+    balanceStock: {
+        position: 'absolute',
+        top: -25,
+        zIndex: 10,
+        alignSelf: 'flex-end',
+        fontFamily: Fonts.openSans700,
+        fontSize: 10,
+        color: 'white',
+        paddingVertical: 2,
+        paddingHorizontal: 4,
+        borderRadius: 35,
+        backgroundColor: '#F79D1580',
+        borderWidth: 2,
+        borderColor: '#F79D15',
+        opacity: 0.9
     }
 });
 
