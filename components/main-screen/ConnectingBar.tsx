@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Animated, Image, Text, StyleSheet } from "react-native";
+import { Animated, Text, StyleSheet } from "react-native";
 import { Fonts } from "../../theme/fonts";
 
 interface IProps {
@@ -10,12 +10,19 @@ interface IProps {
 
 function ConnectingBar({ width, isVissible, isConnected }: IProps) {
     const panelOpacity = useRef(new Animated.Value(0)).current;
-
     const imageOpacity = useRef(new Animated.Value(0)).current;
     const imageTranslateY = useRef(new Animated.Value(-40)).current;
+    const imageRotate = useRef(new Animated.Value(0)).current;
+
+    // Интерполяция для вращения
+    const rotateInterpolate = imageRotate.interpolate({
+        inputRange: [0, 1],
+        outputRange: ["0deg", "360deg"],
+    });
 
     useEffect(() => {
         if (isVissible) {
+            // Параллельные анимации для панели и изображения
             Animated.timing(panelOpacity, {
                 toValue: 1,
                 duration: 300,
@@ -39,30 +46,32 @@ function ConnectingBar({ width, isVissible, isConnected }: IProps) {
                     useNativeDriver: true,
                 }),
             ]).start();
-        } else {
-            Animated.parallel([
-                Animated.timing(imageOpacity, {
-                    toValue: 0,
-                    duration: 300,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(imageTranslateY, {
-                    toValue: -40,
-                    duration: 300,
-                    useNativeDriver: true,
-                }),
-            ]).start();
 
-            setTimeout(() => {
-                Animated.timing(panelOpacity, {
-                    toValue: 0,
-                    duration: 300,
-                    useNativeDriver: true,
-                }).start();
-            }, 500);
+            // Бесконечное вращение с паузой
+            const rotateWithPause = () => {
+                imageRotate.setValue(0); // сбросим вращение
+
+                Animated.sequence([
+                    Animated.timing(imageRotate, {
+                        toValue: 1,
+                        duration: 3000, // продолжительность одного оборота
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(imageRotate, {
+                        toValue: 0,
+                        duration: 0, // сразу сбрасываем
+                        useNativeDriver: true,
+                    }),
+                    Animated.delay(3000), // пауза 3 секунды
+                ]).start(() => {
+                    // Повтор анимации
+                    rotateWithPause();
+                });
+            };
+
+            rotateWithPause(); // Запускаем цикл вращения
         }
     }, [isVissible]);
-
 
     return (
         <Animated.View
@@ -85,7 +94,10 @@ function ConnectingBar({ width, isVissible, isConnected }: IProps) {
                     styles.image,
                     {
                         opacity: imageOpacity,
-                        transform: [{ translateY: imageTranslateY }],
+                        transform: [
+                            { translateY: imageTranslateY },
+                            { rotate: rotateInterpolate },
+                        ],
                     },
                 ]}
             />

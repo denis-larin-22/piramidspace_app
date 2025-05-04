@@ -1,9 +1,10 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from "react-native";
 import { IProductItem } from "../../lib/types";
 import { Fonts } from "../../theme/fonts";
 import { Colors } from "../../theme/colors";
 import { getAvailabilityTextColor } from "../../lib/utils";
 import { CachedImage } from "../ui/CashedImage";
+import CountdownTimer from "../ui/CountdownTimer";
 
 interface IProps {
     product: IProductItem,
@@ -29,11 +30,17 @@ function CatalogCard({ product, onPressHandler }: IProps) {
                 style={style.productImage}
             />
 
-            {isTopProduct &&
-                <Image
-                    source={require('../../assets/catalog-screen/top-product.png')}
-                    style={style.topProductItem}
+            {/* Marks */}
+            {saleValue && <SaleMark saleValue={saleValue} topPositionValue={isTopProduct ? 55 : 4} />}
+            {isTopProduct && <TopProductMark />}
+            {saleValue &&
+                product.price.date_on_sale &&
+                product.price.date_off_sale &&
+                <CountdownTimer
+                    startDate={product.price.date_on_sale}
+                    endDate={product.price.date_off_sale}
                 />}
+
             <View
                 style={{
                     ...style.infoWrap,
@@ -44,7 +51,6 @@ function CatalogCard({ product, onPressHandler }: IProps) {
                     product.low_stock_meters &&
                     <BalanceStock balanceValue={product.low_stock_meters} />
                 }
-                {saleValue && <SaleMark saleValue={saleValue} />}
 
                 <Text
                     style={{
@@ -71,7 +77,6 @@ function CatalogCard({ product, onPressHandler }: IProps) {
                     {product.availability.toLowerCase()}
                 </Text>
             </View>
-            {/* </ImageBackground> */}
         </TouchableOpacity >
     )
 };
@@ -79,19 +84,22 @@ function CatalogCard({ product, onPressHandler }: IProps) {
 export default CatalogCard;
 
 // ui
-function SaleMark({ saleValue }: { saleValue: string }) {
+function TopProductMark() {
+    return <Image
+        source={require('../../assets/catalog-screen/top-product.png')}
+        style={style.topProductItem}
+    />
+}
+
+function SaleMark({ saleValue, topPositionValue = 4 }: { saleValue: string, topPositionValue?: number }) {
     return (
-        <View
-            style={style.saleWrap}
-        >
-            <Image
-                source={require('../../assets/catalog-screen/fire-icon.png')}
-                style={style.saleIcon}
-            />
-            <Text style={style.saleText}>Акція {saleValue}%</Text>
-        </View >
-    )
-};
+        <View style={[style.saleContainer, {
+            top: topPositionValue
+        }]}>
+            <Text style={style.saleText}>{saleValue}%</Text>
+        </View>
+    );
+}
 
 function BalanceStock({ balanceValue }: { balanceValue: string }) {
     return (
@@ -125,8 +133,8 @@ const style = StyleSheet.create({
         width: 48,
         height: 48,
         position: 'absolute',
-        top: 6,
-        right: 6,
+        top: 4,
+        left: 4,
         zIndex: 10
     },
     productImage: {
@@ -166,33 +174,25 @@ const style = StyleSheet.create({
         borderRadius: 36
     },
     // Sale mark
-    saleWrap: {
-        position: "absolute",
-        right: 0,
-        top: -23,
-        flexDirection: "row",
-        alignItems: "flex-end",
-        gap: 5,
-        backgroundColor: "#FFEFD1",
-        alignSelf: "flex-start",
-        paddingBottom: 2,
-        paddingTop: 1,
-        paddingRight: 7,
-        borderRadius: 36
-    },
-    saleIcon: {
-        width: 20,
-        height: 32,
+    saleContainer: {
         position: "absolute",
         left: 4,
-        bottom: 2
+        top: 4,
+        width: 48,
+        height: 48,
+        backgroundColor: "#FFEFD1",
+        borderRadius: 100,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: Colors.orange
     },
     saleText: {
         color: Colors.orange,
-        marginLeft: 30,
         fontFamily: Fonts.comfortaa700,
-        fontSize: 10
+        fontSize: 16,
     },
+
     bgLoader: {
         position: "absolute",
         alignSelf: "center",

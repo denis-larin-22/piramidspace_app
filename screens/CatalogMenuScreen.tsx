@@ -13,7 +13,6 @@ function CatalogMenuScreen({ navigation }: { navigation: CatalogMenuScreenNaviga
     const { catalogList, isLoading: isCatalogLoading } = useCatalogList();
     const { categoriesList, isLoading: isCategoriesLoading } = useCatalogCategories();
 
-
     return (
         <View style={styles.wrap}>
             <StatusBar

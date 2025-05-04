@@ -1,106 +1,88 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { getCorrectTimeDeclension } from '../../lib/utils';
+import { Fonts } from '../../theme/fonts';
 
 interface IInitCountdown {
     days: number;
     hours: number;
     minutes: number;
-    seconds: number;
 }
 
 interface IProps {
-    startDate: string; // ISO format "YYYY-MM-DDTHH:MM:SS"
-    endDate: string; // ISO format "YYYY-MM-DDTHH:MM:SS"
+    startDate: string; // ISO format "YYYY-MM-DD"
+    endDate: string;   // ISO format "YYYY-MM-DD"
 }
 
 const CountdownTimer = ({ startDate, endDate }: IProps) => {
-    const [timeLeft, setTimeLeft] = useState<IInitCountdown | null>(null);
-    const [isVisible, setIsVisible] = useState<boolean>(false);
-    const fadeAnim = new Animated.Value(0); // for fade animation
+    console.log(startDate, endDate);
+
+    const [timeLeft, setTimeLeft] = useState<IInitCountdown>({
+        days: 0,
+        hours: 0,
+        minutes: 0,
+    });
 
     useEffect(() => {
         const updateCountdown = () => {
             const now = new Date();
-            const start = new Date(startDate + 'T00:00:00');
             const end = new Date(endDate + 'T00:00:00');
 
-            if (now < start || now > end) {
-                setIsVisible(false);
+            const difference = end.getTime() - now.getTime();
+
+            if (difference <= 0) {
+                setTimeLeft({ days: 0, hours: 0, minutes: 0 });
                 return;
             }
-
-            const difference = end.getTime() - now.getTime();
 
             setTimeLeft({
                 days: Math.floor(difference / (1000 * 60 * 60 * 24)),
                 hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
                 minutes: Math.floor((difference / 1000 / 60) % 60),
-                seconds: Math.floor((difference / 1000) % 60),
             });
-
-            setIsVisible(true);
         };
 
         updateCountdown();
-        const timer = setInterval(updateCountdown, 1000);
+        const timer = setInterval(updateCountdown, 60 * 1000);
 
         return () => clearInterval(timer);
-    }, [startDate, endDate]);
-
-    // Fade in animation
-    useEffect(() => {
-        if (isVisible && timeLeft) {
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 300,
-                useNativeDriver: true,
-            }).start();
-        }
-    }, [isVisible, timeLeft]);
-
-    if (!isVisible || !timeLeft) {
-        return null;
-    }
+    }, [endDate]);
 
     return (
-        <Animated.View
-            style={[styles.container, { opacity: fadeAnim }]}
-        >
+        <View style={styles.container}>
             <Text style={styles.label}>До кінця пропозиції:</Text>
             <View style={styles.timeContainer}>
-                {['days', 'hours', 'minutes', 'seconds'].map((unit, index) => (
+                {(['days', 'hours', 'minutes'] as const).map((unit) => (
                     <View key={unit} style={styles.timeUnit}>
-                        <Animated.Text style={styles.timeValue}>
-                            {timeLeft[unit as keyof IInitCountdown]}
-                        </Animated.Text>
+                        <Text style={styles.timeValue}>{timeLeft[unit]}</Text>
                         <Text style={styles.unitText}>
-                            {index === 0
-                                ? getCorrectTimeDeclension(timeLeft[unit as keyof IInitCountdown], 'дні')
-                                : index === 1
-                                    ? getCorrectTimeDeclension(timeLeft[unit as keyof IInitCountdown], 'години')
-                                    : index === 2
-                                        ? getCorrectTimeDeclension(timeLeft[unit as keyof IInitCountdown], 'хвилини')
-                                        : 'секунди'}
+                            {getCorrectTimeDeclension(
+                                timeLeft[unit],
+                                unit === 'days' ? 'дні' :
+                                    unit === 'hours' ? 'години' : 'хвилини'
+                            )}
                         </Text>
                     </View>
                 ))}
             </View>
-        </Animated.View>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        padding: 8,
-        borderRadius: 8,
+        width: '90%',
+        padding: 2,
+        alignSelf: 'center',
+        borderRadius: 12,
         backgroundColor: 'rgba(255, 255, 255, 0.3)',
         alignItems: 'center',
     },
     label: {
-        fontSize: 10,
+        fontSize: 8,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#33333385',
+        fontFamily: Fonts.openSans400
     },
     timeContainer: {
         flexDirection: 'row',
@@ -110,15 +92,19 @@ const styles = StyleSheet.create({
     timeUnit: {
         flexDirection: 'column',
         alignItems: 'center',
+        minWidth: 40,
     },
     timeValue: {
-        fontSize: 16,
+        fontSize: 12,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#333333',
+        fontFamily: Fonts.comfortaa400
     },
     unitText: {
         fontSize: 8,
         lineHeight: 10,
+        color: '#33333395',
+        fontFamily: Fonts.openSans400
     },
 });
 

@@ -4,15 +4,13 @@ import { getGreetingUA } from "../../lib/utils";
 import { Colors } from "../../theme/colors";
 import { useEffect, useRef } from "react";
 
-function Greetings({ userName, isOnline = false }: { userName: string, isOnline?: boolean }) {
+function Greetings({ userName }: { userName: string, isOnline?: boolean }) {
     const greetingValue = getGreetingUA();
 
-    // 🔸 Анимационные значения
     const slideAnim = useRef(new Animated.Value(-50)).current;
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        // 🔸 Запуск двух анимаций одновременно
         Animated.parallel([
             Animated.timing(slideAnim, {
                 toValue: 0,
@@ -46,10 +44,6 @@ function Greetings({ userName, isOnline = false }: { userName: string, isOnline?
                 <Text style={styles.userName}> {userName}!</Text>
             </Text>
             <View style={styles.avatarWrapper}>
-                <View style={[
-                    styles.statusIndicator,
-                    { backgroundColor: isOnline ? Colors.green : Colors.red }
-                ]} />
                 <Image
                     source={require('../../assets/main-screen/avatar.png')}
                     style={styles.avatarImage}
