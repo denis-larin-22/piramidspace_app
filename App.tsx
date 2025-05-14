@@ -5,6 +5,7 @@ import { useFonts, Comfortaa_400Regular, Comfortaa_600SemiBold, Comfortaa_700Bol
 import { OpenSans_400Regular, OpenSans_700Bold } from "@expo-google-fonts/open-sans";
 import { ActivityIndicator, View } from "react-native";
 import { Colors } from "./theme/colors";
+import SignupScreen from "./screens/SignupScreen";
 
 export default function App() {
   let [fontsLoaded] = useFonts({
@@ -25,7 +26,8 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <AppStack />
+      {/* <AppStack /> */}
+      <SignupScreen />
     </NavigationContainer>
   );
 }

@@ -105,50 +105,6 @@ function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigat
 
 export default CatalogScreen;
 
-// ui
-function FlatItem({
-    navigation,
-    item,
-    index
-}: {
-    navigation: CatalogScreenNavigationProp,
-    item: IProductItem,
-    index: number
-}) {
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-    const translateY = useRef(new Animated.Value(30)).current;
-
-    useEffect(() => {
-        Animated.parallel([
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 500,
-                delay: 20 * (index === 0 ? 0.5 : index),
-                useNativeDriver: true,
-            }),
-            Animated.timing(translateY, {
-                toValue: 0,
-                duration: 500,
-                delay: 20 * (index === 0 ? 0.5 : index),
-                useNativeDriver: true,
-            }),
-        ]).start();
-    }, []);
-
-    return (
-        <Animated.View style={{
-            opacity: fadeAnim,
-            transform: [{ translateY }],
-            flex: 1,
-            marginRight: index % 2 === 0 ? 10 : 0,
-            maxWidth: '48%'
-        }}>
-
-        </Animated.View>
-    );
-}
-
-
 // utils
 function getFiltredCatalogBySelectedCategory(activeCategoryId: number, catalogList: IProductItem[]) {
     let filtredList: IProductItem[];

@@ -15,8 +15,6 @@ interface IProps {
 }
 
 const CountdownTimer = ({ startDate, endDate }: IProps) => {
-    console.log(startDate, endDate);
-
     const [timeLeft, setTimeLeft] = useState<IInitCountdown>({
         days: 0,
         hours: 0,
