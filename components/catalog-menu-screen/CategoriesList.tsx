@@ -4,7 +4,7 @@ import { Fonts } from "../../theme/fonts";
 import { ICategory, IProductItem } from "../../lib/types";
 import { getCorrectWordDeclension } from "../../lib/utils";
 import { SYSTEM_SALE_CATEGORY_ID, SYSTEM_TOP_CATEGORY_ID } from "../../lib/hooks/useCatalogCategories";
-import AnimatedCardWrapper from "../ui/AnimatedCardWrapper";
+import AnimatedCardWrapper from "../animation/AnimatedCardWrapper";
 
 interface IProps {
     categoriesList: ICategory[],

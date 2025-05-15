@@ -1,59 +1,62 @@
-import { Dimensions, Image, Text, View } from "react-native";
+import { Dimensions, Image, Text, View, StyleSheet } from "react-native";
 import { Fonts } from "../../theme/fonts";
+import AnimatedWrapper from "../animation/AnimatedWrapper";
 
 const STEP_SCREEN_ID = 4;
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 function FourthStep({ activeScreenStep }: { activeScreenStep: number }) {
-    if (activeScreenStep !== STEP_SCREEN_ID) {
-        return null
-    } else {
-        return (
-            <View
-                style={{
-                    marginTop: 54
-                }}
-            >
+    if (activeScreenStep !== STEP_SCREEN_ID) return null;
 
-
+    return (
+        <View style={styles.container}>
+            <AnimatedWrapper offsetY={80} useScale useOpacity>
                 <Image
                     source={require('../../assets/signup-screen/fourth-step-text.png')}
-                    style={{
-                        height: 75,
-                        width: 353,
-                        resizeMode: 'contain',
-                        marginTop: 58
-                    }}
+                    style={styles.topTextImage}
                 />
+            </AnimatedWrapper>
 
-                <Text style={{
-                    marginTop: 17,
-                    marginBottom: 80,
-                    fontFamily: Fonts.openSans400,
-                    fontSize: 16,
-                    color: 'black',
-                    textAlign: 'center'
-                }}>Бажаємо чудового настрою і великих продажів!</Text>
+            <AnimatedWrapper offsetY={80} useScale useOpacity delay={200}>
+                <Text style={styles.message}>
+                    Бажаємо чудового настрою і великих продажів!
+                </Text>
+            </AnimatedWrapper>
 
-                <View
-                    style={{
-                        position: 'relative'
-                    }}
-                >
-                    <Image
-                        source={require('../../assets/signup-screen/fourth-step.png')}
-                        style={{
-                            height: 167,
-                            width: SCREEN_WIDTH,
-                            resizeMode: 'cover',
-                            position: 'absolute',
-                            left: '-5%'
-                        }}
-                    />
-                </View>
-            </View >
-        )
-    };
+            <AnimatedWrapper offsetY={80} useScale useOpacity delay={400}>
+                <Image
+                    source={require('../../assets/signup-screen/fourth-step.png')}
+                    style={styles.bottomImage}
+                />
+            </AnimatedWrapper>
+        </View>
+    );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        marginTop: 54,
+    },
+    topTextImage: {
+        height: 75,
+        width: 353,
+        resizeMode: 'contain',
+        marginTop: 58,
+    },
+    message: {
+        marginTop: 17,
+        marginBottom: 80,
+        fontFamily: Fonts.openSans400,
+        fontSize: 16,
+        color: 'black',
+        textAlign: 'center',
+    },
+    bottomImage: {
+        height: 167,
+        width: SCREEN_WIDTH,
+        resizeMode: 'cover',
+        left: '-5%',
+    },
+});
 
 export default FourthStep;

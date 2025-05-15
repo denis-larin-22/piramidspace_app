@@ -1,4 +1,4 @@
-import { ActivityIndicator, FlatList, StyleSheet, View, Animated, StatusBar } from "react-native";
+import { ActivityIndicator, FlatList, StyleSheet, View, StatusBar } from "react-native";
 import { Colors } from "../theme/colors";
 import CatalogCard from "../components/catalog-screen/CatalogCard";
 import Logo from "../components/ui/Logo";
@@ -9,10 +9,10 @@ import { IProductItem } from "../lib/types";
 import { RouteProp } from "@react-navigation/native";
 import { Fonts } from "../theme/fonts";
 import { useCatalogList } from "../lib/hooks/useCatalogList";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Filters from "../components/catalog-screen/Filters";
 import { SYSTEM_SALE_CATEGORY_ID, SYSTEM_TOP_CATEGORY_ID } from "../lib/hooks/useCatalogCategories";
-import AnimatedCardWrapper from "../components/ui/AnimatedCardWrapper";
+import AnimatedCardWrapper from "../components/animation/AnimatedCardWrapper";
 
 export type CatalogScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "CatalogScreen">;
 type CatalogScreenRouteProp = RouteProp<RootStackParamList, "CatalogScreen">;

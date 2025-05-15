@@ -1,59 +1,152 @@
-import { Animated, Image, ImageBackground, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+    Animated,
+    Image,
+    ImageBackground,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { Colors } from "../theme/colors";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Fonts } from "../theme/fonts";
 import FirstStep from "../components/sign-up-screen/FirstStep";
 import SecondStep from "../components/sign-up-screen/SecondStep";
-import FourthStep from "../components/sign-up-screen/FourthStep";
 import ThirdStep from "../components/sign-up-screen/ThirdStep";
+import FourthStep from "../components/sign-up-screen/FourthStep";
+import { isValidDate } from "../lib/utils";
+
+const initInputsValues = {
+    businessName: '',
+    businessCity: '',
+    businessBirthday: ''
+};
+
+const SCREENS_STEPS = [1, 2, 3, 4];
 
 function SignupScreen() {
-    const screenSteps = [1, 2, 3, 4];
-    const [activeScreenStep, setActiveScreenStep] = useState<number>(screenSteps[0]);
+    const [activeScreenStep, setActiveScreenStep] = useState<number>(SCREENS_STEPS[0]);
+    const [inputsValues, setInputsValues] = useState(initInputsValues);
+    const [error, setError] = useState<boolean>(false);
 
+    // Switch step handler
     const nextStepHandler = () => {
         const nextScreen = activeScreenStep + 1;
-        if (nextScreen > screenSteps.length) {
-            setActiveScreenStep(screenSteps[0]);
+        if (nextScreen > SCREENS_STEPS.length) {
+            setActiveScreenStep(SCREENS_STEPS[0]);
         } else {
             setActiveScreenStep(nextScreen);
         }
+    };
+
+    // Inputs values handlers (saving to inputsValues state)
+    const saveBusinessNameValue = (inputValue: string) => {
+        setError(false);
+        setInputsValues({ ...inputsValues, businessName: inputValue })
     }
+    const saveBusinessCityValue = (inputValue: string) => {
+        setError(false);
+        setInputsValues({ ...inputsValues, businessCity: inputValue })
+    }
+    const saveBusinessBirthdayValue = (inputValue: string) => {
+        setError(false);
+        setInputsValues({ ...inputsValues, businessBirthday: inputValue })
+    }
+
+    // Next button handler - check inputs values, set errors, switch step if input value is valid
+    const nextButtonHandler = () => {
+        switch (activeScreenStep) {
+            case 1:
+                if (isEmpty(inputsValues.businessName)) {
+                    setError(true);
+                } else {
+                    setError(false);
+                    nextStepHandler();
+                }
+                break;
+            case 2:
+                if (isEmpty(inputsValues.businessCity)) {
+                    setError(true);
+                } else {
+                    setError(false);
+                    nextStepHandler();
+                }
+                break;
+            case 3:
+                if (isValidDate(inputsValues.businessBirthday)) {
+                    setError(false);
+                    nextStepHandler();
+                } else {
+                    setError(true);
+                }
+                break;
+            default:
+                console.log('RESULT:', inputsValues);
+                setInputsValues(initInputsValues);
+                nextStepHandler();
+        }
+    };
+
     return (
-        <View style={styles.wrap}>
-            <StatusBar
-                hidden={false}
-                translucent={false}
-                barStyle="dark-content"
-                backgroundColor={Colors.pale}
-            />
+        <View style={styles.signUpWrapper}>
+            <KeyboardAvoidingView
+                style={{ marginBottom: 20 }}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+            >
+                <ScrollView
+                    contentContainerStyle={styles.scrollContainer}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <StatusBar
+                        hidden={false}
+                        translucent={false}
+                        barStyle="dark-content"
+                        backgroundColor={Colors.pale}
+                    />
 
-            <FirstStep activeScreenStep={activeScreenStep} />
-            <SecondStep activeScreenStep={activeScreenStep} />
-            <ThirdStep activeScreenStep={activeScreenStep} />
-            <FourthStep activeScreenStep={activeScreenStep} />
-
+                    <FirstStep activeScreenStep={activeScreenStep} inputChangeHandler={saveBusinessNameValue} isError={error} />
+                    <SecondStep activeScreenStep={activeScreenStep} inputChangeHandler={saveBusinessCityValue} isError={error} />
+                    <ThirdStep activeScreenStep={activeScreenStep} inputChangeHandler={saveBusinessBirthdayValue} isError={error} />
+                    <FourthStep activeScreenStep={activeScreenStep} />
+                </ScrollView>
+            </KeyboardAvoidingView>
 
             <NavigationBar
                 activeScreenStep={activeScreenStep}
-                screenSteps={screenSteps}
-                nextStepHandler={nextStepHandler}
+                screenSteps={SCREENS_STEPS}
+                nextButtonHandler={nextButtonHandler}
+                skipButtonHandler={nextStepHandler}
             />
-        </View >
-    )
+        </View>
+    );
 };
 
 export default SignupScreen;
 
 const styles = StyleSheet.create({
+    signUpWrapper: {
+        flex: 1,
+        backgroundColor: Colors.pale,
+        justifyContent: 'space-between',
+    },
+    scrollContainer: {
+        flexGrow: 1,
+        justifyContent: 'space-between',
+        marginHorizontal: 20
+    },
     wrap: {
         width: '100%',
         height: '100%',
-        padding: 20,
         backgroundColor: Colors.pale,
         justifyContent: 'space-between'
     },
     nav: {
+        paddingHorizontal: 20,
         marginBottom: 30,
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -98,11 +191,13 @@ const styles = StyleSheet.create({
     },
 });
 
-function NavigationBar({ activeScreenStep, screenSteps, nextStepHandler }:
+// ui
+function NavigationBar({ activeScreenStep, screenSteps, nextButtonHandler, skipButtonHandler }:
     {
         activeScreenStep: number,
-        screenSteps: Array<number>
-        nextStepHandler: () => void
+        screenSteps: Array<number>,
+        nextButtonHandler: () => void,
+        skipButtonHandler: () => void
     }) {
 
     const isThirdStep = activeScreenStep === 3;
@@ -118,7 +213,7 @@ function NavigationBar({ activeScreenStep, screenSteps, nextStepHandler }:
                 style={styles.buttonsWrap}
             >
                 <TouchableOpacity
-                    onPress={nextStepHandler}
+                    onPress={skipButtonHandler}
                 >
                     <Text
                         style={[styles.skipBtnText, {
@@ -130,7 +225,7 @@ function NavigationBar({ activeScreenStep, screenSteps, nextStepHandler }:
                     style={[styles.nextBtn, {
                         width: isThirdStep ? '100%' : 50,
                     }]}
-                    onPress={nextStepHandler}
+                    onPress={nextButtonHandler}
                 >
                     <ImageBackground
                         style={styles.nextBtnBcg}
@@ -192,4 +287,7 @@ function Pagination({ activeScreenStep, screenSteps }: { activeScreenStep: numbe
             }
         </>
     );
-}
+};
+
+// utils
+function isEmpty(value: string) { return value.trim().length === 0 };

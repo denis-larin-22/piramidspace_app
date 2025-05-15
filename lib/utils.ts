@@ -128,3 +128,35 @@ export const getGreetingUA = (): string => {
         return 'Доброго вечора';
     }
 };
+
+// Check input date from user in the SignUp screen
+export function isValidDate(dateStr: string): boolean {
+    // Поддержка дней и месяцев с 1 или 2 цифрами
+    const dateRegex = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/;
+    const match = dateStr.match(dateRegex);
+
+    if (!match) return false;
+
+    const day = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10);
+    const year = parseInt(match[3], 10);
+
+    const currentYear = new Date().getFullYear();
+
+    if (day < 1 || day > 31) return false;
+    if (month < 1 || month > 12) return false;
+    if (year > currentYear) return false;
+
+    // Проверка существования даты
+    const dateObj = new Date(year, month - 1, day);
+    if (
+        dateObj.getFullYear() !== year ||
+        dateObj.getMonth() !== month - 1 ||
+        dateObj.getDate() !== day
+    ) {
+        return false;
+    }
+
+    return true;
+}
+
