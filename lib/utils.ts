@@ -170,3 +170,18 @@ export function isValidPhoneNumber(phone: string): boolean {
     return regex.test(cleanedPhone);
 }
 
+export function formatPhoneNumberToInternational(phone: string): string {
+    const cleanedPhone = phone.trim();
+
+    if (cleanedPhone.startsWith('+380')) {
+        return cleanedPhone;
+    }
+
+    if (cleanedPhone.startsWith('380')) {
+        return `+${cleanedPhone}`;
+    }
+
+    // Если начинается с '0'
+    return `+380${cleanedPhone.slice(1)}`;
+}
+

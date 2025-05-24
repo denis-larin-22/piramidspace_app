@@ -2,16 +2,23 @@ import { Image, Text, TouchableOpacity, View, StyleSheet } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { HomeScreenNavigationProp } from "../../screens/MainScreen";
+import { getDataFromAcyncStorage, removeData } from "../../lib/async-storage/acyncStorage";
+import { ASYNC_STORAGE_USER_INFO_OBJECT, ASYNC_STORAGE_USER_PHONE_NUMBER } from "../../lib/async-storage/asyncStorageKeys";
 
 function MainLinks({ navigation }: { navigation: HomeScreenNavigationProp }) {
     const links = [
         {
             text: 'Замовлення',
-            onPress: () => { }
+            onPress: () => {
+                removeData(ASYNC_STORAGE_USER_INFO_OBJECT);
+            }
         },
         {
             text: 'Операції',
-            onPress: () => { }
+            onPress: () => {
+                getDataFromAcyncStorage(ASYNC_STORAGE_USER_PHONE_NUMBER)
+                    .then((res) => console.log(res))
+            }
         },
         {
             text: 'Рахунки',

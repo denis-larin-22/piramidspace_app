@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useInput } from "../../lib/hooks/useInput";
-import { formatToLowerCase, isValidPhoneNumber } from "../../lib/utils";
-import { ButtonProps, Image, ImageBackground, Keyboard, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { formatPhoneNumberToInternational, formatToLowerCase, isValidPhoneNumber } from "../../lib/utils";
+import { ButtonProps, Image, ImageBackground, Keyboard, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import ErrorNotification from "../ui/ErrorNotification";
@@ -10,6 +10,7 @@ import { LoginScreenNavigationProp } from "../../screens/LoginScreen";
 import { saveDataToAcyncStorage } from "../../lib/async-storage/acyncStorage";
 import { ASYNC_STORAGE_USER_INFO_OBJECT, ASYNC_STORAGE_USER_LOGIN, ASYNC_STORAGE_USER_PHONE_NUMBER } from "../../lib/async-storage/asyncStorageKeys";
 import { getAuth } from "../../lib/api";
+import AnimatedWrapper from "../animation/AnimatedWrapper";
 
 function LoginForm({ navigation }: { navigation: LoginScreenNavigationProp }) {
     //   login value
@@ -46,7 +47,7 @@ function LoginForm({ navigation }: { navigation: LoginScreenNavigationProp }) {
         Keyboard.dismiss(); // hide keyboard
 
         const login = formatToLowerCase(loginValue).trim();
-        const phoneNumber = phoneNumberValue.trim();
+        const phoneNumber = formatPhoneNumberToInternational(phoneNumberValue);
 
         const authResponseResult = await getAuth(login, phoneNumber); // Auth
 
@@ -59,8 +60,10 @@ function LoginForm({ navigation }: { navigation: LoginScreenNavigationProp }) {
             onLoginChange("");
             onPhoneNumberChange("");
 
-            setIsLoading(false);
-            navigation.navigate('MainScreen');
+            setTimeout(() => {
+                setIsLoading(false);
+                navigation.navigate('MainScreen');
+            }, 1000)
         } else {
             setLoginError(true);
             setPhoneNumberError(true);
@@ -127,12 +130,11 @@ function LoginForm({ navigation }: { navigation: LoginScreenNavigationProp }) {
                 style={styles.decorImage}
             />
 
-            {isLoading && <Loader />}
+            {isLoading && <Loading />}
 
-            <ErrorNotification
-                isVissible={modalErrorVisible}
-                message="Перевірте значення логіна і номеру телефону"
-            />
+            {modalErrorVisible && <ErrorNotification
+                message="⚠️ Перевір значення логіна і номеру телефону"
+            />}
         </View>
     )
 };
@@ -153,6 +155,27 @@ function LoginButton(loginButtonProps: ButtonProps) {
                 </Text>
             </ImageBackground>
         </TouchableOpacity>
+    )
+}
+
+function Loading() {
+    return (
+        <View
+            style={styles.loadingContainer}
+        >
+            <AnimatedWrapper
+                useScale
+                offsetY={50}
+                useOpacity
+                style={styles.loadingWrap}
+            >
+                <Text
+                    style={styles.loadingText}
+                >🦥 Зачекай...</Text>
+                <Loader radius={70} />
+
+            </AnimatedWrapper>
+        </View >
     )
 }
 
@@ -237,4 +260,37 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         textAlign: "center"
     },
+    // loading
+    loadingContainer: {
+        backgroundColor: "#00000080",
+        height: '100%',
+        width: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 20,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    loadingWrap: {
+        width: 250,
+        height: 100,
+        backgroundColor: Colors.pale,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 14,
+        padding: 10,
+        paddingTop: 15
+    },
+    loadingText: {
+        width: '100%',
+        textAlign: 'center',
+        fontFamily: Fonts.comfortaa600,
+        fontSize: 16,
+        borderBottomWidth: 1,
+        borderColor: "#A2A2A840",
+        paddingBottom: 5
+    }
 });

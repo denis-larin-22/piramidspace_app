@@ -1,20 +1,21 @@
-import { Modal, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Colors } from "../../theme/colors";
+import { Fonts } from "../../theme/fonts";
+import AnimatedWrapper from "../animation/AnimatedWrapper";
 
-function ErrorNotification({ isVissible, message }: { isVissible: boolean, message: string }) {
+function ErrorNotification({ message }: { message: string }) {
     return (
-        <Modal
-            animationType="fade"
-            transparent={true}
-            visible={isVissible}
-        >
-            <View style={styles.modalWrap}>
-                <View style={styles.modalTextWrap}>
-                    <Text style={styles.headText}>😔 Щось пішло не так...</Text>
-                    <Text style={styles.messageText}>{message}</Text>
-                </View>
-            </View>
-        </Modal>
+        <View style={styles.modalWrap}>
+            <AnimatedWrapper
+                offsetY={-50}
+                useOpacity
+                useScale
+                style={styles.modalTextWrap}
+            >
+                <Text style={styles.headText}>😔 Щось пішло не так...</Text>
+                <Text style={styles.messageText}>{message}</Text>
+            </AnimatedWrapper>
+        </View>
     )
 };
 
@@ -22,10 +23,17 @@ export default ErrorNotification;
 
 const styles = StyleSheet.create({
     modalWrap: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#00000098",
+        backgroundColor: "#00000080",
+        height: '100%',
+        width: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 20,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     modalTextWrap: {
         width: 250,
@@ -33,17 +41,24 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.pale,
         alignItems: "center",
         justifyContent: "center",
-        gap: 10,
         borderRadius: 14,
-        borderTopWidth: 3,
-        borderColor: Colors.red,
+        overflow: 'hidden'
     },
     headText: {
-        fontSize: 14,
-        fontWeight: 500,
-        textAlign: "center",
+        width: '100%',
+        textAlign: 'center',
+        fontFamily: Fonts.comfortaa600,
+        fontSize: 16,
+        paddingBottom: 5,
+        color: 'white',
+        backgroundColor: '#FF0A0A90',
+        paddingTop: 5,
+        position: 'relative',
+        top: -16
     },
     messageText: {
-        fontSize: 12,
+        maxWidth: '80%',
+        fontSize: 14,
+        textAlign: 'center'
     },
 })

@@ -12,7 +12,7 @@ function LoginScreen({ navigation }: { navigation: LoginScreenNavigationProp }) 
     return (
         <>
             <StatusBar
-                hidden={false}
+                hidden={true}
                 translucent={false}
                 barStyle="dark-content"
                 backgroundColor={Colors.pale}
