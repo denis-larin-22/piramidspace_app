@@ -26,8 +26,8 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      {/* <AppStack /> */}
-      <SignupScreen />
+      <AppStack />
+      {/* <SignupScreen /> */}
     </NavigationContainer>
   );
 }

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { ASYNC_STORAGE_CATEGORIES_DATA_KEY, getDataFromAcyncStorage, saveDataToAcyncStorage } from "../acyncStorage";
+import { getDataFromAcyncStorage, saveDataToAcyncStorage } from "../async-storage/acyncStorage";
 import { ICategory } from "../types";
 import { fetchCategories } from "../api";
+import { ASYNC_STORAGE_CATEGORIES_DATA_KEY } from "../async-storage/asyncStorageKeys";
 
 // Reserved category IDs (not from backend)
 export const SYSTEM_SALE_CATEGORY_ID = 101;  // Special category: "Sale"

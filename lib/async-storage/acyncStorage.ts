@@ -1,9 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const ASYNC_STORAGE_CATALOG_DATA_KEY = "catalogData";
-export const ASYNC_STORAGE_CATEGORIES_DATA_KEY = "categoriesData";
-
-
 export async function saveDataToAcyncStorage(key: string, data: string) {
     try {
         await AsyncStorage.setItem(key, data);

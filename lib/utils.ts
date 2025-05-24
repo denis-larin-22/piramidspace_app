@@ -160,3 +160,13 @@ export function isValidDate(dateStr: string): boolean {
     return true;
 }
 
+export function isValidPhoneNumber(phone: string): boolean {
+    // valid options
+    // +380XXXXXXXXX
+    // 380XXXXXXXXX
+    // 0XXXXXXXXX
+    const cleanedPhone = phone.trim();
+    const regex = /^(?:\+380|380|0)\d{9}$/;
+    return regex.test(cleanedPhone);
+}
+

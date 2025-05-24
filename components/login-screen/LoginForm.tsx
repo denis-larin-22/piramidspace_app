@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { useInput } from "../../lib/hooks/useInput";
-import { formatToLowerCase } from "../../lib/utils";
+import { formatToLowerCase, isValidPhoneNumber } from "../../lib/utils";
 import { ButtonProps, Image, ImageBackground, Keyboard, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import ErrorNotification from "../ui/ErrorNotification";
 import Loader from "../ui/Loader";
 import { LoginScreenNavigationProp } from "../../screens/LoginScreen";
+import { saveDataToAcyncStorage } from "../../lib/async-storage/acyncStorage";
+import { ASYNC_STORAGE_USER_INFO_OBJECT, ASYNC_STORAGE_USER_LOGIN, ASYNC_STORAGE_USER_PHONE_NUMBER } from "../../lib/async-storage/asyncStorageKeys";
+import { getAuth } from "../../lib/api";
 
 function LoginForm({ navigation }: { navigation: LoginScreenNavigationProp }) {
     //   login value
@@ -15,59 +18,59 @@ function LoginForm({ navigation }: { navigation: LoginScreenNavigationProp }) {
         onChange: onLoginChange,
         error: loginError,
         setError: setLoginError,
-    } = useInput("test");
-    // password value
+    } = useInput("");
+    // phone number value
     const {
-        value: passwordValue,
-        onChange: onPasswordChange,
-        error: passwordError,
-        setError: setPasswordError,
-    } = useInput("test");
-    // hide password value
-    const [isPasswordHide, setIsPasswordHide] = useState<boolean>(true); // Hide password button state
+        value: phoneNumberValue,
+        onChange: onPhoneNumberChange,
+        error: phoneNumberError,
+        setError: setPhoneNumberError,
+    } = useInput("");
+
     // loading
     const [isLoading, setIsLoading] = useState<boolean>(false); // Loading auth state
     // error notif.
     const [modalErrorVisible, setModalErrorVisible] = useState(false); // Error notification state
 
     // Button handler
-    const loginButtonHandler = () => {
-        const keyValue = 'test'; // temporary
+    const loginButtonHandler = async () => {
+        const isLoginValueValid = loginValue.length !== 0;
+        const isPhoneNumberValueValid = isValidPhoneNumber(phoneNumberValue);
 
-        // If input fields are empty
-        if (loginValue.length === 0) {
-            setLoginError(true);
-        }
-        if (passwordValue.length === 0) {
-            setPasswordError(true);
-        }
-        if (loginValue.length === 0 || passwordValue.length === 0) return;
+        if (!isLoginValueValid) setLoginError(true);
+        if (!isPhoneNumberValueValid) setPhoneNumberError(true);
+        if (!isLoginValueValid || !isPhoneNumberValueValid) return;
 
         // Start auth
         setIsLoading(true);
         Keyboard.dismiss(); // hide keyboard
 
         const login = formatToLowerCase(loginValue).trim();
-        const password = passwordValue.trim();
+        const phoneNumber = phoneNumberValue.trim();
 
-        if (login === keyValue && password === keyValue) {
-            setTimeout(() => {
-                onLoginChange("");
-                onPasswordChange("");
-                setIsLoading(false);
-                navigation.navigate('MainScreen');
-            }, 1500)
+        const authResponseResult = await getAuth(login, phoneNumber); // Auth
+
+        if (authResponseResult !== undefined) {
+            // saving login, phoneNumber values and user info to the Async Storage
+            saveDataToAcyncStorage(ASYNC_STORAGE_USER_LOGIN, login);
+            saveDataToAcyncStorage(ASYNC_STORAGE_USER_PHONE_NUMBER, phoneNumber);
+            saveDataToAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT, JSON.stringify(authResponseResult));
+
+            onLoginChange("");
+            onPhoneNumberChange("");
+
+            setIsLoading(false);
+            navigation.navigate('MainScreen');
         } else {
-            setTimeout(() => {
-                setLoginError(true);
-                setPasswordError(true);
-                setIsLoading(false);
-                setModalErrorVisible(true);
-            }, 1500);
+            setLoginError(true);
+            setPhoneNumberError(true);
+
+            setIsLoading(false);
+            setModalErrorVisible(true);
 
             setTimeout(() => {
                 setModalErrorVisible(false);
-            }, 5000)
+            }, 3000);
         }
     }
 
@@ -96,41 +99,22 @@ function LoginForm({ navigation }: { navigation: LoginScreenNavigationProp }) {
                     }}
                 />
 
-                <Text style={styles.label}>Пароль</Text>
-                <View>
-                    <TextInput
-                        onChangeText={(text) => {
-                            setPasswordError(false);
-                            onPasswordChange(text);
-                        }}
-                        value={passwordValue}
-                        placeholder="Введіть свій пароль"
-                        placeholderTextColor={Colors.gray}
-                        secureTextEntry={isPasswordHide}
-                        style={{
-                            ...styles.input,
-                            borderColor: passwordError ? Colors.red : Colors.pale,
-                            marginBottom: 10,
-                        }}
-                    />
-                    <TouchableOpacity
-                        onPress={() => { setIsPasswordHide(!isPasswordHide) }}
-                        style={styles.hidePasswordButton}>
-                        {isPasswordHide ?
-                            <Image
-                                source={require('../../assets/login-screen/open-eye.png')}
-                                style={styles.openEyeImage}
-                            />
-                            :
-                            <Image
-                                source={require('../../assets/login-screen/close-eye.png')}
-                                style={styles.closeEyeImage}
-                            />
-                        }
-                    </TouchableOpacity>
-                </View>
-
-                <Text style={styles.forgotPassword}>Забули пароль?</Text>
+                <Text style={styles.label}>Номер телефону:</Text>
+                <TextInput
+                    onChangeText={(text) => {
+                        setPhoneNumberError(false);
+                        onPhoneNumberChange(text);
+                    }}
+                    value={phoneNumberValue}
+                    keyboardType="number-pad"
+                    placeholder="+38 067 111 11 11"
+                    placeholderTextColor={Colors.gray}
+                    style={{
+                        ...styles.input,
+                        borderColor: phoneNumberError ? Colors.red : Colors.pale,
+                        marginBottom: 10,
+                    }}
+                />
 
                 <LoginButton
                     title="Увійти"
@@ -147,7 +131,7 @@ function LoginForm({ navigation }: { navigation: LoginScreenNavigationProp }) {
 
             <ErrorNotification
                 isVissible={modalErrorVisible}
-                message="Перевірте значення логіна і паролю"
+                message="Перевірте значення логіна і номеру телефону"
             />
         </View>
     )
@@ -171,7 +155,6 @@ function LoginButton(loginButtonProps: ButtonProps) {
         </TouchableOpacity>
     )
 }
-
 
 // Styles
 
@@ -220,13 +203,6 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.openSans400,
         fontSize: 14
     },
-    hidePasswordButton: {
-        width: 26,
-        height: 15,
-        position: 'absolute',
-        right: 13,
-        top: '25%'
-    },
     openEyeImage: {
         height: 15,
         width: 24,
@@ -260,12 +236,5 @@ const styles = StyleSheet.create({
         width: '100%',
         paddingVertical: 12,
         textAlign: "center"
-    },
-    forgotPassword: {
-        fontSize: 14,
-        color: Colors.blue,
-        opacity: 0.8,
-        textAlign: "right",
-        fontFamily: Fonts.openSans400,
     },
 });

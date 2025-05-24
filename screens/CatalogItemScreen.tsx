@@ -7,7 +7,8 @@ import { RouteProp } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { fetchProductItem } from "../lib/api";
 import { Colors } from "../theme/colors";
-import { ASYNC_STORAGE_CATALOG_DATA_KEY, getDataFromAcyncStorage } from "../lib/acyncStorage";
+import { getDataFromAcyncStorage } from "../lib/async-storage/acyncStorage";
+import { ASYNC_STORAGE_CATALOG_DATA_KEY } from "../lib/async-storage/asyncStorageKeys";
 
 export type CatalogItemScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "CatalogItemScreen">;
 type CatalogItemScreenRouteProp = RouteProp<RootStackParamList, "CatalogItemScreen">;

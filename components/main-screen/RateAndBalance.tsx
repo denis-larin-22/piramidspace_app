@@ -1,90 +1,124 @@
-import { Image, Text, TouchableOpacity, View, StyleSheet, Animated, Easing } from "react-native";
-import { useEffect, useRef } from "react";
+import { Image, Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
+import AnimatedWrapper from "../animation/AnimatedWrapper";
+import AnimatedAbsolutePosition from "../animation/AnimatedTransition";
+import { getBalanceByLogin, getExchangeDollarRate } from "../../lib/api";
+import { getDataFromAcyncStorage } from "../../lib/async-storage/acyncStorage";
+import { ASYNC_STORAGE_USER_LOGIN } from "../../lib/async-storage/asyncStorageKeys";
 
 function RateAndBalance() {
-    const slideAnim1 = useRef(new Animated.Value(-20)).current;
-    const fadeAnim1 = useRef(new Animated.Value(0)).current;
-
-    const slideAnim2 = useRef(new Animated.Value(-20)).current;
-    const fadeAnim2 = useRef(new Animated.Value(0)).current;
+    const [rateValue, setRateValue] = useState<null | string>(null);
+    const [balanceValue, setBalanceValue] = useState<null | number>(null);
 
     useEffect(() => {
-        // Анимация первой карточки
-        Animated.parallel([
-            Animated.timing(slideAnim1, {
-                toValue: 0,
-                duration: 500,
-                delay: 500,
-                easing: Easing.out(Easing.ease),
-                useNativeDriver: true,
-            }),
-            Animated.timing(fadeAnim1, {
-                toValue: 1,
-                duration: 500,
-                delay: 500,
-                easing: Easing.out(Easing.ease),
-                useNativeDriver: true,
-            })
-        ]).start();
+        setTimeout(() => {
+            getRate();
+            getBalance();
+        }, 1000);
+        // !!!!!!!!!!!!!!11
+        // !!!!!!!!!!!!!!11
+        // !!!!!!!!!!!!!!11
+        // !!!!!!!!!!!!!!11
+        // !!!!!!!!!!!!!!11
+        // ПРОПИШИ СОХРАНЕНИЕ ЗНАЧЕНИЙ НА СЛУЧАЙ ЕСЛИ НЕТ ИНТЕРНЕТА, ВЫВОДИТЬ СТАРОЕ!!!!!!!!!
+        // !!!!!!!!!!!!!!11
+        // !!!!!!!!!!!!!!11
+        // !!!!!!!!!!!!!!11
+        // !!!!!!!!!!!!!!11
 
-        // Анимация второй карточки с задержкой
-        Animated.parallel([
-            Animated.timing(slideAnim2, {
-                toValue: 0,
-                duration: 500,
-                delay: 700,
-                easing: Easing.out(Easing.ease),
-                useNativeDriver: true,
-            }),
-            Animated.timing(fadeAnim2, {
-                toValue: 1,
-                duration: 500,
-                delay: 700,
-                easing: Easing.out(Easing.ease),
-                useNativeDriver: true,
-            })
-        ]).start();
+
     }, []);
+
+    async function getRate() {
+        const value = await getExchangeDollarRate();
+        setRateValue(value);
+    }
+
+    async function getBalance() {
+        const userLoginValue = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
+        const value = await getBalanceByLogin(userLoginValue as string);
+        setBalanceValue(value);
+    }
 
     return (
         <View style={styles.container}>
-            <Animated.View style={{
-                transform: [{ translateY: slideAnim1 }],
-                opacity: fadeAnim1,
-                width: '48%',
-            }}>
+            <AnimatedWrapper
+                style={{ width: '48%' }}
+                offsetY={-40}
+                useOpacity
+                useScale
+                duration={500}
+                delay={500}
+            >
                 <TouchableOpacity style={styles.card}>
-                    <Image
-                        source={require('../../assets/main-screen/rate.png')}
+                    <AnimatedAbsolutePosition
+                        right={rateValue ? 15 : 75}
+                        top={rateValue ? 15 : 35}
                         style={styles.rateIcon}
-                        resizeMode="contain"
-                    />
-                    <View style={styles.textBlock}>
-                        <Text style={styles.title}>Курс</Text>
-                        <Text style={styles.subtitle}>42,32</Text>
-                    </View>
+                    >
+                        <Image
+                            source={require('../../assets/main-screen/rate.png')}
+                            style={{
+                                width: '100%',
+                                height: '100%'
+                            }}
+                            resizeMode="contain"
+                        />
+                    </AnimatedAbsolutePosition>
+                    {rateValue &&
+                        <AnimatedWrapper
+                            style={styles.textBlock}
+                            offsetY={20}
+                            duration={300}
+                            useOpacity
+                            useScale
+                        >
+                            <Text style={styles.title}>Курс</Text>
+                            <Text style={styles.subtitle}>{rateValue}</Text>
+                        </AnimatedWrapper>
+                    }
                 </TouchableOpacity>
-            </Animated.View>
+            </AnimatedWrapper>
 
-            <Animated.View style={{
-                transform: [{ translateY: slideAnim2 }],
-                opacity: fadeAnim2,
-                width: '48%',
-            }}>
+            <AnimatedWrapper
+                style={{ width: '48%' }}
+                offsetY={-40}
+                useOpacity
+                useScale
+                duration={500}
+                delay={700}
+            >
                 <TouchableOpacity style={styles.card}>
-                    <Image
-                        source={require('../../assets/main-screen/balance.png')}
+                    <AnimatedAbsolutePosition
+                        right={balanceValue ? 15 : 75}
+                        top={balanceValue ? 15 : 35}
                         style={styles.balanceIcon}
-                        resizeMode="contain"
-                    />
-                    <View style={styles.textBlock}>
-                        <Text style={styles.title}>Баланс</Text>
-                        <Text style={styles.subtitle}>545498</Text>
-                    </View>
+                    >
+                        <Image
+                            source={require('../../assets/main-screen/balance.png')}
+                            style={{
+                                width: '100%',
+                                height: '100%'
+                            }}
+                            resizeMode="contain"
+                        />
+                    </AnimatedAbsolutePosition>
+                    {balanceValue &&
+                        <AnimatedWrapper
+                            style={styles.textBlock}
+                            offsetY={20}
+                            duration={300}
+                            useOpacity
+                            useScale
+                        >
+                            <Text style={styles.title}>Баланс</Text>
+                            <Text style={styles.subtitle}>{balanceValue}</Text>
+                        </AnimatedWrapper>
+                    }
                 </TouchableOpacity>
-            </Animated.View>
+            </AnimatedWrapper>
         </View>
     );
 }
@@ -116,16 +150,10 @@ const styles = StyleSheet.create({
     rateIcon: {
         width: 32,
         height: 28,
-        position: 'absolute',
-        top: 15,
-        right: 15,
     },
     balanceIcon: {
         width: 29,
         height: 27,
-        position: 'absolute',
-        top: 15,
-        right: 15,
     },
     textBlock: {
         alignSelf: 'flex-end',

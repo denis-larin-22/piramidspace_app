@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { ASYNC_STORAGE_CATALOG_DATA_KEY, getDataFromAcyncStorage, saveDataToAcyncStorage } from "../acyncStorage";
+import { getDataFromAcyncStorage, saveDataToAcyncStorage } from "../async-storage/acyncStorage";
 import { IProductItem } from "../types";
 import { fetchProductsList } from "../api";
+import { ASYNC_STORAGE_CATALOG_DATA_KEY } from "../async-storage/asyncStorageKeys";
 
 // Checks the cache for saved Catalog list data, if there is no saved data, gets it via API and saves it to the cache / show loading status
 export function useCatalogList() {
