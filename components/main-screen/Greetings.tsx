@@ -3,54 +3,24 @@ import { Fonts } from "../../theme/fonts";
 import { getGreetingUA } from "../../lib/utils";
 import { Colors } from "../../theme/colors";
 import { useEffect, useRef } from "react";
+import { Avatar } from "./Avatar";
+import AnimatedWrapper from "../animation/AnimatedWrapper";
 
 function Greetings({ userName }: { userName: string, isOnline?: boolean }) {
     const greetingValue = getGreetingUA();
 
-    const slideAnim = useRef(new Animated.Value(-50)).current;
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-
-    useEffect(() => {
-        Animated.parallel([
-            Animated.timing(slideAnim, {
-                toValue: 0,
-                duration: 500,
-                delay: 300,
-                easing: Easing.out(Easing.ease),
-                useNativeDriver: true,
-            }),
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 500,
-                delay: 300,
-                easing: Easing.out(Easing.ease),
-                useNativeDriver: true,
-            }),
-        ]).start();
-    }, []);
-
     return (
-        <Animated.View
-            style={[
-                styles.container,
-                {
-                    transform: [{ translateY: slideAnim }],
-                    opacity: fadeAnim,
-                }
-            ]}
+        <AnimatedWrapper
+            style={styles.container}
+            useOpacity
+            offsetY={-40}
         >
             <Text style={styles.greetingText}>
                 {greetingValue},
                 <Text style={styles.userName}> {userName}!</Text>
             </Text>
-            <View style={styles.avatarWrapper}>
-                <Image
-                    source={require('../../assets/main-screen/avatar.png')}
-                    style={styles.avatarImage}
-                    resizeMode="contain"
-                />
-            </View>
-        </Animated.View>
+            <Avatar />
+        </AnimatedWrapper>
     );
 }
 
@@ -62,33 +32,13 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     greetingText: {
-        fontSize: 20,
+        fontSize: 18,
         fontFamily: Fonts.comfortaa400,
+        maxWidth: '75%'
     },
     userName: {
         fontFamily: Fonts.comfortaa700,
-    },
-    avatarWrapper: {
-        width: 31,
-        height: 31,
-        borderRadius: 100,
-        position: 'relative',
-    },
-    statusIndicator: {
-        width: 11,
-        height: 11,
-        borderWidth: 1,
-        borderColor: Colors.pale,
-        borderRadius: 100,
-        position: 'absolute',
-        zIndex: 10,
-        right: -2,
-        top: -4,
-    },
-    avatarImage: {
-        width: '100%',
-        height: '100%',
-    },
+    }
 });
 
 export default Greetings;

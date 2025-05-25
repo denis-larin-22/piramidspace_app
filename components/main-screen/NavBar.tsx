@@ -1,54 +1,24 @@
-import { StyleSheet, View, Animated, Easing, Image } from "react-native";
-import { useEffect, useRef } from "react";
+import { StyleSheet, Image } from "react-native";
 import MainLinks from "./MainLinks";
 import { HomeScreenNavigationProp } from "../../screens/MainScreen";
 import { Colors } from "../../theme/colors";
+import AnimatedWrapper from "../animation/AnimatedWrapper";
 
 function NavBar({ navigation, width }: { navigation: HomeScreenNavigationProp, width: number }) {
-    const slideAnim = useRef(new Animated.Value(70)).current;
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-    const adsOpacity = useRef(new Animated.Value(0)).current;
-
-    useEffect(() => {
-        Animated.parallel([
-            Animated.timing(slideAnim, {
-                toValue: 0,
-                duration: 500,
-                delay: 800,
-                easing: Easing.out(Easing.ease),
-                useNativeDriver: true,
-            }),
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 500,
-                delay: 800,
-                easing: Easing.out(Easing.ease),
-                useNativeDriver: true,
-            }),
-        ]).start();
-
-        Animated.timing(adsOpacity, {
-            toValue: 1,
-            duration: 500,
-            delay: 1100,
-            easing: Easing.out(Easing.ease),
-            useNativeDriver: true,
-        }).start();
-    }, []);
-
     return (
-        <Animated.View
-            style={[
-                styles.linksWrap,
-                {
-                    width: width,
-                    transform: [{ translateY: slideAnim }],
-                    opacity: fadeAnim,
-                },
-            ]}
+        <AnimatedWrapper
+            style={[styles.linksWrap, { width: width }]}
+            offsetY={400}
+            useOpacity
+            duration={300}
         >
             {/* Ads. Images */}
-            <Animated.View style={[styles.adsImage, { opacity: adsOpacity }]}>
+            <AnimatedWrapper
+                style={styles.adsImage}
+                useScale
+                useOpacity
+                delay={300}
+            >
                 <Image
                     source={{ uri: 'https://www.makemyblinds.co.uk/media/catalog/product/cache/4f056f72a16582089f5732dba9736180/b/e/bexley_sandstone_rp5055_cupdp_1.jpg' }}
                     style={{
@@ -57,10 +27,10 @@ function NavBar({ navigation, width }: { navigation: HomeScreenNavigationProp, w
 
                     }}
                 />
-            </Animated.View>
+            </AnimatedWrapper>
             {/* Screens links */}
             <MainLinks navigation={navigation} />
-        </Animated.View>
+        </AnimatedWrapper>
     );
 }
 

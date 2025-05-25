@@ -1,23 +1,23 @@
-import { ActivityIndicator, Image, ImageStyle, View } from "react-native";
+import { Image, ImageStyle, View } from "react-native";
 import { useCachedImage } from "../../lib/hooks/useCachedImage";
 import { Colors } from "../../theme/colors";
+import Loader from "./Loader";
 
 interface CachedImageProps {
     source: string;
     style?: ImageStyle;
-    loadingIndicatorSize?: number | 'small' | 'large';
 }
 
-export const CachedImage = ({ source, style, loadingIndicatorSize = 'small' }: CachedImageProps) => {
+export const CachedImage = ({ source, style }: CachedImageProps) => {
     const { localUri, isLoading } = useCachedImage(source);
 
     if (isLoading) {
         return (
-            <View style={[{ justifyContent: 'center', alignItems: 'center' }, style]}>
-                <ActivityIndicator size={loadingIndicatorSize} color={Colors.blue} />
+            <View style={[{ justifyContent: 'flex-start', alignItems: 'center', paddingTop: 35, backgroundColor: Colors.pale }, style]}>
+                <Loader />
             </View>
-        );
-    }
+        )
+    };
 
     if (!localUri) return null;
 

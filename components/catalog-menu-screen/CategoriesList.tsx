@@ -4,7 +4,7 @@ import { Fonts } from "../../theme/fonts";
 import { ICategory, IProductItem } from "../../lib/types";
 import { getCorrectWordDeclension } from "../../lib/utils";
 import { SYSTEM_SALE_CATEGORY_ID, SYSTEM_TOP_CATEGORY_ID } from "../../lib/hooks/useCatalogCategories";
-import AnimatedCardWrapper from "../animation/AnimatedCardWrapper";
+import AnimatedWrapper from "../animation/AnimatedWrapper";
 
 interface IProps {
     categoriesList: ICategory[],
@@ -17,13 +17,16 @@ function CategoriesList({ categoriesList, catalogList, cardPressHandler }: IProp
         <ScrollView style={styles.listContainer}>
             <View style={styles.listWrap}>
                 {categoriesList.map((category, index) => (
-                    <AnimatedCardWrapper
+                    <AnimatedWrapper
                         key={index + category.name}
-                        index={index}
                         style={styles.categoryItem}
+                        offsetY={-80}
+                        useScale
+                        useOpacity
+                        delay={(index / 2) * 100}
+                        duration={200}
                     >
                         <TouchableOpacity
-                            // style={}
                             onPress={() => cardPressHandler(String(category.id))}
                         >
                             <View style={{ height: "100%", width: "100%" }}>
@@ -37,12 +40,10 @@ function CategoriesList({ categoriesList, catalogList, cardPressHandler }: IProp
                                         categoryId={category.id}
                                     />
                                 </ImageBackground>
-                                <Text style={styles.categoryName}>
-                                    {category.name}
-                                </Text>
+                                <CategoryName categoryName={category.name} />
                             </View>
                         </TouchableOpacity>
-                    </AnimatedCardWrapper>
+                    </AnimatedWrapper>
                 ))}
             </View>
         </ScrollView>
@@ -84,7 +85,7 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     categoryName: {
-        fontFamily: Fonts.openSans400,
+        fontFamily: Fonts.comfortaa700,
         fontSize: 16,
         color: "white",
         textAlign: "center",
@@ -118,14 +119,36 @@ const styles = StyleSheet.create({
 });
 
 // ui
+function CategoryName({ categoryName }: { categoryName: string }) {
+    return (
+        <AnimatedWrapper
+            useOpacity
+            duration={300}
+            delay={150}
+        >
+            <Text style={styles.categoryName}>
+                {categoryName}
+            </Text>
+        </AnimatedWrapper>
+    )
+}
+
 function DetailsCount({ catalogList, categoryId }: { catalogList: IProductItem[] | null, categoryId: number }): JSX.Element {
     const countValue = getCategoryListCount(categoryId, catalogList as IProductItem[]);
     const textValue = getCorrectWordDeclension(countValue, "пропозицій");
 
     return (
-        <Text style={styles.detailsCountText}>
-            {countValue} {textValue}
-        </Text>
+        <AnimatedWrapper
+            useOpacity
+            offsetX={50}
+            offsetY={-50}
+            duration={300}
+            delay={100}
+        >
+            <Text style={styles.detailsCountText}>
+                {countValue} {textValue}
+            </Text>
+        </AnimatedWrapper>
     )
 }
 

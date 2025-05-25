@@ -4,6 +4,7 @@ import { Fonts } from "../../theme/fonts";
 import { HomeScreenNavigationProp } from "../../screens/MainScreen";
 import { getDataFromAcyncStorage, removeData } from "../../lib/async-storage/acyncStorage";
 import { ASYNC_STORAGE_USER_INFO_OBJECT, ASYNC_STORAGE_USER_PHONE_NUMBER } from "../../lib/async-storage/asyncStorageKeys";
+import AnimatedWrapper from "../animation/AnimatedWrapper";
 
 function MainLinks({ navigation }: { navigation: HomeScreenNavigationProp }) {
     const links = [
@@ -33,17 +34,28 @@ function MainLinks({ navigation }: { navigation: HomeScreenNavigationProp }) {
     return (
         <View style={styles.container}>
             {links.map((link, index) => (
-                <TouchableOpacity key={index} style={styles.linkCard} onPress={link.onPress}>
-                    <View style={styles.moreWrapper}>
-                        <Text style={styles.moreText}>більше</Text>
-                        <Image
-                            source={require('../../assets/main-screen/arrow-right.png')}
-                            style={styles.arrowIcon}
-                            resizeMode="contain"
-                        />
-                    </View>
-                    <Text style={styles.linkText}>{link.text}</Text>
-                </TouchableOpacity>
+                <AnimatedWrapper
+                    key={index}
+                    offsetY={50}
+                    useOpacity
+                    delay={(3 + index) * 100}
+                    duration={300}
+                >
+                    <TouchableOpacity
+                        style={styles.linkCard}
+                        onPress={link.onPress}
+                    >
+                        <View style={styles.moreWrapper}>
+                            <Text style={styles.moreText}>більше</Text>
+                            <Image
+                                source={require('../../assets/main-screen/arrow-right.png')}
+                                style={styles.arrowIcon}
+                                resizeMode="contain"
+                            />
+                        </View>
+                        <Text style={styles.linkText}>{link.text}</Text>
+                    </TouchableOpacity>
+                </AnimatedWrapper>
             ))}
         </View>
     );

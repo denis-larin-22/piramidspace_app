@@ -5,7 +5,7 @@ export const BASE_URL = "https://api.piramidspace.com";
 
 
 // !!!!!!!!  THERE IS CYRILLIC IN THE BACKEND ANSWER - result object !!!!!!!
-interface IUserInfo {
+export interface IUserInfo {
     логин: string;
     "Имя Фамилия": string;
     "условия сотрудничества": number;

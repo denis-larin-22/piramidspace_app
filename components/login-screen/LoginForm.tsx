@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useInput } from "../../lib/hooks/useInput";
 import { formatPhoneNumberToInternational, formatToLowerCase, isValidPhoneNumber } from "../../lib/utils";
 import { ButtonProps, Image, ImageBackground, Keyboard, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -13,6 +13,22 @@ import { getAuth } from "../../lib/api";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
 
 function LoginForm({ navigation }: { navigation: LoginScreenNavigationProp }) {
+    const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+    useEffect(() => {
+        const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+            setKeyboardVisible(true);
+        });
+        const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+            setKeyboardVisible(false);
+        });
+
+        return () => {
+            showSubscription.remove();
+            hideSubscription.remove();
+        };
+    }, []);
+
     //   login value
     const {
         value: loginValue,
@@ -79,7 +95,9 @@ function LoginForm({ navigation }: { navigation: LoginScreenNavigationProp }) {
 
     return (
         <View style={styles.container}>
-            <SafeAreaView style={styles.loginForm}>
+            <SafeAreaView style={[styles.loginForm, {
+                marginBottom: keyboardVisible ? 150 : 15
+            }]}>
                 <Text style={styles.loginHeadText}>
                     Привіт, Партнере!
                 </Text>

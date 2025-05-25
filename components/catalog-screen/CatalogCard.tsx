@@ -89,7 +89,7 @@ function TopProductMark() {
         source={require('../../assets/catalog-screen/top-product.png')}
         style={style.topProductItem}
     />
-}
+};
 
 function SaleMark({ saleValue, topPositionValue = 4 }: { saleValue: string, topPositionValue?: number }) {
     return (
@@ -99,16 +99,16 @@ function SaleMark({ saleValue, topPositionValue = 4 }: { saleValue: string, topP
             <Text style={style.saleText}>{saleValue}%</Text>
         </View>
     );
-}
+};
 
 function BalanceStock({ balanceValue }: { balanceValue: string }) {
     return (
         <Text
             style={style.balanceStock}
-        > Лишилось {balanceValue ? balanceValue : ""} м.
+        >📦 Лишилось {balanceValue ? balanceValue : ""} м.
         </Text>
     )
-}
+};
 
 // styles
 const style = StyleSheet.create({
@@ -210,9 +210,10 @@ const style = StyleSheet.create({
         paddingVertical: 2,
         paddingHorizontal: 4,
         borderRadius: 35,
-        backgroundColor: '#F79D1580',
-        borderWidth: 2,
-        borderColor: '#F79D15',
+        // backgroundColor: '#F79D1580',
+        backgroundColor: '#00000050',
+        // borderWidth: 2,
+        // borderColor: '#F79D15',
         opacity: 0.9
     }
 });

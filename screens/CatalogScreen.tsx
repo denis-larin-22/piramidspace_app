@@ -12,7 +12,7 @@ import { useCatalogList } from "../lib/hooks/useCatalogList";
 import { useEffect, useState } from "react";
 import Filters from "../components/catalog-screen/Filters";
 import { SYSTEM_SALE_CATEGORY_ID, SYSTEM_TOP_CATEGORY_ID } from "../lib/hooks/useCatalogCategories";
-import AnimatedCardWrapper from "../components/animation/AnimatedCardWrapper";
+import AnimatedWrapper from "../components/animation/AnimatedWrapper";
 
 export type CatalogScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "CatalogScreen">;
 type CatalogScreenRouteProp = RouteProp<RootStackParamList, "CatalogScreen">;
@@ -79,8 +79,8 @@ function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigat
                         columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 10 }}
                         contentContainerStyle={{ paddingHorizontal: 15 }}
                         renderItem={({ item, index }) => (
-                            <AnimatedCardWrapper
-                                index={index}
+                            <AnimatedWrapper
+                                key={index + item.id}
                                 style={{
                                     width: '48%'
                                 }}
@@ -91,7 +91,7 @@ function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigat
                                         navigation.navigate("CatalogItemScreen", { activeProductId: String(productId) });
                                     }}
                                 />
-                            </AnimatedCardWrapper>
+                            </AnimatedWrapper>
                         )}
                         style={{
                             paddingBottom: 150
