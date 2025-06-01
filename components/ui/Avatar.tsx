@@ -1,4 +1,4 @@
-import { FlatList, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { useEffect, useState } from "react";
 import AnimatedWrapper from "../animation/AnimatedWrapper";

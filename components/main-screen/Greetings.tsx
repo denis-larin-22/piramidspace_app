@@ -1,9 +1,7 @@
-import { Image, Text, View, StyleSheet, Animated, Easing } from "react-native";
+import { Text, StyleSheet, } from "react-native";
 import { Fonts } from "../../theme/fonts";
 import { getGreetingUA } from "../../lib/utils";
-import { Colors } from "../../theme/colors";
-import { useEffect, useRef } from "react";
-import { Avatar } from "./Avatar";
+import { Avatar } from "../ui/Avatar";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
 
 function Greetings({ userName }: { userName: string, isOnline?: boolean }) {

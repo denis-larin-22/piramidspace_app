@@ -1,11 +1,12 @@
 import { useState } from "react"
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Fonts } from "../../theme/fonts";
 import { Colors } from "../../theme/colors";
 import { IProductItem } from "../../lib/types";
 import { getFilterOptions } from "../../lib/catalog-filters/getFiltersOptions";
 import { ICatalogListByCategory } from "../../screens/CatalogScreen";
 import { filterValuesIcons } from "../../lib/filter-icons/colorsIcons";
+import AnimatedWrapper from "../animation/AnimatedWrapper";
 
 interface IProps {
     catalogList: ICatalogListByCategory,
@@ -118,13 +119,18 @@ function Filters({ catalogList, setCatalogList }: IProps) {
 
             {/* Options */}
             {openFilterIndex !== null &&
-                <TouchableOpacity
+                <Pressable
                     style={[styles.listWrap, {
                         width: windowWidth
                     }]}
                     onPress={() => setOpenFilterIndex(null)}
                 >
-                    <View style={styles.list}>
+                    <AnimatedWrapper
+                        style={styles.list}
+                        useOpacity
+                        offsetY={-50}
+                        duration={300}
+                    >
                         {filtersOptions[openFilterIndex].options.map((option, index) => (
                             <TouchableOpacity
                                 key={index}
@@ -144,8 +150,9 @@ function Filters({ catalogList, setCatalogList }: IProps) {
                                 >{getFormatedOptionValue(option, filtersOptions[openFilterIndex].filter)}</Text>
                             </TouchableOpacity>
                         ))}
-                    </View>
-                </TouchableOpacity>}
+                    </AnimatedWrapper>
+                </Pressable>
+            }
         </View>
     )
 };
@@ -287,7 +294,7 @@ const styles = StyleSheet.create({
         height: "2300%",
         position: "absolute",
         top: "100%",
-        zIndex: 10,
+        zIndex: 20,
     },
     list: {
         backgroundColor: Colors.pale,

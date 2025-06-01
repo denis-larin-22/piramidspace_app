@@ -3,14 +3,16 @@ import { Fonts } from "../../theme/fonts"
 import { Colors } from "../../theme/colors"
 
 interface IProps {
-    text: string,
+    text?: string,
     onPressAction: () => void,
 }
 
-function BackButton({ text, onPressAction }: IProps) {
+function BackButton({ text = "", onPressAction }: IProps) {
     return (
         <TouchableOpacity
             style={{
+                width: text.length ? 'auto' : 30,
+                height: text.length ? 'auto' : 30,
                 paddingBottom: 4,
                 paddingRight: 16,
                 paddingLeft: 8,

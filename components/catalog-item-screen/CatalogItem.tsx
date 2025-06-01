@@ -1,4 +1,4 @@
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { useState } from "react";
@@ -7,6 +7,7 @@ import { IProductItem } from "../../lib/types";
 import { CatalogItemScreenNavigationProp } from "../../screens/CatalogItemScreen";
 import BackButton from "../ui/BackButton";
 import { CachedImage } from "../ui/CashedImage";
+import AnimatedWrapper from "../animation/AnimatedWrapper";
 
 interface IProps {
     product: IProductItem,
@@ -32,15 +33,9 @@ function CatalogItem({ product, navigation }: IProps) {
     return (
         <>
             <View
-                style={{
-                    position: "absolute",
-                    top: 50,
-                    left: 10,
-                    zIndex: 30,
-                }}
+                style={styles.backBtnWrap}
             >
                 <BackButton
-                    text="Назад"
                     onPressAction={() => {
                         navigation.goBack();
                     }}
@@ -52,7 +47,7 @@ function CatalogItem({ product, navigation }: IProps) {
                 style={styles.logo}
             />
 
-            <TouchableOpacity
+            <Pressable
                 style={{
                     ...styles.fullWidth,
                     height: isInfoHide ? "100%" : "50%",
@@ -69,7 +64,7 @@ function CatalogItem({ product, navigation }: IProps) {
                         resizeMode: isInfoHide ? "contain" : "cover"
                     }}
                 />
-            </TouchableOpacity>
+            </Pressable>
 
             <View style={styles.imageList}>
                 {product.images_url.map((path, index) => {
@@ -97,8 +92,12 @@ function CatalogItem({ product, navigation }: IProps) {
 
             {!isInfoHide &&
                 <ScrollView style={styles.info}>
-
-                    <View style={styles.infoWrap}>
+                    <AnimatedWrapper
+                        style={styles.infoWrap}
+                        useOpacity
+                        offsetY={50}
+                        delay={100}
+                    >
                         <Text style={styles.infoCollection}>
                             {product.category.name} / {product.technical_info.collection}
                         </Text>
@@ -110,58 +109,72 @@ function CatalogItem({ product, navigation }: IProps) {
                         >
                             {product.availability}
                         </Text>
-                    </View>
+                    </AnimatedWrapper>
 
-                    <Text style={styles.infoName}>
-                        {product.name}
-                    </Text>
+                    <AnimatedWrapper
+                        useOpacity
+                        offsetY={50}
+                        delay={300}
+                    >
+                        <Text style={styles.infoName}>
+                            {product.name}
+                        </Text>
+                    </AnimatedWrapper>
 
                     {product.price.sale && <SaleMark saleValue={product.price.sale} />}
 
-                    <Text
-                        style={{
-                            ...styles.infoTitle,
-                            marginBottom: 14
-                        }}
-                    >Опис</Text>
-                    <Text
-                        style={{
-                            ...styles.infoText,
-                            marginBottom: 14,
-                        }}
+                    <AnimatedWrapper
+                        useOpacity
+                        offsetY={50}
+                        delay={500}
                     >
-                        {product.technical_info.description}
-                    </Text>
 
-                    <Text style={styles.infoTitle}>Технічна інформація</Text>
+                        <Text
+                            style={{
+                                ...styles.infoTitle,
+                                marginBottom: 14
+                            }}
+                        >Опис</Text>
+                        <Text
+                            style={{
+                                ...styles.infoText,
+                                marginBottom: 14,
+                            }}
+                        >
+                            {product.technical_info.description}
+                        </Text>
 
-                    <View style={styles.separator}></View>
+                        <Text style={styles.infoTitle}>Технічна інформація</Text>
 
-                    <View style={styles.infoList}>
-                        {technicalInformation.map((item, index) => (
-                            <View
-                                key={index}
-                                style={{
-                                    width: "48%",
-                                    marginBottom: 10,
-                                }}
-                            >
-                                <Text style={{
-                                    ...styles.infoTitle,
-                                    marginBottom: 5,
-                                }}>
-                                    {item.item}
-                                </Text>
-                                <Text style={styles.infoText}>
-                                    {item.info === null ?
-                                        "відсутнє"
-                                        :
-                                        item.info
-                                    }
-                                </Text>
-                            </View>
-                        ))}
-                    </View>
+                        <View style={styles.separator}></View>
+
+                        <View style={styles.infoList}>
+                            {technicalInformation.map((item, index) => (
+                                <View
+                                    key={index}
+                                    style={{
+                                        width: "48%",
+                                        marginBottom: 10,
+                                    }}
+                                >
+                                    <Text style={{
+                                        ...styles.infoTitle,
+                                        marginBottom: 5,
+                                    }}>
+                                        {item.item}
+                                    </Text>
+                                    <Text style={styles.infoText}>
+                                        {item.info === null ?
+                                            "відсутнє"
+                                            :
+                                            item.info
+                                        }
+                                    </Text>
+                                </View>
+                            ))}
+                        </View>
+                    </AnimatedWrapper>
+
                 </ScrollView>}
         </>
     )
@@ -187,6 +200,12 @@ const styles = StyleSheet.create({
     },
     fullHeight: {
         height: '100%'
+    },
+    backBtnWrap: {
+        position: "absolute",
+        top: 50,
+        left: 10,
+        zIndex: 30,
     },
     logo: {
         width: 129,

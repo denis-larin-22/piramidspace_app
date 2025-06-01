@@ -14,7 +14,7 @@ type AnimatedWrapperProps = {
 
 const AnimatedWrapper: React.FC<AnimatedWrapperProps> = ({
   children,
-  duration = 500,
+  duration = 300,
   delay = 0,
   offsetX = 0,
   offsetY = 0,

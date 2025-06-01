@@ -4,14 +4,14 @@ import { RootStackParamList } from "../navigation/AppStack";
 import { Colors } from "../theme/colors";
 import { useEffect, useState } from "react";
 import { getDataCatalogCategories, getDataCatalogList } from "../lib/appDataHandler";
-import MainHeader from "../components/main-screen/MainHeader";
-import BurgerMenu from "../components/main-screen/BurgerMenu";
+import Header from "../components/ui/Header";
+import BurgerMenu from "../components/ui/BurgerMenu";
 import Greetings from "../components/main-screen/Greetings";
 import RateAndBalance from "../components/main-screen/RateAndBalance";
 import ConnectingBar from "../components/main-screen/ConnectingBar";
 import NetInfo from '@react-native-community/netinfo';
 import NavBar from "../components/main-screen/NavBar";
-import { getAuth, IUserInfo } from "../lib/api";
+import { IUserInfo } from "../lib/api";
 import { getDataFromAcyncStorage } from "../lib/async-storage/acyncStorage";
 import { ASYNC_STORAGE_USER_INFO_OBJECT } from "../lib/async-storage/asyncStorageKeys";
 
@@ -101,7 +101,8 @@ function MainScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
                 />
 
                 {/* Top components */}
-                <MainHeader
+                <Header
+                    style={{ marginTop: 40 }}
                     setIsBurgerOpen={setIsBurgerOpen}
                 />
                 <BurgerMenu

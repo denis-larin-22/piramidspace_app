@@ -11,6 +11,7 @@ import { Image, StatusBar, View } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { Colors } from '../theme/colors';
 import Loader from '../components/ui/Loader';
+import OrdersScreen from '../screens/OrdersScreen';
 
 export type RootStackParamList = {
     LoginScreen: undefined;
@@ -18,6 +19,7 @@ export type RootStackParamList = {
     CatalogMenuScreen: undefined;
     CatalogScreen: { activeCategoryId: string };
     CatalogItemScreen: { activeProductId: string };
+    OrdersScreen: undefined
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -80,6 +82,13 @@ export default function AppStack() {
                 <Stack.Screen
                     name="CatalogItemScreen"
                     component={CatalogItemScreen}
+                    options={{
+                        headerShown: false
+                    }}
+                />
+                <Stack.Screen
+                    name="OrdersScreen"
+                    component={OrdersScreen}
                     options={{
                         headerShown: false
                     }}

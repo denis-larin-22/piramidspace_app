@@ -49,57 +49,78 @@ function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigat
                 backgroundColor={Colors.pale}
             />
 
-            <View style={styles.backButtonWrap}>
+            <AnimatedWrapper
+                style={styles.backButtonWrap}
+                useOpacity
+                offsetX={50}
+                duration={300}
+                delay={100}
+            >
                 <BackButton
                     text="Усі категорії"
                     onPressAction={() => navigation.goBack()}
                 />
 
                 <Logo />
-            </View>
+            </AnimatedWrapper>
 
-            {isLoading ?
-                <View style={styles.loaderWrap}>
-                    <ActivityIndicator
-                        color={Colors.blue}
-                        size={"large"}
-                    />
-                </View>
-                :
-                <>
-                    <Filters
-                        catalogList={catalogListByCategory}
-                        setCatalogList={setCatalogListByCategory}
-                    />
-                    <FlatList
-                        data={catalogListByCategory.renderList}
-                        horizontal={false}
-                        numColumns={2}
-                        keyExtractor={(product) => product.id.toString()}
-                        columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 10 }}
-                        contentContainerStyle={{ paddingHorizontal: 15 }}
-                        renderItem={({ item, index }) => (
-                            <AnimatedWrapper
-                                key={index + item.id}
+            {
+                isLoading ?
+                    <View style={styles.loaderWrap}>
+                        <ActivityIndicator
+                            color={Colors.blue}
+                            size={"large"}
+                        />
+                    </View>
+                    :
+                    <>
+                        <AnimatedWrapper
+                            useOpacity
+                            offsetX={50}
+                            delay={200}
+                            style={{ zIndex: 20 }}
+                        >
+                            <Filters
+                                catalogList={catalogListByCategory}
+                                setCatalogList={setCatalogListByCategory}
+                            />
+                        </AnimatedWrapper>
+
+                        <AnimatedWrapper
+                            useOpacity
+                            offsetX={50}
+                            delay={300}
+                        >
+                            <FlatList
+                                data={catalogListByCategory.renderList}
+                                horizontal={false}
+                                numColumns={2}
+                                keyExtractor={(product) => product.id.toString()}
+                                columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 10 }}
+                                contentContainerStyle={{ paddingHorizontal: 15 }}
+                                renderItem={({ item, index }) => (
+                                    <AnimatedWrapper
+                                        key={index + item.id}
+                                        style={{
+                                            width: '48%'
+                                        }}
+                                    >
+                                        <CatalogCard
+                                            product={item}
+                                            onPressHandler={(productId: number) => {
+                                                navigation.navigate("CatalogItemScreen", { activeProductId: String(productId) });
+                                            }}
+                                        />
+                                    </AnimatedWrapper>
+                                )}
                                 style={{
-                                    width: '48%'
+                                    paddingBottom: 150
                                 }}
-                            >
-                                <CatalogCard
-                                    product={item}
-                                    onPressHandler={(productId: number) => {
-                                        navigation.navigate("CatalogItemScreen", { activeProductId: String(productId) });
-                                    }}
-                                />
-                            </AnimatedWrapper>
-                        )}
-                        style={{
-                            paddingBottom: 150
-                        }}
-                    />
-                </>
+                            />
+                        </AnimatedWrapper>
+                    </>
             }
-        </View>
+        </View >
     )
 };
 

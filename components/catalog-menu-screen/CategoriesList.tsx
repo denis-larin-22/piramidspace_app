@@ -1,4 +1,4 @@
-import { ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { ICategory, IProductItem } from "../../lib/types";
@@ -20,13 +20,12 @@ function CategoriesList({ categoriesList, catalogList, cardPressHandler }: IProp
                     <AnimatedWrapper
                         key={index + category.name}
                         style={styles.categoryItem}
-                        offsetY={-80}
-                        useScale
+                        offsetX={50}
                         useOpacity
                         delay={(index / 2) * 100}
-                        duration={200}
+                        duration={300}
                     >
-                        <TouchableOpacity
+                        <Pressable
                             onPress={() => cardPressHandler(String(category.id))}
                         >
                             <View style={{ height: "100%", width: "100%" }}>
@@ -42,7 +41,7 @@ function CategoriesList({ categoriesList, catalogList, cardPressHandler }: IProp
                                 </ImageBackground>
                                 <CategoryName categoryName={category.name} />
                             </View>
-                        </TouchableOpacity>
+                        </Pressable>
                     </AnimatedWrapper>
                 ))}
             </View>

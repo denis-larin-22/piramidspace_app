@@ -1,11 +1,12 @@
-import { Image, TouchableOpacity, View, StyleSheet } from "react-native";
+import { Image, TouchableOpacity, View, StyleSheet, ViewProps, ViewStyle } from "react-native";
 import { Colors } from "../../theme/colors";
 
-function MainHeader({ setIsBurgerOpen }: {
-    setIsBurgerOpen: React.Dispatch<React.SetStateAction<boolean>>
+function Header({ setIsBurgerOpen, style }: {
+    setIsBurgerOpen: React.Dispatch<React.SetStateAction<boolean>>,
+    style?: ViewStyle
 }) {
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, style]}>
             <Image
                 source={require('../../assets/adaptive-icon.png')}
                 style={styles.logo}
@@ -36,9 +37,10 @@ function MainHeader({ setIsBurgerOpen }: {
     );
 }
 
+export default Header;
+
 const styles = StyleSheet.create({
     container: {
-        marginTop: 40,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -82,4 +84,3 @@ const styles = StyleSheet.create({
     },
 });
 
-export default MainHeader;

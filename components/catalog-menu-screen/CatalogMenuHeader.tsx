@@ -1,6 +1,7 @@
 import { Image, StyleSheet, View } from "react-native";
 import BackButton from "../ui/BackButton";
 import Logo from "../ui/Logo";
+import AnimatedWrapper from "../animation/AnimatedWrapper";
 
 interface IProps {
     backButtonPressHandler: () => void
@@ -8,12 +9,14 @@ interface IProps {
 
 function CatalogMenuHeader({ backButtonPressHandler }: IProps) {
     return (
-        <>
+        <AnimatedWrapper
+            useOpacity
+            offsetX={50}
+            delay={200}
+            duration={300}
+        >
             <View style={styles.topWrap}>
-                <BackButton
-                    text="Головний екран"
-                    onPressAction={backButtonPressHandler}
-                />
+                <BackButton onPressAction={backButtonPressHandler} />
 
                 <Logo />
             </View>
@@ -22,7 +25,7 @@ function CatalogMenuHeader({ backButtonPressHandler }: IProps) {
                 source={require("../../assets/catalog-screen/menu-decorate-text.png")}
                 style={styles.mainText}
             />
-        </>
+        </AnimatedWrapper>
     )
 };
 
