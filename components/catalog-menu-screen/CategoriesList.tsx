@@ -55,7 +55,8 @@ export default CategoriesList;
 const styles = StyleSheet.create({
     listContainer: {
         width: "100%",
-        marginBottom: 130
+        marginBottom: 130,
+        paddingBottom: 50
     },
     listWrap: {
         flexDirection: "row",

@@ -56,7 +56,7 @@ function MainLinks({ navigation }: { navigation: HomeScreenNavigationProp }) {
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 70,
+        marginTop: 20,
         gap: 10,
     },
     linkCard: {

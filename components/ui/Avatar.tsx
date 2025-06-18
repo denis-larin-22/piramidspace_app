@@ -8,10 +8,24 @@ import { ASYNC_STORAGE_USER_SETTINGS_AVATAR } from "../../lib/async-storage/asyn
 
 export function Avatar() {
     const avatarList = [
-        require('../../assets/main-screen/avatar-1.png'),
-        require('../../assets/main-screen/avatar-2.png'),
-        require('../../assets/main-screen/avatar-3.png'),
-        require('../../assets/main-screen/avatar-4.png'),
+        require('../../assets/avatars/avatar1.png'),
+        require('../../assets/avatars/avatar2.png'),
+        require('../../assets/avatars/avatar3.png'),
+        require('../../assets/avatars/avatar4.png'),
+        require('../../assets/avatars/avatar5.png'),
+        require('../../assets/avatars/avatar6.png'),
+        require('../../assets/avatars/avatar8.png'),
+        require('../../assets/avatars/avatar9.png'),
+        require('../../assets/avatars/avatar7.png'),
+        require('../../assets/avatars/avatar11.png'),
+        require('../../assets/avatars/avatar10.png'),
+        require('../../assets/avatars/avatar12.png'),
+        require('../../assets/avatars/avatar13.png'),
+        require('../../assets/avatars/avatar14.png'),
+        require('../../assets/avatars/avatar15.png'),
+        require('../../assets/avatars/avatar16.png'),
+        require('../../assets/avatars/avatar18.png'),
+        require('../../assets/avatars/avatar17.png'),
     ];
 
     const [activeAvatar, setActiveAvatar] = useState(avatarList[0]);
@@ -95,10 +109,14 @@ const styles = StyleSheet.create({
         borderWidth: 3,
         borderColor: Colors.blue,
         overflow: 'hidden',
+        position: 'relative'
     },
     avatarImage: {
-        width: '100%',
-        height: '100%',
+        width: '120%',
+        height: '120%',
+        position: 'absolute',
+        top: -3,
+        left: -4
     },
     modalOverlay: {
         alignItems: 'center',
@@ -149,16 +167,22 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-evenly',
+        flexWrap: 'wrap',
+        gap: 5
     },
     avatarOption: {
         width: 50,
         height: 50,
         borderRadius: 50,
         overflow: 'hidden',
+        position: 'relative'
     },
     avatarOptionImage: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'contain',
+        width: '120%',
+        height: '120%',
+        // resizeMode: 'center',
+        position: 'absolute',
+        top: -2,
+        left: -5
     },
 });

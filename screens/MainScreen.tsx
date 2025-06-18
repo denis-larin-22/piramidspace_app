@@ -5,137 +5,101 @@ import { Colors } from "../theme/colors";
 import { useEffect, useState } from "react";
 import { getDataCatalogCategories, getDataCatalogList } from "../lib/appDataHandler";
 import Header from "../components/ui/Header";
-import BurgerMenu from "../components/ui/BurgerMenu";
 import Greetings from "../components/main-screen/Greetings";
 import RateAndBalance from "../components/main-screen/RateAndBalance";
 import ConnectingBar from "../components/main-screen/ConnectingBar";
 import NetInfo from '@react-native-community/netinfo';
 import NavBar from "../components/main-screen/NavBar";
-import { IUserInfo } from "../lib/api";
 import { getDataFromAcyncStorage } from "../lib/async-storage/acyncStorage";
 import { ASYNC_STORAGE_USER_INFO_OBJECT } from "../lib/async-storage/asyncStorageKeys";
+import { IUserInfo } from "../lib/api/auth";
 
 export type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "MainScreen">;
 
 function MainScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
-    // Get curren screen width
     const { width } = Dimensions.get('window');
-
-    // User info object
     const [userInfo, setUserInfo] = useState<IUserInfo | null>(null);
+    const [isConnected, setIsConnected] = useState<boolean>(false);
+    const [isConnectionBarVissible, setIsConnectionBarVissible] = useState(false);
 
-    // Get data CASH/API
     useEffect(() => {
-        // get user data from async storage
         getDataFromAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT)
-            .then((result) => {
+            .then(result => {
                 if (result === undefined) {
                     setUserInfo(null);
                 } else {
                     setUserInfo(JSON.parse(result));
                 }
             })
-            .catch(() => setUserInfo(null))
-        // IMPORTANT! Loading data for further work of the catalog!
-        getDataCatalogList(); // loading Catalog list
-        getDataCatalogCategories(); // loading Catalog categories list
+            .catch(() => setUserInfo(null));
+
+        getDataCatalogList();
+        getDataCatalogCategories();
     }, []);
-
-    // Burger menu
-    const [isBurgerOpen, setIsBurgerOpen] = useState<boolean>(false);
-
-    // Connection
-    const [isConnected, setIsConnected] = useState<boolean>(false);
-    const [isConnectionBarVissible, setIsConnectionBarVissible] = useState(false);
 
     useEffect(() => {
         const unsubscribe = NetInfo.addEventListener(state => {
-            const currentState = Boolean(state.isConnected);
-            setIsConnected(currentState);
-            setTimeout(() => {
-                setIsConnectionBarVissible(true);
-            }, 2000);
+            setIsConnected(Boolean(state.isConnected));
+            setTimeout(() => setIsConnectionBarVissible(true), 2000);
         });
 
-        // Проверка при первом рендере
         NetInfo.fetch().then(state => {
-            const currentState = Boolean(state.isConnected);
-            setIsConnected(currentState);
-            setTimeout(() => {
-                setIsConnectionBarVissible(true);
-            }, 1500);
+            setIsConnected(Boolean(state.isConnected));
         });
-
-        setTimeout(() => {
-            setIsConnectionBarVissible(false);
-        }, 5000)
 
         return () => {
             unsubscribe();
         };
     }, []);
 
-    if (userInfo === null) {
-        return null;
-    } else {
-        return (
-            <View
-                style={{
-                    height: "100%",
-                    backgroundColor: Colors.pale,
-                    padding: 20,
-                    position: 'relative',
-                }}
-            >
-                <StatusBar
-                    hidden={false}
-                    translucent={true}
-                    barStyle="dark-content"
-                    backgroundColor="transparent"
-                />
+    if (userInfo === null) return null;
 
+    return (
+        <View style={styles.container}>
+            <StatusBar
+                hidden={false}
+                translucent={true}
+                barStyle="dark-content"
+                backgroundColor="transparent"
+            />
+
+            <View style={styles.content}>
                 <ConnectingBar
                     width={width}
                     isConnected={isConnected}
                     isVissible={isConnectionBarVissible}
                 />
 
-                {/* Top components */}
-                <Header
-                    style={{ marginTop: 40 }}
-                    setIsBurgerOpen={setIsBurgerOpen}
-                />
-                <BurgerMenu
-                    isOpen={isBurgerOpen}
-                    setIsOpen={() => setIsBurgerOpen(!isBurgerOpen)}
-                />
+                <Header style={styles.header} navigation={navigation} />
+
                 <Greetings
                     userName={userInfo["Имя Фамилия"]}
                     isOnline={isConnected}
                 />
 
-                {/* //// */}
                 <RateAndBalance />
-
-                <NavBar
-                    navigation={navigation}
-                    width={width}
-                />
             </View>
-        );
-    }
+
+            <NavBar
+                navigation={navigation}
+                width={width}
+            />
+        </View>
+    );
 }
 
 export default MainScreen;
 
-
-
-
-
-
-
-
-
-
-
-
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: Colors.pale,
+        position: 'relative',
+    },
+    content: {
+        padding: 20,
+    },
+    header: {
+        marginTop: 40,
+    },
+});

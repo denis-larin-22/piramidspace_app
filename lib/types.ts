@@ -1,5 +1,4 @@
 type StringOrNull = string | null;
-type NumberOrNull = number | null;
 
 // Product item from catalog
 export interface IProductItem {

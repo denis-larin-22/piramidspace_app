@@ -6,6 +6,7 @@ import CategoriesList from "../components/catalog-menu-screen/CategoriesList";
 import CatalogMenuHeader from "../components/catalog-menu-screen/CatalogMenuHeader";
 import { useCatalogList } from "../lib/hooks/useCatalogList";
 import { useCatalogCategories } from "../lib/hooks/useCatalogCategories";
+import BackButton from "../components/ui/BackButton";
 
 type CatalogMenuScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'CatalogMenuScreen'>;
 
@@ -22,7 +23,7 @@ function CatalogMenuScreen({ navigation }: { navigation: CatalogMenuScreenNaviga
                 backgroundColor={Colors.pale}
             />
 
-            <CatalogMenuHeader backButtonPressHandler={() => navigation.navigate("MainScreen")} />
+            <CatalogMenuHeader />
 
             {(isCatalogLoading && isCategoriesLoading) ?
                 <View style={styles.loaderWrap}>
@@ -43,6 +44,14 @@ function CatalogMenuScreen({ navigation }: { navigation: CatalogMenuScreenNaviga
                         }}
                     />
             }
+
+            <BackButton
+                styles={styles.backButton}
+                useOpacity
+                offsetX={-50}
+                delay={400}
+                onPressAction={() => navigation.navigate("MainScreen")}
+            />
         </View>
     )
 };
@@ -51,6 +60,7 @@ export default CatalogMenuScreen;
 
 const styles = StyleSheet.create({
     wrap: {
+        position: 'relative',
         marginTop: 20,
         paddingHorizontal: 10
     },
@@ -59,6 +69,11 @@ const styles = StyleSheet.create({
         height: "80%",
         alignItems: "center",
         justifyContent: "center"
+    },
+    backButton: {
+        position: 'absolute',
+        bottom: 150,
+        left: 10,
     }
 });
 

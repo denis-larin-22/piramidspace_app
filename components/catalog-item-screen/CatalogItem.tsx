@@ -32,15 +32,15 @@ function CatalogItem({ product, navigation }: IProps) {
 
     return (
         <>
-            <View
-                style={styles.backBtnWrap}
-            >
-                <BackButton
-                    onPressAction={() => {
-                        navigation.goBack();
-                    }}
-                />
-            </View>
+            <BackButton
+                styles={styles.backBtn}
+                useOpacity
+                offsetX={-50}
+                duration={300}
+                onPressAction={() => {
+                    navigation.goBack();
+                }}
+            />
 
             <Image
                 source={require('../../assets/logo.png')}
@@ -201,9 +201,9 @@ const styles = StyleSheet.create({
     fullHeight: {
         height: '100%'
     },
-    backBtnWrap: {
+    backBtn: {
         position: "absolute",
-        top: 50,
+        top: 40,
         left: 10,
         zIndex: 30,
     },

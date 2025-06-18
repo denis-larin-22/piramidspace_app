@@ -50,19 +50,24 @@ function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigat
             />
 
             <AnimatedWrapper
-                style={styles.backButtonWrap}
+                style={styles.logoWrap}
                 useOpacity
                 offsetX={50}
                 duration={300}
                 delay={100}
             >
-                <BackButton
-                    text="Усі категорії"
-                    onPressAction={() => navigation.goBack()}
-                />
 
                 <Logo />
             </AnimatedWrapper>
+
+
+            <BackButton
+                styles={styles.backButton}
+                useOpacity
+                offsetX={-50}
+                delay={400}
+                onPressAction={() => navigation.goBack()}
+            />
 
             {
                 isLoading ?
@@ -114,7 +119,7 @@ function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigat
                                     </AnimatedWrapper>
                                 )}
                                 style={{
-                                    paddingBottom: 150
+                                    marginBottom: 120,
                                 }}
                             />
                         </AnimatedWrapper>
@@ -149,11 +154,17 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.pale,
         height: '100%'
     },
-    backButtonWrap: {
+    logoWrap: {
         flexDirection: "row",
         justifyContent: "space-between",
         paddingHorizontal: 10,
-        marginBottom: 20
+        marginBottom: 20,
+    },
+    backButton: {
+        position: 'absolute',
+        bottom: 40,
+        left: 10,
+        zIndex: 50
     },
     loaderWrap: {
         width: "100%",

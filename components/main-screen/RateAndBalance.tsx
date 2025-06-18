@@ -4,42 +4,49 @@ import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
 import AnimatedAbsolutePosition from "../animation/AnimatedTransition";
-import { getBalanceByLogin, getExchangeDollarRate } from "../../lib/api";
-import { getDataFromAcyncStorage } from "../../lib/async-storage/acyncStorage";
-import { ASYNC_STORAGE_USER_LOGIN } from "../../lib/async-storage/asyncStorageKeys";
+import { getDataFromAcyncStorage, saveDataToAcyncStorage } from "../../lib/async-storage/acyncStorage";
+import { ASYNC_STORAGE_BALANCE_VALUE_KEY, ASYNC_STORAGE_RATE_VALUE_KEY, ASYNC_STORAGE_USER_LOGIN } from "../../lib/async-storage/asyncStorageKeys";
+import { getBalanceByLogin, getExchangeDollarRate } from "../../lib/api/info";
+import { useNetworkStatus } from "../../lib/hooks/useNetworkStatus";
 
 function RateAndBalance() {
+    const { isConnected } = useNetworkStatus();
+
     const [rateValue, setRateValue] = useState<null | string>(null);
     const [balanceValue, setBalanceValue] = useState<null | number>(null);
 
     useEffect(() => {
-        setTimeout(() => {
-            getRate();
-            getBalance();
-        }, 1000);
-        // !!!!!!!!!!!!!!11
-        // !!!!!!!!!!!!!!11
-        // !!!!!!!!!!!!!!11
-        // !!!!!!!!!!!!!!11
-        // !!!!!!!!!!!!!!11
-        // ПРОПИШИ СОХРАНЕНИЕ ЗНАЧЕНИЙ НА СЛУЧАЙ ЕСЛИ НЕТ ИНТЕРНЕТА, ВЫВОДИТЬ СТАРОЕ!!!!!!!!!
-        // !!!!!!!!!!!!!!11
-        // !!!!!!!!!!!!!!11
-        // !!!!!!!!!!!!!!11
-        // !!!!!!!!!!!!!!11
-
-
+        getRate(isConnected);
+        getBalance(isConnected);
     }, []);
 
-    async function getRate() {
-        const value = await getExchangeDollarRate();
-        setRateValue(value);
+    async function getRate(isConnected: boolean) {
+        if (isConnected) {
+            const value = await getExchangeDollarRate();
+            setRateValue(value);
+            saveDataToAcyncStorage(ASYNC_STORAGE_RATE_VALUE_KEY, JSON.stringify(value));
+        } else {
+            const valueFromAS = await getDataFromAcyncStorage(ASYNC_STORAGE_RATE_VALUE_KEY);
+            valueFromAS === undefined ?
+                setRateValue(null)
+                :
+                setRateValue(JSON.parse(valueFromAS))
+        }
     }
 
-    async function getBalance() {
-        const userLoginValue = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
-        const value = await getBalanceByLogin(userLoginValue as string);
-        setBalanceValue(value);
+    async function getBalance(isConnected: boolean) {
+        if (isConnected) {
+            const userLoginValue = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
+            const value = await getBalanceByLogin(userLoginValue as string);
+            setBalanceValue(value);
+            saveDataToAcyncStorage(ASYNC_STORAGE_BALANCE_VALUE_KEY, JSON.stringify(value));
+        } else {
+            const valueFromAS = await getDataFromAcyncStorage(ASYNC_STORAGE_BALANCE_VALUE_KEY);
+            valueFromAS === undefined ?
+                setBalanceValue(null)
+                :
+                setBalanceValue(JSON.parse(valueFromAS))
+        }
     }
 
     return (

@@ -1,58 +1,64 @@
-import { Image, Text, TouchableOpacity } from "react-native"
-import { Fonts } from "../../theme/fonts"
-import { Colors } from "../../theme/colors"
+import { Image, StyleProp, StyleSheet, TouchableOpacity, ViewStyle } from "react-native";
+import { Colors } from "../../theme/colors";
+import AnimatedWrapper, { AnimatedWrapperProps } from "../animation/AnimatedWrapper";
 
-interface IProps {
-    text?: string,
-    onPressAction: () => void,
+type IButtonAnimWrap = Omit<AnimatedWrapperProps, 'style' | 'children'>;
+
+interface IProps extends IButtonAnimWrap {
+    onPressAction: () => void;
+    styles?: StyleProp<ViewStyle>;
 }
 
-function BackButton({ text = "", onPressAction }: IProps) {
+function BackButton({ styles, onPressAction, ...animatedWrapperProps }: IProps) {
     return (
-        <TouchableOpacity
-            style={{
-                width: text.length ? 'auto' : 30,
-                height: text.length ? 'auto' : 30,
-                paddingBottom: 4,
-                paddingRight: 16,
-                paddingLeft: 8,
-                borderRadius: 23,
-                backgroundColor: Colors.blue,
-                flexDirection: 'row',
-                alignItems: "center",
-                gap: 10,
-                // iOS shadow
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.2,
-                shadowRadius: 4,
-
-                // Android shadow
-                elevation: 5,
-            }}
-            onPress={onPressAction}
+        <AnimatedWrapper
+            {...animatedWrapperProps}
+            style={styles}
         >
-            <Image
-                source={require('../../assets/arrow-back.png')}
-                style={{
-                    width: 12,
-                    height: 12,
-                    resizeMode: "contain",
-                    position: "relative",
-                    top: 1,
-                }}
-            />
-            <Text
-                style={{
-                    color: "white",
-                    fontFamily: Fonts.comfortaa700,
-                    fontSize: 12,
-                }}
+            <TouchableOpacity
+                style={localStyles.button}
+                onPress={onPressAction}
             >
-                {text}
-            </Text>
-        </TouchableOpacity>
-    )
-};
+                <AnimatedWrapper
+                    useOpacity
+                    offsetX={-30}
+                    delay={300}
+                >
+                    <Image
+                        source={require('../../assets/arrow-back.png')}
+                        style={localStyles.image}
+                    />
+                </AnimatedWrapper>
+            </TouchableOpacity>
+        </AnimatedWrapper>
+    );
+}
+
+const localStyles = StyleSheet.create({
+    button: {
+        width: 60,
+        height: 60,
+        borderRadius: 50,
+        backgroundColor: Colors.blue,
+        alignItems: 'center',
+        justifyContent: 'center',
+
+        // iOS shadow
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+
+        // Android shadow
+        elevation: 5,
+    },
+    image: {
+        width: 20,
+        height: 20,
+        resizeMode: "contain",
+        position: "relative",
+        top: 1,
+    }
+});
 
 export default BackButton;

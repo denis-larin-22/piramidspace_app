@@ -1,7 +1,7 @@
 import { getDataFromAcyncStorage, saveDataToAcyncStorage } from "./async-storage/acyncStorage";
-import { fetchCategories, fetchProductsList } from "./api";
 import { ICategory, IProductItem } from "./types";
 import { ASYNC_STORAGE_CATALOG_DATA_KEY, ASYNC_STORAGE_CATEGORIES_DATA_KEY } from "./async-storage/asyncStorageKeys";
+import { fetchCategories, fetchProductsList } from "./api/catalog";
 
 // Checks the cache for saved Catalog list data, if there is no saved data, gets it via API and saves it to the cache
 export async function getDataCatalogList(): Promise<IProductItem[]> {

@@ -9,10 +9,11 @@ import Loader from "../ui/Loader";
 import { LoginScreenNavigationProp } from "../../screens/LoginScreen";
 import { saveDataToAcyncStorage } from "../../lib/async-storage/acyncStorage";
 import { ASYNC_STORAGE_USER_INFO_OBJECT, ASYNC_STORAGE_USER_LOGIN, ASYNC_STORAGE_USER_PHONE_NUMBER } from "../../lib/async-storage/asyncStorageKeys";
-import { getAuth } from "../../lib/api";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
+import { getAuth } from "../../lib/api/auth";
+import { CommonActions } from "@react-navigation/native";
 
-function LoginForm({ navigation }: { navigation: LoginScreenNavigationProp }) {
+function LoginForm({ navigation, isInternetConnected }: { navigation: LoginScreenNavigationProp, isInternetConnected: boolean }) {
     const [keyboardVisible, setKeyboardVisible] = useState(false);
 
     useEffect(() => {
@@ -47,7 +48,8 @@ function LoginForm({ navigation }: { navigation: LoginScreenNavigationProp }) {
     // loading
     const [isLoading, setIsLoading] = useState<boolean>(false); // Loading auth state
     // error notif.
-    const [modalErrorVisible, setModalErrorVisible] = useState(false); // Error notification state
+    const [modalErrorVisible, setModalErrorVisible] = useState<boolean>(false); // Error notification state
+    const [noNumberInDatabaseError, setNoNumberInDatabaseError] = useState<boolean>(false); // no number in the data base error
 
     // Button handler
     const loginButtonHandler = async () => {
@@ -68,18 +70,36 @@ function LoginForm({ navigation }: { navigation: LoginScreenNavigationProp }) {
         const authResponseResult = await getAuth(login, phoneNumber); // Auth
 
         if (authResponseResult !== undefined) {
-            // saving login, phoneNumber values and user info to the Async Storage
-            saveDataToAcyncStorage(ASYNC_STORAGE_USER_LOGIN, login);
-            saveDataToAcyncStorage(ASYNC_STORAGE_USER_PHONE_NUMBER, phoneNumber);
-            saveDataToAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT, JSON.stringify(authResponseResult));
+            // CHECK IF THERE IS USER NUMBER IN THE ACCOUNT IN THE DATA BASE !!!
+            const isThereNumber = typeof authResponseResult.cellphone_dill === 'string' && authResponseResult.cellphone_dill.length > 0;
 
-            onLoginChange("");
-            onPhoneNumberChange("");
+            if (isThereNumber) {
+                // saving login, phoneNumber values and user info to the Async Storage
+                saveDataToAcyncStorage(ASYNC_STORAGE_USER_LOGIN, login);
+                saveDataToAcyncStorage(ASYNC_STORAGE_USER_PHONE_NUMBER, phoneNumber);
+                saveDataToAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT, JSON.stringify(authResponseResult));
 
-            setTimeout(() => {
+                onLoginChange("");
+                onPhoneNumberChange("");
+
+                setTimeout(() => {
+                    setIsLoading(false);
+                    navigation.dispatch(
+                        CommonActions.reset({
+                            index: 0,
+                            routes: [{ name: 'MainScreen' }],
+                        })
+                    );
+                }, 1000);
+            } else {
+                setNoNumberInDatabaseError(true);
                 setIsLoading(false);
-                navigation.navigate('MainScreen');
-            }, 1000)
+                setModalErrorVisible(true);
+
+                setTimeout(() => {
+                    setModalErrorVisible(false);
+                }, 3000);
+            }
         } else {
             setLoginError(true);
             setPhoneNumberError(true);
@@ -151,7 +171,14 @@ function LoginForm({ navigation }: { navigation: LoginScreenNavigationProp }) {
             {isLoading && <Loading />}
 
             {modalErrorVisible && <ErrorNotification
-                message="⚠️ Перевір значення логіна і номеру телефону"
+                message={isInternetConnected ?
+                    noNumberInDatabaseError ?
+                        "⚠️ Введений номер телефону не прив'язано до акаунту! Зверніться будь ласка до вашого менеджера"
+                        :
+                        "⚠️ Перевір значення логіна і номеру телефону"
+                    :
+                    "⚠️ Десь пропало інтернет-з’єднання"
+                }
             />}
         </View>
     )

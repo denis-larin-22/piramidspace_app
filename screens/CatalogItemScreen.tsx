@@ -5,10 +5,10 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppStack";
 import { RouteProp } from "@react-navigation/native";
 import { useEffect, useState } from "react";
-import { fetchProductItem } from "../lib/api";
 import { Colors } from "../theme/colors";
 import { getDataFromAcyncStorage } from "../lib/async-storage/acyncStorage";
 import { ASYNC_STORAGE_CATALOG_DATA_KEY } from "../lib/async-storage/asyncStorageKeys";
+import { fetchProductItem } from "../lib/api/catalog";
 
 export type CatalogItemScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "CatalogItemScreen">;
 type CatalogItemScreenRouteProp = RouteProp<RootStackParamList, "CatalogItemScreen">;

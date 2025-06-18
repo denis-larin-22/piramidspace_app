@@ -1,103 +1,118 @@
-import React from 'react';
-import { ScrollView, View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import React, { useMemo, useRef, useState } from 'react';
+import { ScrollView, View, Text, StyleSheet, Pressable } from 'react-native';
 import { Fonts } from '../../theme/fonts';
 import AnimatedWrapper from '../animation/AnimatedWrapper';
+import { IOrder } from '../../lib/api/orders';
+import OrderItem from './OrderItem';
 
-const orders = [
-    { number: '#242378', type: 'вертикальні штори', status: 'в обробці', price: 'xxxxx' },
-    { number: '#246873', type: 'горизонтальні штори', status: 'попередній', price: 'xxxxx' },
-    { number: '#247340', type: 'вертикальні штори', status: 'в обробці', price: 'xxxxx' },
-    { number: '#242332', type: 'рулонні штори', status: 'у виробництві', price: 'xxxxxxxx' },
-    { number: '#246873', type: 'горизонтальні штори', status: 'попередній', price: 'xxxxx' },
-    { number: '#247340', type: 'вертикальні штори', status: 'в обробці', price: 'xxxxx' },
-    { number: '#242378', type: 'вертикальні штори', status: 'в обробці', price: 'xxxxx' },
-    { number: '#246873', type: 'горизонтальні штори', status: 'попередній', price: 'xxxxx' },
-    { number: '#247340', type: 'вертикальні штори', status: 'в обробці', price: 'xxxxx' },
-    { number: '#242332', type: 'рулонні штори', status: 'у виробництві', price: 'xxxxxxxx' },
-    { number: '#246873', type: 'горизонтальні штори', status: 'попередній', price: 'xxxxx' },
-    { number: '#247340', type: 'вертикальні штори', status: 'в обробці', price: 'xxxxx' },
-    { number: '#242378', type: 'вертикальні штори', status: 'в обробці', price: 'xxxxx' },
-    { number: '#246873', type: 'горизонтальні штори', status: 'попередній', price: 'xxxxx' },
-    { number: '#247340', type: 'вертикальні штори', status: 'в обробці', price: 'xxxxx' },
-    { number: '#242332', type: 'рулонні штори', status: 'у виробництві', price: 'xxxxxxxx' },
-    { number: '#246873', type: 'горизонтальні штори', status: 'попередній', price: 'xxxxx' },
-    { number: '#247340', type: 'вертикальні штори', status: 'в обробці', price: 'xxxxx' },
-];
+const ITEMS_PER_PAGE = 30;
 
-const getStatusStyle = (status: string) => {
-    switch (status) {
-        case 'в обробці':
-            return styles.statusYellow;
-        case 'попередній':
-            return styles.statusBlue;
-        case 'у виробництві':
-            return styles.statusGreen;
-        default:
-            return styles.statusDefault;
-    }
-};
+export default function TableOrders({ ordersList }: { ordersList: Array<IOrder> }) {
+    const scrollRef = useRef<ScrollView>(null);
+    const [currentPage, setCurrentPage] = useState(1);
 
-export default function TableOrders() {
+    const totalPages = Math.ceil(ordersList.length / ITEMS_PER_PAGE);
+
+    const paginatedOrders = useMemo(() => {
+        if (ordersList.length < ITEMS_PER_PAGE) return ordersList;
+        const start = (currentPage - 1) * ITEMS_PER_PAGE;
+        const end = start + ITEMS_PER_PAGE;
+        return ordersList.slice(start, end);
+    }, [ordersList, currentPage]);
+
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
+        scrollRef.current?.scrollTo({ y: 0, animated: true });
+    };
+
     return (
         <AnimatedWrapper
-            style={styles.ordersTable}
+            style={tableStyles.ordersTable}
             useOpacity
             offsetX={50}
             duration={300}
             delay={300}
         >
             <ScrollView
-                style={styles.scrollVertical}
+                style={tableStyles.scrollVertical}
+                ref={scrollRef}
                 nestedScrollEnabled
-
             >
-                <ScrollView horizontal>
-                    <View style={styles.container}>
-                        {/* titles */}
-                        <View style={styles.row}>
-                            <Text style={[styles.cellTitle, styles.column1, styles.cellTitleFontSize]}>№</Text>
-                            <Text style={[styles.cellTitle, styles.column2]}>вид{'\n'}замовлення</Text>
-                            <Text style={[styles.cellTitle, styles.column3, styles.cellTitleNoPadding]}>статус</Text>
-                            <Text style={[styles.cellTitle, styles.column4]}>сума</Text>
-                            <Text style={[styles.cellTitle, styles.column5]}>інше</Text>
-                        </View>
+                {/* Header */}
+                <View style={tableStyles.row}>
+                    <Text style={[tableStyles.cellTitle, tableStyles.column1, tableStyles.cellTitleFontSize]}>№</Text>
+                    <Text style={[tableStyles.cellTitle, tableStyles.column2]}>вид{'\n'}замовлення</Text>
+                    <Text style={[tableStyles.cellTitle, tableStyles.column3, tableStyles.cellTitleNoPadding]}>статус</Text>
+                    <Text style={[tableStyles.cellTitle, tableStyles.column4]}>сума</Text>
+                </View>
 
-                        {/* orders data */}
-                        {orders.map((order, index) => (
-                            <View key={index} style={styles.row}>
-                                <Text style={[styles.cell, styles.column1, styles.link]}>{order.number}</Text>
-                                <Text style={[styles.cell, styles.column2]}>{order.type}</Text>
-                                <Text style={[styles.cell, styles.column3, getStatusStyle(order.status)]}>{order.status}</Text>
-                                <Text style={[styles.cell, styles.column4]}>{order.price}</Text>
-                                <View style={[styles.column5, styles.iconsContainer]}>
-                                    <Pressable style={styles.iconEditBtn}>
-                                        <Image source={require('../../assets/orders-screen/edit-icon.png')} style={styles.iconImage} />
-                                    </Pressable>
-                                    <Pressable style={styles.iconDeleteBtn}>
-                                        <Image source={require('../../assets/orders-screen/delete-icon.png')} style={styles.iconImage} />
-                                    </Pressable>
-                                    <Pressable style={styles.iconOptionsBtn}>
-                                        <Image source={require('../../assets/orders-screen/options-icon.png')} style={styles.iconImage} />
-                                    </Pressable>
-                                </View>
-                            </View>
-                        ))}
-                    </View>
-                </ScrollView>
+                {/* Rows */}
+                {paginatedOrders.map((order, index) => (
+                    <OrderItem key={index} order={order} index={index} />
+                ))}
             </ScrollView>
+
+            {/* Pagination */}
+            {ordersList.length > ITEMS_PER_PAGE && (
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                />
+            )}
         </AnimatedWrapper>
     );
 }
 
+function Pagination({
+    currentPage,
+    totalPages,
+    onPageChange,
+}: {
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+}) {
+    return (
+        <View style={tableStyles.pagination}>
+            <Pressable
+                onPress={() => onPageChange(Math.max(currentPage - 1, 1))}
+                disabled={currentPage === 1}
+                style={({ pressed }) => [
+                    tableStyles.pageButton,
+                    currentPage === 1 && tableStyles.disabled,
+                    pressed && tableStyles.pressed
+                ]}
+            >
+                <Text style={tableStyles.pageText}>{'<'}</Text>
+            </Pressable>
+            <Text style={tableStyles.pageInfo}>
+                {currentPage} / {totalPages}
+            </Text>
+            <Pressable
+                onPress={() => onPageChange(Math.min(currentPage + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                style={({ pressed }) => [
+                    tableStyles.pageButton,
+                    currentPage === totalPages && tableStyles.disabled,
+                    pressed && tableStyles.pressed
+                ]}
+            >
+                <Text style={tableStyles.pageText}>{'>'}</Text>
+            </Pressable>
+        </View>
+    );
+}
+
 const COLUMN_WIDTH = {
-    col1: 60,
-    col2: 115,
-    col3: 116,
+    col1: 50,
+    col2: 120,
+    col3: 100,
     col4: 60,
     col5: 60,
 };
 
-const styles = StyleSheet.create({
+export const tableStyles = StyleSheet.create({
     ordersTable: {
         marginVertical: 20,
         backgroundColor: 'white',
@@ -108,49 +123,40 @@ const styles = StyleSheet.create({
     scrollVertical: {
         height: '50%',
     },
-    container: {
-        position: 'relative',
-        padding: 15,
-    },
     row: {
         flexDirection: 'row',
         borderBottomWidth: 1,
         borderColor: '#D9D9D9',
+        padding: 10
     },
     cellTitle: {
         fontFamily: Fonts.comfortaa700,
         fontSize: 12,
         lineHeight: 12,
         color: '#A2A2A8',
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingBottom: 9,
         textAlign: 'center',
-        textAlignVertical: 'center',
+        verticalAlign: 'middle',
     },
     cellTitleFontSize: {
-        fontSize: 14,
+        fontSize: 12,
+        verticalAlign: 'middle'
     },
     cellTitleNoPadding: {
         paddingVertical: 0,
-    },
-    cell: {
-        fontFamily: Fonts.comfortaa700,
-        fontSize: 12,
-        lineHeight: 12,
-        textAlignVertical: 'center',
     },
     column1: {
         width: COLUMN_WIDTH.col1,
     },
     column2: {
         width: COLUMN_WIDTH.col2,
+        textAlign: 'center',
+        marginHorizontal: 5
     },
     column3: {
         width: COLUMN_WIDTH.col3,
         borderRadius: 6,
         textAlign: 'center',
-        paddingVertical: 23,
+        paddingVertical: 20,
         marginVertical: 3,
     },
     column4: {
@@ -162,44 +168,33 @@ const styles = StyleSheet.create({
         width: COLUMN_WIDTH.col5,
         textAlign: 'center',
     },
-    link: {
-        color: '#337ef7',
-        fontFamily: Fonts.openSans400,
-        textAlignVertical: 'center',
-    },
-    statusYellow: {
-        backgroundColor: '#FFEE6D',
-    },
-    statusBlue: {
-        backgroundColor: '#62BDEA',
-    },
-    statusGreen: {
-        backgroundColor: '#AFFFA5',
-    },
-    statusDefault: {
-        backgroundColor: '#ffffff',
-    },
-    iconsContainer: {
+    pagination: {
         flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 10,
+        gap: 20,
+    },
+    pageButton: {
+        width: 30,
+        height: 30,
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 16,
+        backgroundColor: '#337ef7',
+        borderRadius: 50,
     },
-    iconEditBtn: {
-        width: 12,
-        height: 12,
+    pageText: {
+        color: 'white',
+        fontWeight: 'bold',
     },
-    iconDeleteBtn: {
-        width: 11,
-        height: 13,
+    pageInfo: {
+        fontSize: 14,
+        color: '#333',
     },
-    iconOptionsBtn: {
-        width: 3,
-        height: 11,
+    disabled: {
+        backgroundColor: '#ccc',
     },
-    iconImage: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'contain',
+    pressed: {
+        opacity: 0.7,
     },
 });

@@ -1,5 +1,5 @@
 import { Colors } from "../theme/colors";
-import { BASE_URL } from "./api";
+import { BASE_URL } from "./api/base-url";
 
 export function getAvailabilityTextColor(availabilityValue: string) {
     const value = availabilityValue.toLowerCase();

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, ViewStyle, StyleProp } from 'react-native';
 
-type AnimatedWrapperProps = {
+export type AnimatedWrapperProps = {
   children: React.ReactNode;
   duration?: number;
   delay?: number;

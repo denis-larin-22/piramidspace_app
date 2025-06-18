@@ -1,39 +1,6 @@
-import { ICategory, IProductItem } from "./types";
-import { capitalizeFirstLetter, formatImagePathFromApi, getAvailabilityStatus, getStringFromNumber } from "./utils";
-
-export const BASE_URL = "https://api.piramidspace.com";
-
-
-// !!!!!!!!  THERE IS CYRILLIC IN THE BACKEND ANSWER - result object !!!!!!!
-export interface IUserInfo {
-    логин: string;
-    "Имя Фамилия": string;
-    "условия сотрудничества": number;
-    e_mail_1: string;
-    "адрес доставки": string;
-    "права дистрибьютера": number;
-    организация: string;
-    pay_order_dill: number;
-    brand_dill: string;
-    birthday_dill: string;
-    okpo_dill: number;
-    location_dill: string;
-    cellphone_dill: string | null;
-}
-
-export async function getAuth(login: string, phoneNumber: string): Promise<IUserInfo | undefined> {
-    try {
-        const response = await fetch(`${BASE_URL}/api/cms/getDiler?user=${login}`)
-        if (!response.ok) {
-            throw new Error(`LOGIN ERROR! HTTP error! status: ${response.status} `);
-        }
-        const resultObject = await response.json() as IUserInfo;
-        return resultObject;
-    } catch (error) {
-        console.error('Error auth!', error);
-        return undefined;
-    }
-};
+import { ICategory, IProductItem } from "../types";
+import { capitalizeFirstLetter, formatImagePathFromApi, getAvailabilityStatus, getStringFromNumber } from "../utils";
+import { BASE_URL } from "./base-url";
 
 // GET Product list
 export async function fetchProductsList(): Promise<IProductItem[]> {
@@ -101,6 +68,7 @@ export async function fetchProductsList(): Promise<IProductItem[]> {
     }
 };
 
+// GET product item
 export async function fetchProductItem(productId: string | number): Promise<Omit<IProductItem, 'price'> | null> {
     try {
         const response = await fetch(`${BASE_URL}/api/cms/jaluji/products/${productId}`);
@@ -152,6 +120,7 @@ export async function fetchProductItem(productId: string | number): Promise<Omit
     }
 };
 
+// GET all catalog categories
 // Categories
 export async function fetchCategories(): Promise<ICategory[]> {
     try {
@@ -169,58 +138,3 @@ export async function fetchCategories(): Promise<ICategory[]> {
         return [];
     }
 };
-
-
-// Get the current exchange rate (dollars)
-// !!!!!!!!  THERE IS CYRILLIC IN THE BACKEND ANSWER - result object !!!!!!!
-interface IRateObject {
-    дата: string,
-    наименование: string,
-    "курс, грн.": string
-}
-
-export async function getExchangeDollarRate() {
-    try {
-        const response = await fetch(`${BASE_URL}/api/cms/getCourse`);
-        if (!response.ok) {
-            throw new Error(`Exchange Dollar ERROR! HTTP error! status: ${response.status} `);
-        }
-        const rateObject = await response.json() as IRateObject; // IMPORTANT ↓↓↓↓
-        // ↓↓↓ THE OBJECT HAS THE APPROACH ↓↓↓
-        // { "дата": "2025-05-15",
-        //   "наименование": "доллар",
-        //   "курс, грн.": "41.60"
-        // }
-        return rateObject["курс, грн."]
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        return null;
-    }
-}
-
-
-// Get the balance by login
-// !!!!!!!!  THERE IS CYRILLIC IN THE BACKEND ANSWER - result object !!!!!!!
-interface IBalanceObject {
-    логин: string,
-    "баланс, дол.": number
-}
-
-export async function getBalanceByLogin(login: string) {
-    try {
-        const response = await fetch(`${BASE_URL}/api/cms/getBalance?login=${login}`);
-        if (!response.ok) {
-            throw new Error(`Get Balance ERROR! HTTP error! status: ${response.status} `);
-        }
-        const balanceObject = await response.json() as IBalanceObject; // IMPORTANT ↓↓↓↓
-        // ↓↓↓ THE OBJECT HAS THE APPROACH ↓↓↓
-        // {
-        //   "логин": "test@test",
-        //   "баланс, дол.": -115.93
-        // }
-        return balanceObject["баланс, дол."];
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        return null;
-    }
-}
