@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
         borderRadius: 50
     },
     listWrap: {
-        // marginTop: 10,
+        marginTop: -10,
         backgroundColor: "#00000070",
         height: "2300%",
         position: "absolute",

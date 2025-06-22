@@ -10,14 +10,14 @@ function MainLinks({ navigation }: { navigation: HomeScreenNavigationProp }) {
             text: 'Замовлення',
             onPress: () => { navigation.navigate('OrdersScreen') }
         },
-        {
-            text: 'Операції',
-            onPress: () => { }
-        },
-        {
-            text: 'Рахунки',
-            onPress: () => { }
-        },
+        // {
+        //     text: 'Операції',
+        //     onPress: () => { }
+        // },
+        // {
+        //     text: 'Рахунки',
+        //     onPress: () => { }
+        // },
         {
             text: 'Каталог',
             onPress: () => navigation.navigate('CatalogMenuScreen')

@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     },
     detailsCountText: {
         fontFamily: Fonts.comfortaa600,
-        fontSize: 10,
+        fontSize: 11,
         backgroundColor: Colors.blue,
         position: "absolute",
         top: 0,

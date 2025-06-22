@@ -155,7 +155,7 @@ const style = StyleSheet.create({
     },
     infoCollection: {
         fontFamily: Fonts.openSans400,
-        fontSize: 8,
+        fontSize: 10,
         marginBottom: 4,
     },
     infoName: {
@@ -165,8 +165,8 @@ const style = StyleSheet.create({
     },
     infoAvailability: {
         fontFamily: Fonts.openSans400,
-        fontSize: 9,
-        lineHeight: 10,
+        fontSize: 11,
+        lineHeight: 13,
         backgroundColor: "white",
         paddingHorizontal: 4,
         paddingVertical: 2,

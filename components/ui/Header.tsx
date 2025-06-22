@@ -13,7 +13,7 @@ import { useState } from "react";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
 import { Fonts } from "../../theme/fonts";
 import { HomeScreenNavigationProp } from "../../screens/MainScreen";
-import { CommonActions } from "@react-navigation/native";
+import { CommonActions, useNavigation } from "@react-navigation/native";
 import { removeData } from "../../lib/async-storage/acyncStorage";
 import {
     ASYNC_STORAGE_USER_INFO_OBJECT,
@@ -23,12 +23,11 @@ import {
 
 function Header({
     style,
-    navigation,
 }: {
     style?: ViewStyle;
-    navigation: HomeScreenNavigationProp;
 }) {
     const [isExitVissible, setIsExitVissible] = useState<boolean>(false);
+    const navigation = useNavigation<HomeScreenNavigationProp>();
 
     return (
         <View style={[styles.container, style]}>

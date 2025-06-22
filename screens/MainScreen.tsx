@@ -70,7 +70,7 @@ function MainScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
                     isVissible={isConnectionBarVissible}
                 />
 
-                <Header style={styles.header} navigation={navigation} />
+                <Header style={styles.header} />
 
                 <Greetings
                     userName={userInfo["Имя Фамилия"]}

@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     },
     modalTitle: {
         fontFamily: Fonts.comfortaa700,
-        fontSize: 16,
+        fontSize: 17,
         position: 'relative',
         top: 10,
         left: 10,

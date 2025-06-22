@@ -27,7 +27,7 @@ export default NavBar;
 
 const styles = StyleSheet.create({
     linksWrap: {
-        position: 'absolute',
+        position: 'relative',
         bottom: 0,
         flexGrow: 1,
         borderTopLeftRadius: 20,

@@ -6,8 +6,15 @@ import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { tableStyles } from "./TableOrders";
 
-function OrderItem({ order, index }: { order: IOrder, index: number }) {
+function OrderItem({
+    order,
+    activeOrderId, setActiveOrderId
+}: {
+    order: IOrder,
+    activeOrderId: number | null, setActiveOrderId: (id: number | null) => void
+}) {
     const {
+        ['N_заказа']: id,
         ['дата_заказа']: createDate,
         ["дата готовности"]: finishDate,
         ["ТТН перевозчика"]: ttn,
@@ -18,28 +25,32 @@ function OrderItem({ order, index }: { order: IOrder, index: number }) {
         ["комментарий менеджера"]: managerComment
     } = order;
 
-    const [isOpen, setIsOpen] = useState<boolean>(false);
-
     return (
         <AnimatedWrapper
-            key={order['N_заказа'] + index}
-            useOpacity
-            offsetY={20}
+            key={id}
+            offsetX={20}
+            duration={400}
             style={styles.wrapper}
         >
             <Pressable
                 style={({ pressed }) => [
                     styles.pressableRow,
-                    !isOpen && styles.pressableRowBorder,
+                    activeOrderId !== id && styles.pressableRowBorder,
                     pressed && styles.rowPressed
                 ]}
-                onPress={() => setIsOpen(!isOpen)}
+                onPress={() => {
+                    if (activeOrderId === id) {
+                        setActiveOrderId(null);
+                    } else {
+                        setActiveOrderId(id);
+                    }
+                }}
             >
                 <Text style={[styles.cell, tableStyles.column1, styles.link]}>
                     #{order['N_заказа']}
                 </Text>
                 <Text style={[styles.cell, tableStyles.column2]}>
-                    {order['вид заказа'].toLowerCase()}
+                    {getFormatedOrderType(order['вид заказа'])}
                 </Text>
                 <Status statusValue={order['статус']} />
                 <Text style={[styles.cell, tableStyles.column4]}>
@@ -47,11 +58,11 @@ function OrderItem({ order, index }: { order: IOrder, index: number }) {
                 </Text>
             </Pressable>
 
-            {isOpen && (
+            {id === activeOrderId && (
                 <AnimatedWrapper
                     useOpacity
                     offsetY={-30}
-                    duration={100}
+                    duration={300}
                     style={styles.detailsWrapper}
                 >
                     <View style={styles.detailsContainer}>
@@ -109,6 +120,29 @@ function formatDateAndTime(dateString: string): string {
     return `${day}.${month}.${year} - ${hours}:${minutes}`;
 }
 
+function getFormatedOrderType(type: string) {
+    switch (type.toLowerCase()) {
+        case 'горизонтальные жалюзи':
+            return 'горизонтальні жалюзі';
+        case 'вертикальные жалюзи':
+            return 'вертикальні жалюзі';
+        case 'рулонка':
+        case 'рулонные жалюзи':
+            return 'рулонні жалюзі';
+        case 'комплектующие':
+            return 'комплектуючі';
+        case 'рекламная продукция':
+            return 'рекламна продукція';
+        case 'деньночь':
+        case 'день-ночь':
+            return 'день-ніч';
+        case 'тип заказа не определен':
+            return 'тип не визначено';
+        default:
+            return type;
+    }
+}
+
 function getFormatedStatus(status: string) {
     switch (status) {
         case 'удален':
@@ -138,8 +172,8 @@ const styles = StyleSheet.create({
     },
     cell: {
         fontFamily: Fonts.comfortaa700,
-        fontSize: 11,
-        lineHeight: 12,
+        fontSize: 12,
+        lineHeight: 13,
         textAlignVertical: 'center',
     },
     link: {
@@ -167,12 +201,12 @@ const styles = StyleSheet.create({
     },
     detailLabel: {
         fontFamily: Fonts.openSans400,
-        fontSize: 11,
+        fontSize: 12,
         color: Colors.gray,
     },
     detailValue: {
         fontFamily: Fonts.openSans700,
-        fontSize: 11,
+        fontSize: 12,
         color: Colors.gray,
         flexGrow: 1,
         maxWidth: '75%'

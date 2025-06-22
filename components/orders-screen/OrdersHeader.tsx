@@ -16,7 +16,7 @@ function OrdersHeader() {
             offsetY={50}
             duration={300}
         >
-            <Header setIsBurgerOpen={setIsMenuOpen} />
+            <Header />
             <BurgerMenu isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} />
 
             <View style={styles.headerRow}            >

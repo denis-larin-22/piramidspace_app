@@ -4,10 +4,13 @@ import { Fonts } from '../../theme/fonts';
 import AnimatedWrapper from '../animation/AnimatedWrapper';
 import { IOrder } from '../../lib/api/orders';
 import OrderItem from './OrderItem';
+import { Colors } from '../../theme/colors';
 
 const ITEMS_PER_PAGE = 30;
 
 export default function TableOrders({ ordersList }: { ordersList: Array<IOrder> }) {
+    const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
+
     const scrollRef = useRef<ScrollView>(null);
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -48,7 +51,12 @@ export default function TableOrders({ ordersList }: { ordersList: Array<IOrder> 
 
                 {/* Rows */}
                 {paginatedOrders.map((order, index) => (
-                    <OrderItem key={index} order={order} index={index} />
+                    <OrderItem
+                        key={order['N_заказа']}
+                        order={order}
+                        activeOrderId={activeOrderId}
+                        setActiveOrderId={setActiveOrderId}
+                    />
                 ))}
             </ScrollView>
 
@@ -64,45 +72,98 @@ export default function TableOrders({ ordersList }: { ordersList: Array<IOrder> 
     );
 }
 
-function Pagination({
-    currentPage,
-    totalPages,
-    onPageChange,
-}: {
+type PaginationProps = {
     currentPage: number;
     totalPages: number;
     onPageChange: (page: number) => void;
-}) {
+};
+
+const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
+    const pages: (number | 'dots')[] = [];
+
+    const windowSize = 5; // общее количество в центре (2 слева, 1 текущая, 2 справа)
+    const half = Math.floor(windowSize / 2);
+
+    let start = Math.max(currentPage - half, 1);
+    let end = Math.min(currentPage + half, totalPages);
+
+    // Сдвигаем окно вправо, если не хватает слева
+    if (currentPage <= half) {
+        end = Math.min(windowSize, totalPages);
+    }
+
+    // Сдвигаем влево, если не хватает справа
+    if (currentPage + half > totalPages) {
+        start = Math.max(totalPages - windowSize + 1, 1);
+    }
+
+    // Первая страница
+    if (start > 1) {
+        pages.push(1);
+        if (start > 2) pages.push('dots');
+    }
+
+    // Окно из 5 страниц
+    for (let i = start; i <= end; i++) {
+        pages.push(i);
+    }
+
+    // Последняя страница
+    if (end < totalPages) {
+        if (end < totalPages - 1) pages.push('dots');
+        pages.push(totalPages);
+    }
+
     return (
-        <View style={tableStyles.pagination}>
+        <View style={paginationStyles.container}>
             <Pressable
                 onPress={() => onPageChange(Math.max(currentPage - 1, 1))}
                 disabled={currentPage === 1}
                 style={({ pressed }) => [
-                    tableStyles.pageButton,
-                    currentPage === 1 && tableStyles.disabled,
-                    pressed && tableStyles.pressed
+                    paginationStyles.pageButton,
+                    currentPage === 1 && paginationStyles.disabled,
+                    pressed && paginationStyles.pressed,
                 ]}
             >
-                <Text style={tableStyles.pageText}>{'<'}</Text>
+                <Text style={[paginationStyles.pageText, paginationStyles.arrowButton]}>{'<'}</Text>
             </Pressable>
-            <Text style={tableStyles.pageInfo}>
-                {currentPage} / {totalPages}
-            </Text>
+
+            <View style={paginationStyles.numbersWrap}>
+                {pages.map((page, index) =>
+                    page === 'dots' ? (
+                        <Text key={`dots-${index}`} style={paginationStyles.pageText}>...</Text>
+                    ) : (
+                        <Pressable
+                            key={page}
+                            onPress={() => onPageChange(page)}
+                            style={({ pressed }) => [
+                                paginationStyles.pageButton,
+                                pressed && paginationStyles.pressed,
+                                page === currentPage ? paginationStyles.activePage : paginationStyles.notActivePage
+                            ]}
+                        >
+                            <Text style={[paginationStyles.pageText, page === currentPage ? paginationStyles.activeText : paginationStyles.notActiveText]}>
+                                {page}
+                            </Text>
+                        </Pressable>
+                    )
+                )}
+            </View>
+
             <Pressable
                 onPress={() => onPageChange(Math.min(currentPage + 1, totalPages))}
                 disabled={currentPage === totalPages}
                 style={({ pressed }) => [
-                    tableStyles.pageButton,
-                    currentPage === totalPages && tableStyles.disabled,
-                    pressed && tableStyles.pressed
+                    paginationStyles.pageButton,
+                    currentPage === totalPages && paginationStyles.disabled,
+                    pressed && paginationStyles.pressed,
                 ]}
             >
-                <Text style={tableStyles.pageText}>{'>'}</Text>
+                <Text style={[paginationStyles.pageText, paginationStyles.arrowButton]}>{'>'}</Text>
             </Pressable>
         </View>
     );
-}
+};
 
 const COLUMN_WIDTH = {
     col1: 50,
@@ -111,6 +172,58 @@ const COLUMN_WIDTH = {
     col4: 60,
     col5: 60,
 };
+
+const paginationStyles = StyleSheet.create({
+    container: {
+        flexDirection: 'row',
+        borderRadius: 16,
+        paddingVertical: 10,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    numbersWrap: {
+        flexDirection: 'row',
+        gap: 5
+    },
+    pageButton: {
+        borderRadius: 50,
+        backgroundColor: 'transparent',
+        width: 28,
+        height: 28
+    },
+    pressed: {
+        opacity: 0.6,
+    },
+    disabled: {
+        opacity: 0.3,
+    },
+    activePage: {
+        backgroundColor: Colors.blue,
+    },
+    notActivePage: {
+        backgroundColor: Colors.pale,
+    },
+    pageText: {
+        fontSize: 15,
+        lineHeight: 27,
+        textAlign: 'center',
+        verticalAlign: 'middle',
+        borderRadius: 50
+    },
+    activeText: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    notActiveText: {
+        color: Colors.gray,
+        fontWeight: '400',
+    },
+    arrowButton: {
+        fontSize: 20,
+        color: Colors.blue
+    }
+});
+
 
 export const tableStyles = StyleSheet.create({
     ordersTable: {

@@ -114,8 +114,8 @@ function FullScreenBanner({
     const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
 
     return (
-        <Modal visible={isOpen} transparent animationType="slide">
-            <View style={styles.modalContainer}>
+        <Modal visible={isOpen} transparent animationType="none">
+            <AnimatedWrapper useScale duration={500} style={styles.modalContainer}>
                 <Pressable style={styles.closeButton} onPress={() => setIsOpen(false)}>
                     <Image
                         source={require('../../assets/main-screen/close-icon.png')}
@@ -155,7 +155,7 @@ function FullScreenBanner({
                         />
                     ))}
                 </View>
-            </View>
+            </AnimatedWrapper>
         </Modal>
     );
 }
@@ -212,9 +212,8 @@ const styles = StyleSheet.create({
         position: 'relative',
         height: '100%',
         width: '100%',
-        backgroundColor: '#00000090',
-        borderTopLeftRadius: 25,
-        borderTopRightRadius: 25,
+        backgroundColor: '#00000080',
+        borderRadius: 25,
         alignItems: 'center',
         justifyContent: 'center',
         padding: 20,

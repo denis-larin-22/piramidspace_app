@@ -18,7 +18,7 @@ function RateAndBalance() {
     useEffect(() => {
         getRate(isConnected);
         getBalance(isConnected);
-    }, []);
+    }, [isConnected]);
 
     async function getRate(isConnected: boolean) {
         if (isConnected) {
@@ -168,12 +168,13 @@ const styles = StyleSheet.create({
     title: {
         color: 'white',
         fontFamily: Fonts.comfortaa700,
-        fontSize: 16,
+        fontSize: 17,
     },
     subtitle: {
         color: 'white',
         fontFamily: Fonts.openSans400,
-        fontSize: 14,
+        fontSize: 15,
+        marginTop: 4
     },
 });
 

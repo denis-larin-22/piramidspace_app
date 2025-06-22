@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
         borderRadius: 32,
     },
     statusBox: {
-        width: "70%",
+        width: "74%",
         paddingVertical: 7,
         paddingHorizontal: 12,
         backgroundColor: "white",
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
     },
     flatList: {
-        marginLeft: 10,
+        marginLeft: 5,
     },
     flatItem: {
         width: 16,
