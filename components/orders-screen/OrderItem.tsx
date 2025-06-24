@@ -208,8 +208,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.openSans700,
         fontSize: 12,
         color: Colors.gray,
-        flexGrow: 1,
-        maxWidth: '75%'
+        maxWidth: '60%',
     },
     rowPressed: {
         backgroundColor: Colors.pale,

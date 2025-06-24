@@ -23,6 +23,7 @@ function NumberAndStatus({
     getOrderByNumberHandler: (numberValue: string) => void;
     getOrdersByStatusHandler: (status: string | null) => void;
 }) {
+    const [numberInputValue, setNumberInputValue] = useState<string>('');
     const [isStatusModalOpen, setIsStatusModalOpen] = useState<boolean>(false);
     const [activeStatus, setActiveStatus] = useState<string | null>(null);
 
@@ -35,8 +36,12 @@ function NumberAndStatus({
                     inputMode="numeric"
                     keyboardType="number-pad"
                     maxLength={6}
+                    value={numberInputValue}
                     onChange={(e) => {
+                        setActiveStatus(null); // reset filters by status
+
                         const numberValue = e.nativeEvent.text;
+                        setNumberInputValue(numberValue);
                         getOrderByNumberHandler(numberValue);
                     }}
                 />
@@ -53,71 +58,91 @@ function NumberAndStatus({
                     style={styles.statusPressable}
                     onPress={() => setIsStatusModalOpen(true)}
                 >
-                    <Text style={styles.statusText}>Статус</Text>
-                    <FlatList
-                        data={statusColorsObjects}
-                        renderItem={({ item }) => <Item color={item.color} />}
-                        keyExtractor={(item) => item.color}
-                        horizontal
-                        style={styles.flatList}
-                    />
+                    <Text style={styles.statusText}>{isStatusModalOpen ? 'Оберіть статус' : 'Статус:'}</Text>
+                    {!isStatusModalOpen && <AnimatedWrapper useOpacity duration={400} offsetY={10}>
+
+                        {activeStatus === null ?
+                            <FlatList
+                                data={statusColorsObjects}
+                                renderItem={({ item }) => <Item color={item.color} />}
+                                keyExtractor={(item) => item.color}
+                                horizontal
+                                style={styles.flatList}
+                            />
+                            :
+                            <Text style={[styles.statusText, styles.activeStatus]}>{activeStatus}</Text>
+                        }
+                    </AnimatedWrapper>}
                 </Pressable>
             </AnimatedWrapper>
 
-            <Modal visible={isStatusModalOpen} transparent animationType="slide">
-                <View style={styles.modalOverlay}>
-                    <Text style={styles.statusText}>Статус</Text>
 
-                    <View style={styles.modalInner}>
-                        <Pressable
-                            style={styles.modalCloseButton}
-                            onPress={() => setIsStatusModalOpen(false)}
-                        >
-                            <Image
-                                source={require("../../assets/main-screen/close-icon.png")}
-                                style={styles.modalCloseIcon}
-                            />
-                        </Pressable>
+            {
+                <Modal visible={isStatusModalOpen} transparent >
+                    <AnimatedWrapper
+                        style={styles.modalOverlay}
+                        useScale
+                        duration={100}
+                    >
+                        <View style={styles.modalInner}>
+                            <Pressable
+                                style={styles.modalCloseButton}
+                                onPress={() => setIsStatusModalOpen(false)}
+                            >
+                                <Image
+                                    source={require("../../assets/main-screen/close-icon.png")}
+                                    style={styles.modalCloseIcon}
+                                />
+                            </Pressable>
 
-                        <Text style={styles.modalTitle}>Оберіть статус:</Text>
-
-                        <FlatList
-                            data={statusColorsObjects}
-                            renderItem={({ item }) => (
-                                <Pressable
-                                    style={[
-                                        styles.modalItem,
-                                        item.status === activeStatus && styles.activeModalItem,
-                                    ]}
-                                    onPress={() => {
-                                        if (item.status === activeStatus) {
-                                            setActiveStatus(null);
-                                            getOrdersByStatusHandler(null);
-                                            setIsStatusModalOpen(false);
-                                        } else {
-                                            setActiveStatus(item.status);
-                                            const originalStatus = getOriginalStatus(item.status);
-                                            getOrdersByStatusHandler(originalStatus);
-                                            setIsStatusModalOpen(false);
-                                        }
-                                    }}
-                                >
-                                    <Item color={item.color} />
-                                    <Text
-                                        style={[
-                                            styles.modalItemText,
-                                            item.status === activeStatus && styles.activeModalText,
-                                        ]}
+                            <FlatList
+                                data={statusColorsObjects}
+                                renderItem={({ item, index }) => (
+                                    <AnimatedWrapper
+                                        useOpacity
+                                        offsetX={20}
+                                        delay={index * 50}
                                     >
-                                        {item.status}
-                                    </Text>
-                                </Pressable>
-                            )}
-                            keyExtractor={(item) => item.color}
-                        />
-                    </View>
-                </View>
-            </Modal>
+                                        <Pressable
+                                            style={[
+                                                styles.modalItem,
+                                                item.status === activeStatus && styles.activeModalItem,
+                                            ]}
+                                            onPress={() => {
+                                                if (item.status === activeStatus) {
+                                                    getOrderByNumberHandler('') // reset filter handler bu Number
+                                                    setNumberInputValue(''); // reset number input value
+
+                                                    setActiveStatus(null);
+                                                    getOrdersByStatusHandler(null);
+                                                } else {
+                                                    getOrderByNumberHandler('') // reset filter handler bu Number
+                                                    setNumberInputValue(''); // reset number input value
+
+                                                    setActiveStatus(item.status);
+                                                    const originalStatus = getOriginalStatus(item.status);
+                                                    getOrdersByStatusHandler(originalStatus);
+                                                }
+                                            }}
+                                        >
+                                            <Item color={item.color} />
+                                            <Text
+                                                style={[
+                                                    styles.modalItemText,
+                                                    item.status === activeStatus && styles.activeModalText,
+                                                ]}
+                                            >
+                                                {item.status}
+                                            </Text>
+                                        </Pressable>
+                                    </AnimatedWrapper>
+                                )}
+                                keyExtractor={(item) => item.color}
+                            />
+                        </View>
+                    </AnimatedWrapper>
+                </Modal>
+            }
         </View>
     );
 }
@@ -167,6 +192,8 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         minWidth: "25%",
         borderRadius: 32,
+        textAlign: 'center',
+        verticalAlign: 'middle'
     },
     statusBox: {
         width: "74%",
@@ -184,6 +211,7 @@ const styles = StyleSheet.create({
     },
     statusPressable: {
         flexDirection: "row",
+        width: '100%'
     },
     flatList: {
         marginLeft: 5,
@@ -199,53 +227,47 @@ const styles = StyleSheet.create({
         position: "relative",
         height: "100%",
         width: "100%",
-        backgroundColor: "#00000070",
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        alignItems: "center",
-        justifyContent: "center",
+        backgroundColor: "#00000050",
     },
     modalInner: {
-        backgroundColor: Colors.pale,
+        paddingTop: 50,
+        maxWidth: 280,
         maxHeight: 450,
         padding: 20,
         borderRadius: 20,
+        position: 'absolute',
+        right: 0,
+        top: '14%',
     },
     modalCloseButton: {
-        width: 20,
-        height: 20,
+        width: 30,
+        height: 30,
         position: "absolute",
         top: 10,
         right: 10,
         zIndex: 52,
+        backgroundColor: Colors.pale,
+        borderRadius: 50
     },
     modalCloseIcon: {
-        width: 20,
-        height: 20,
-    },
-    modalTitle: {
-        fontFamily: Fonts.comfortaa700,
-        fontSize: 16,
-        paddingBottom: 10,
-        borderBottomWidth: 1,
-        borderColor: Colors.gray,
-        marginBottom: 10,
+        width: 30,
+        height: 30,
     },
     modalItem: {
         flexDirection: "row",
         alignItems: "center",
         gap: 10,
-        marginBottom: 7,
-        paddingHorizontal: 10,
-        paddingVertical: 5,
+        marginBottom: 8,
+        paddingHorizontal: 8,
+        paddingVertical: 7,
         borderRadius: 20,
-        backgroundColor: "#A2A2A830",
+        backgroundColor: Colors.pale,
     },
     activeModalItem: {
         backgroundColor: Colors.blue,
     },
     modalItemText: {
-        fontFamily: Fonts.comfortaa600,
+        fontFamily: Fonts.comfortaa700,
         fontSize: 12,
         lineHeight: 12,
         color: "black",
@@ -253,4 +275,8 @@ const styles = StyleSheet.create({
     activeModalText: {
         color: "white",
     },
+    activeStatus: {
+        color: Colors.gray,
+        marginLeft: 10
+    }
 });
