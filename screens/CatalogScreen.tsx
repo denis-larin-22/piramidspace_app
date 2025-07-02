@@ -1,4 +1,4 @@
-import { ActivityIndicator, FlatList, StyleSheet, View, StatusBar } from "react-native";
+import { ActivityIndicator, FlatList, StyleSheet, View, StatusBar, Text } from "react-native";
 import { Colors } from "../theme/colors";
 import CatalogCard from "../components/catalog-screen/CatalogCard";
 import Logo from "../components/ui/Logo";
@@ -24,6 +24,7 @@ export interface ICatalogListByCategory {
 
 function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigationProp, route: CatalogScreenRouteProp }) {
     const { activeCategoryId } = route.params;
+    const [categoryName, setCategoryName] = useState<null | string>(null);
     const { catalogList, isLoading } = useCatalogList();
 
     const [catalogListByCategory, setCatalogListByCategory] = useState<ICatalogListByCategory>({
@@ -32,13 +33,22 @@ function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigat
     });
 
     useEffect(() => {
+        if (!catalogList || catalogList.length === 0) return;
+
         const filtredByCategory = getFiltredCatalogBySelectedCategory(+activeCategoryId, catalogList);
 
-        setCatalogListByCategory({
-            initList: filtredByCategory,
-            renderList: filtredByCategory
-        });
-    }, [catalogList]);
+        if (filtredByCategory.length > 0) {
+            const categoryName = getCategoryName(+activeCategoryId, filtredByCategory);
+
+            setCategoryName(categoryName);
+            setCatalogListByCategory({
+                initList: filtredByCategory,
+                renderList: filtredByCategory
+            });
+        } else {
+            console.warn('Нет товаров в выбранной категории:', activeCategoryId);
+        }
+    }, [catalogList, activeCategoryId]);
 
     return (
         <View style={styles.screenWrap}>
@@ -56,8 +66,8 @@ function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigat
                 duration={300}
                 delay={100}
             >
-
                 <Logo />
+                {categoryName && <Text style={styles.screenTitle}>{categoryName}</Text>}
             </AnimatedWrapper>
 
 
@@ -146,6 +156,16 @@ function getFiltredCatalogBySelectedCategory(activeCategoryId: number, catalogLi
     return filtredList;
 }
 
+function getCategoryName(categoryId: number, catalogList: IProductItem[]): string {
+    if (categoryId === SYSTEM_SALE_CATEGORY_ID) {
+        return 'Акція';
+    } else if (categoryId === SYSTEM_TOP_CATEGORY_ID) {
+        return 'Топ-продукція';
+    } else {
+        return catalogList[0].category.name;
+    }
+}
+
 // styles
 const styles = StyleSheet.create({
     screenWrap: {
@@ -154,9 +174,16 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.pale,
         height: '100%'
     },
+    screenTitle: {
+        fontFamily: Fonts.comfortaa700,
+        fontSize: 18,
+        color: Colors.gray,
+        opacity: 0.5,
+    },
     logoWrap: {
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: 'center',
         paddingHorizontal: 10,
         marginBottom: 20,
     },
