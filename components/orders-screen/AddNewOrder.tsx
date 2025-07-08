@@ -4,30 +4,51 @@ import { Image, ImageBackground, Modal, Pressable, StyleSheet, Text, TouchableOp
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 
-function AddNewOrder() {
-    const [isTooltipVissible, setIsTooltipVissible] = useState<boolean>(true);
-    const [isModalVissible, setIsModalVissible] = useState<boolean>(false);
+interface INewOrderObject {
+    category: {
+        name: string | null,
+        id: number | null
+    },
+    subcategory: {
+        name: string | null,
+        id: number | null
+    },
+}
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsTooltipVissible(false);
-        }, 5000);
-        return () => clearTimeout(timer);
-    }, []);
+function AddNewOrder() {
+    const [isModalVissible, setIsModalVissible] = useState<boolean>(false);
+    //
+    const initNewOrderObject: INewOrderObject = {
+        category: { id: null, name: null },
+        subcategory: { id: null, name: null }
+    };
+
+    const [activeStep, setActiveStep] = useState<number>(1);
+    const [newOrderObject, setNewOrderObject] = useState<INewOrderObject>(initNewOrderObject);
+
+    const firstStepHandler = (selectedCategory: { name: string, id: number }) => {
+        setNewOrderObject({
+            ...newOrderObject,
+            category: {
+                id: selectedCategory.id,
+                name: selectedCategory.name
+            }
+        });
+        setActiveStep(2);
+    }
+
+    const backButtonHandler = () => {
+        setActiveStep(activeStep - 1);
+    }
+
+    const closeButtonHandler = () => {
+        setNewOrderObject(initNewOrderObject);
+        setActiveStep(1);
+        setIsModalVissible(false);
+    }
 
     return (
         <>
-            {isTooltipVissible && (
-                <AnimatedWrapper
-                    useOpacity
-                    offsetX={100}
-                    delay={1000}
-                    duration={600}
-                    style={styles.addBtnNotice}>
-                    <Text style={styles.addBtnNoticeText}>Додати замовлення</Text>
-                </AnimatedWrapper>
-            )}
-
             <AnimatedWrapper useOpacity offsetX={50} duration={300} delay={400}>
                 <TouchableOpacity
                     style={styles.addButton}
@@ -52,15 +73,17 @@ function AddNewOrder() {
                         duration={200}
                         style={styles.modalContent}
                     >
-                        <Image
-                            source={require('../../assets/orders-screen/add-new-text.png')}
-                            style={styles.modalTitleImage}
-                            resizeMode="contain"
+                        <FirstStep
+                            activeStep={activeStep}
+                            stepHandler={firstStepHandler}
+                        />
+                        <SecondStep
+                            activeStep={activeStep}
+                            selectedCategory={newOrderObject.category.name as string}
                         />
 
-                        <FirstStep />
-
-                        <CloseButton closeHandler={() => setIsModalVissible(false)} />
+                        {(activeStep !== 1) && <BackButton backHandler={backButtonHandler} />}
+                        <CloseButton closeHandler={closeButtonHandler} />
                     </AnimatedWrapper>
                 </AnimatedWrapper>
             </Modal>
@@ -70,8 +93,15 @@ function AddNewOrder() {
 
 export default AddNewOrder;
 
-function FirstStep() {
-    const [activeCategory, setActiveCategory] = useState<null | number>(null);
+function FirstStep({ activeStep, stepHandler }: {
+    activeStep: number,
+    stepHandler: (selectedCategory: {
+        name: string;
+        id: number;
+    }) => void
+}) {
+    const STEP_ID = 1;
+    if (activeStep !== STEP_ID) return null;
 
     const categories = [
         { id: 3, name: 'Горизонтальні', icon: require('../../assets/orders-screen/horisontal.png') },
@@ -84,6 +114,14 @@ function FirstStep() {
 
     return (
         <>
+            <Text style={{
+                fontFamily: Fonts.comfortaa700,
+                fontSize: 18,
+                textTransform: 'uppercase',
+                marginBottom: 30,
+                textAlign: 'center'
+            }}>Оформлення <Text style={{ color: Colors.blue }}>Замовлення</Text></Text>
+
             {categories.map((category, index) => (
                 <AnimatedWrapper
                     key={category.id}
@@ -93,26 +131,69 @@ function FirstStep() {
                     delay={index * 80}
                 >
                     <Pressable
-                        style={[
-                            styles.categoryButton,
-                            activeCategory === category.id && styles.categoryButtonActive
-                        ]}
-                        onPress={() =>
-                            setActiveCategory(prev => prev === category.id ? null : category.id)
-                        }
+                        style={styles.categoryButton}
+                        onPress={() => {
+                            stepHandler(category);
+                        }}
                     >
                         <Image
                             source={category.icon}
                             style={styles.categoryIcon}
                         />
-                        <Text
-                            style={[
-                                styles.categoryText,
-                                activeCategory === category.id && styles.categoryTextActive
-                            ]}
-                        >
+                        <Text style={styles.categoryText}>
                             {category.name}
                         </Text>
+                    </Pressable>
+                </AnimatedWrapper>
+            ))}
+        </>
+    );
+}
+
+function SecondStep({ activeStep, selectedCategory }: { activeStep: number, selectedCategory: string }) {
+    const STEP_ID = 2;
+    if (activeStep !== STEP_ID) return null;
+
+    const subCategories = [
+        { id: 3, name: `${selectedCategory} MINI`, option: false },
+        { id: 4, name: `${selectedCategory} UNI плоскі`, option: true },
+        { id: 2, name: `${selectedCategory} UNI П-образні`, option: true },
+    ];
+
+    return (
+        <>
+            <Text style={styles.stepSubtitle}>Оформлення Замовлення</Text>
+
+            <Text style={styles.stepCategory}>{selectedCategory}</Text>
+
+            <AnimatedWrapper
+                useOpacity
+                offsetY={20}
+                style={styles.detailsBlock}
+            >
+                <Text style={styles.detailsText}>Готовність на: 03.07.2025</Text>
+                <Text style={styles.detailsText}>Курс: 42,32 грн</Text>
+                <Text style={styles.detailsText}>Баланс: 1088.5 $</Text>
+            </AnimatedWrapper>
+
+            {subCategories.map((subCategory, index) => (
+                <AnimatedWrapper
+                    key={subCategory.id}
+                    useOpacity
+                    useScale
+                    offsetY={20}
+                    delay={index * 80}
+                >
+                    <Pressable
+                        style={styles.categoryButton}
+                        onPress={() => { }}
+                    >
+                        <Text style={styles.categoryText}>
+                            {subCategory.name}
+                        </Text>
+                        {subCategory.option && (
+                            <Text style={styles.categoryOptionText}>в коробі</Text>
+                        )}
                     </Pressable>
                 </AnimatedWrapper>
             ))}
@@ -123,12 +204,27 @@ function FirstStep() {
 function CloseButton({ closeHandler }: { closeHandler: () => void }) {
     return (
         <AnimatedWrapper delay={200} useOpacity offsetY={-30}>
-            <Pressable style={styles.closeButton} onPress={closeHandler}>
+            <Pressable style={[styles.button, styles.closeButton]} onPress={closeHandler}>
                 <ImageBackground
                     source={require('../../assets/gradient-small.png')}
-                    style={styles.closeButtonBg}
+                    style={styles.buttonBg}
                 >
-                    <Text style={styles.closeButtonText}>+</Text>
+                    <Text style={[styles.closeButtonText, styles.rotate]}>+</Text>
+                </ImageBackground>
+            </Pressable>
+        </AnimatedWrapper>
+    );
+}
+
+function BackButton({ backHandler }: { backHandler: () => void }) {
+    return (
+        <AnimatedWrapper delay={200} useOpacity offsetY={-30}>
+            <Pressable style={[styles.button, styles.backButton]} onPress={backHandler}>
+                <ImageBackground
+                    source={require('../../assets/gradient-small.png')}
+                    style={styles.buttonBg}
+                >
+                    <Text style={styles.backButtonText}>{'<'}</Text>
                 </ImageBackground>
             </Pressable>
         </AnimatedWrapper>
@@ -186,14 +282,11 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.pale,
         paddingVertical: 20,
         paddingHorizontal: 12,
-        borderRadius: 13
-    },
-    modalTitleImage: {
-        width: 305,
-        height: 82,
-        marginBottom: 20
+        borderRadius: 13,
+        width: '90%'
     },
     categoryButton: {
+        overflow: 'hidden',
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
@@ -203,9 +296,6 @@ const styles = StyleSheet.create({
         borderRadius: 32,
         marginVertical: 5,
     },
-    categoryButtonActive: {
-        backgroundColor: Colors.blue,
-    },
     categoryIcon: {
         width: 21,
         height: 21,
@@ -213,23 +303,30 @@ const styles = StyleSheet.create({
     },
     categoryText: {
         fontFamily: Fonts.comfortaa400,
-        fontSize: 14,
-        lineHeight: 16,
+        fontSize: 15,
+        lineHeight: 17,
         color: 'black'
     },
     categoryTextActive: {
         color: 'white'
     },
-    closeButton: {
+    button: {
         width: 59,
         height: 59,
         borderRadius: 50,
         overflow: 'hidden',
+    },
+    closeButton: {
         position: 'absolute',
         bottom: -100,
         right: 0
     },
-    closeButtonBg: {
+    backButton: {
+        position: 'absolute',
+        bottom: -100,
+        left: 0
+    },
+    buttonBg: {
         width: '100%',
         height: '100%',
         alignItems: 'center',
@@ -239,7 +336,47 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.comfortaa400,
         fontSize: 40,
         lineHeight: 50,
-        transform: [{ rotate: '45deg' }],
         color: 'white'
-    }
+    },
+    backButtonText: {
+        fontFamily: Fonts.comfortaa400,
+        fontSize: 30,
+        lineHeight: 38,
+        color: 'white'
+    },
+    rotate: {
+        transform: [{ rotate: '45deg' }],
+    },
+    stepSubtitle: {
+        fontFamily: Fonts.comfortaa400,
+        fontSize: 16,
+        textTransform: 'uppercase',
+        marginBottom: 7,
+        textAlign: 'right',
+        color: Colors.gray,
+    },
+    stepCategory: {
+        fontFamily: Fonts.comfortaa700,
+        fontSize: 30,
+        textTransform: 'uppercase',
+        marginBottom: 30,
+        textAlign: 'left',
+        color: Colors.blue,
+    },
+    detailsBlock: {
+        marginBottom: 22,
+    },
+    detailsText: {
+        fontFamily: Fonts.comfortaa400,
+        fontSize: 16,
+        color: Colors.gray,
+    },
+    categoryOptionText: {
+        fontFamily: Fonts.comfortaa400,
+        fontSize: 14,
+        lineHeight: 16,
+        color: Colors.red,
+        flexGrow: 1,
+        textAlign: 'right',
+    },
 });
