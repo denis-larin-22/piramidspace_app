@@ -1,53 +1,17 @@
 import { Image, Text, TouchableOpacity, View, StyleSheet } from "react-native";
-import { useEffect, useState } from "react";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
 import AnimatedAbsolutePosition from "../animation/AnimatedTransition";
-import { getDataFromAcyncStorage, saveDataToAcyncStorage } from "../../lib/async-storage/acyncStorage";
-import { ASYNC_STORAGE_BALANCE_VALUE_KEY, ASYNC_STORAGE_RATE_VALUE_KEY, ASYNC_STORAGE_USER_LOGIN } from "../../lib/async-storage/asyncStorageKeys";
-import { getBalanceByLogin, getExchangeDollarRate } from "../../lib/api/info";
 import { useNetworkStatus } from "../../lib/hooks/useNetworkStatus";
+import { useBalanceValue } from "../../lib/hooks/useBalanceValue";
+import { useDollarRate } from "../../lib/hooks/useDollarRate";
 
 function RateAndBalance() {
     const { isConnected } = useNetworkStatus();
 
-    const [rateValue, setRateValue] = useState<null | string>(null);
-    const [balanceValue, setBalanceValue] = useState<null | number>(null);
-
-    useEffect(() => {
-        getRate(isConnected);
-        getBalance(isConnected);
-    }, [isConnected]);
-
-    async function getRate(isConnected: boolean) {
-        if (isConnected) {
-            const value = await getExchangeDollarRate();
-            setRateValue(value);
-            saveDataToAcyncStorage(ASYNC_STORAGE_RATE_VALUE_KEY, JSON.stringify(value));
-        } else {
-            const valueFromAS = await getDataFromAcyncStorage(ASYNC_STORAGE_RATE_VALUE_KEY);
-            valueFromAS === undefined ?
-                setRateValue(null)
-                :
-                setRateValue(JSON.parse(valueFromAS))
-        }
-    }
-
-    async function getBalance(isConnected: boolean) {
-        if (isConnected) {
-            const userLoginValue = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
-            const value = await getBalanceByLogin(userLoginValue as string);
-            setBalanceValue(value);
-            saveDataToAcyncStorage(ASYNC_STORAGE_BALANCE_VALUE_KEY, JSON.stringify(value));
-        } else {
-            const valueFromAS = await getDataFromAcyncStorage(ASYNC_STORAGE_BALANCE_VALUE_KEY);
-            valueFromAS === undefined ?
-                setBalanceValue(null)
-                :
-                setBalanceValue(JSON.parse(valueFromAS))
-        }
-    }
+    const { balance, isLoading: isBalanceLoading } = useBalanceValue(isConnected);
+    const { rate, isLoading: isRateLoading } = useDollarRate(isConnected);
 
     return (
         <View style={styles.container}>
@@ -59,10 +23,10 @@ function RateAndBalance() {
                 duration={500}
                 delay={500}
             >
-                <TouchableOpacity style={styles.card}>
+                <View style={styles.card}>
                     <AnimatedAbsolutePosition
-                        right={rateValue ? 15 : 75}
-                        top={rateValue ? 15 : 35}
+                        right={rate ? 15 : 75}
+                        top={rate ? 15 : 35}
                         style={styles.rateIcon}
                     >
                         <Image
@@ -74,7 +38,7 @@ function RateAndBalance() {
                             resizeMode="contain"
                         />
                     </AnimatedAbsolutePosition>
-                    {rateValue &&
+                    {!isRateLoading &&
                         <AnimatedWrapper
                             style={styles.textBlock}
                             offsetY={20}
@@ -83,10 +47,10 @@ function RateAndBalance() {
                             useScale
                         >
                             <Text style={styles.title}>Курс</Text>
-                            <Text style={styles.subtitle}>{rateValue}</Text>
+                            <Text style={styles.subtitle}>{rate}</Text>
                         </AnimatedWrapper>
                     }
-                </TouchableOpacity>
+                </View>
             </AnimatedWrapper>
 
             <AnimatedWrapper
@@ -97,10 +61,10 @@ function RateAndBalance() {
                 duration={500}
                 delay={700}
             >
-                <TouchableOpacity style={styles.card}>
+                <View style={styles.card}>
                     <AnimatedAbsolutePosition
-                        right={balanceValue ? 15 : 75}
-                        top={balanceValue ? 15 : 35}
+                        right={balance ? 15 : 75}
+                        top={balance ? 15 : 35}
                         style={styles.balanceIcon}
                     >
                         <Image
@@ -112,7 +76,7 @@ function RateAndBalance() {
                             resizeMode="contain"
                         />
                     </AnimatedAbsolutePosition>
-                    {balanceValue &&
+                    {!isBalanceLoading &&
                         <AnimatedWrapper
                             style={styles.textBlock}
                             offsetY={20}
@@ -121,10 +85,10 @@ function RateAndBalance() {
                             useScale
                         >
                             <Text style={styles.title}>Баланс</Text>
-                            <Text style={styles.subtitle}>{balanceValue}</Text>
+                            <Text style={styles.subtitle}>{balance}</Text>
                         </AnimatedWrapper>
                     }
-                </TouchableOpacity>
+                </View>
             </AnimatedWrapper>
         </View>
     );

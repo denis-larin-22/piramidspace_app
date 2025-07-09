@@ -31,7 +31,7 @@ function NumberAndStatus({
         <View style={styles.wrapper}>
             <AnimatedWrapper useOpacity offsetX={50} duration={300} delay={100}>
                 <TextInput
-                    placeholder="№"
+                    placeholder="    №"
                     style={styles.numberBox}
                     inputMode="numeric"
                     keyboardType="number-pad"
@@ -188,15 +188,16 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.comfortaa700,
         fontSize: 12,
         paddingVertical: 7,
-        paddingHorizontal: 12,
+        paddingLeft: 12,
+        paddingRight: 11,
         backgroundColor: "white",
-        minWidth: "25%",
+        minWidth: '18%',
         borderRadius: 32,
-        textAlign: 'center',
-        verticalAlign: 'middle'
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     statusBox: {
-        width: "74%",
+        width: "80%",
         paddingVertical: 7,
         paddingHorizontal: 12,
         backgroundColor: "white",

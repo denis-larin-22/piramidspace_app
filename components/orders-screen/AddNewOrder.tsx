@@ -3,6 +3,9 @@ import AnimatedWrapper from "../animation/AnimatedWrapper";
 import { Image, ImageBackground, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
+import { useDollarRate } from "../../lib/hooks/useDollarRate";
+import { useNetworkStatus } from "../../lib/hooks/useNetworkStatus";
+import { useBalanceValue } from "../../lib/hooks/useBalanceValue";
 
 interface INewOrderObject {
     category: {
@@ -16,6 +19,10 @@ interface INewOrderObject {
 }
 
 function AddNewOrder() {
+    const { isConnected } = useNetworkStatus();
+    const { rate } = useDollarRate(isConnected);
+    const { balance } = useBalanceValue(isConnected);
+
     const [isModalVissible, setIsModalVissible] = useState<boolean>(false);
     //
     const initNewOrderObject: INewOrderObject = {
@@ -80,6 +87,8 @@ function AddNewOrder() {
                         <SecondStep
                             activeStep={activeStep}
                             selectedCategory={newOrderObject.category.name as string}
+                            balanceValue={balance}
+                            rateValue={rate}
                         />
 
                         {(activeStep !== 1) && <BackButton backHandler={backButtonHandler} />}
@@ -126,12 +135,16 @@ function FirstStep({ activeStep, stepHandler }: {
                 <AnimatedWrapper
                     key={category.id}
                     useOpacity
-                    useScale
                     offsetY={20}
-                    delay={index * 80}
+                    delay={index * 60}
                 >
                     <Pressable
-                        style={styles.categoryButton}
+                        style={({ pressed }) => [
+                            {
+                                backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+                            },
+                            styles.categoryButton
+                        ]}
                         onPress={() => {
                             stepHandler(category);
                         }}
@@ -144,15 +157,18 @@ function FirstStep({ activeStep, stepHandler }: {
                             {category.name}
                         </Text>
                     </Pressable>
-                </AnimatedWrapper>
-            ))}
+                </AnimatedWrapper >
+            ))
+            }
         </>
     );
 }
 
-function SecondStep({ activeStep, selectedCategory }: { activeStep: number, selectedCategory: string }) {
+function SecondStep({ activeStep, selectedCategory, rateValue, balanceValue }: { activeStep: number, selectedCategory: string, rateValue: string | null, balanceValue: number | null }) {
     const STEP_ID = 2;
     if (activeStep !== STEP_ID) return null;
+    //
+
 
     const subCategories = [
         { id: 3, name: `${selectedCategory} MINI`, option: false },
@@ -166,23 +182,22 @@ function SecondStep({ activeStep, selectedCategory }: { activeStep: number, sele
 
             <Text style={styles.stepCategory}>{selectedCategory}</Text>
 
-            <AnimatedWrapper
+            {rateValue && balanceValue && <AnimatedWrapper
                 useOpacity
                 offsetY={20}
                 style={styles.detailsBlock}
             >
                 <Text style={styles.detailsText}>Готовність на: 03.07.2025</Text>
-                <Text style={styles.detailsText}>Курс: 42,32 грн</Text>
-                <Text style={styles.detailsText}>Баланс: 1088.5 $</Text>
-            </AnimatedWrapper>
+                <Text style={styles.detailsText}>{`Курс: ${rateValue} грн`}</Text>
+                <Text style={styles.detailsText}>{`Баланс: ${balanceValue} $`}</Text>
+            </AnimatedWrapper>}
 
             {subCategories.map((subCategory, index) => (
                 <AnimatedWrapper
                     key={subCategory.id}
                     useOpacity
-                    useScale
-                    offsetY={20}
-                    delay={index * 80}
+                    offsetY={5}
+                    delay={index * 60}
                 >
                     <Pressable
                         style={styles.categoryButton}
@@ -292,9 +307,11 @@ const styles = StyleSheet.create({
         gap: 10,
         paddingVertical: 12,
         paddingHorizontal: 18,
-        backgroundColor: 'white',
+        // backgroundColor: 'white',
         borderRadius: 32,
         marginVertical: 5,
+        borderWidth: 1,
+        borderColor: '#3372F923'
     },
     categoryIcon: {
         width: 21,
@@ -364,6 +381,7 @@ const styles = StyleSheet.create({
         color: Colors.blue,
     },
     detailsBlock: {
+        marginLeft: 18,
         marginBottom: 22,
     },
     detailsText: {
