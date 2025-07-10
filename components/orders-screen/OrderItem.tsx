@@ -8,10 +8,12 @@ import { tableStyles } from "./TableOrders";
 
 function OrderItem({
     order,
-    activeOrderId, setActiveOrderId
+    activeOrderId,
+    setActiveOrderId
 }: {
     order: IOrder,
-    activeOrderId: number | null, setActiveOrderId: (id: number | null) => void
+    activeOrderId: number | null,
+    setActiveOrderId: (id: number | null) => void
 }) {
     const {
         ['N_заказа']: id,
@@ -35,8 +37,11 @@ function OrderItem({
             <Pressable
                 style={({ pressed }) => [
                     styles.pressableRow,
-                    activeOrderId !== id && styles.pressableRowBorder,
-                    pressed && styles.rowPressed
+                    activeOrderId !== id && styles.activeOrder,
+                    pressed && styles.rowPressed,
+                    {
+                        backgroundColor: activeOrderId === null || activeOrderId === id ? 'white' : Colors.pale,
+                    }
                 ]}
                 onPress={() => {
                     if (activeOrderId === id) {
@@ -61,22 +66,11 @@ function OrderItem({
             {id === activeOrderId && (
                 <AnimatedWrapper
                     useOpacity
-                    offsetY={-30}
-                    duration={300}
+                    offsetY={-10}
+                    duration={200}
                     style={styles.detailsWrapper}
                 >
                     <View style={styles.detailsContainer}>
-                        <Image
-                            source={require('../../assets/orders-screen/arrow-bottom.png')}
-                            style={{
-                                width: 50,
-                                height: 50,
-                                position: 'absolute',
-                                top: 0,
-                                right: 0
-                            }}
-                            resizeMode="center"
-                        />
                         <Detail label="🗓️ Дата замовлення:" value={formatDateAndTime(createDate)} />
                         <Detail label="📦 Дата готовності:" value={finishDate ? formatDateAndTime(finishDate as string) : '—'} />
                         <Detail label="🚚 ТТН:" value={ttn} />
@@ -116,8 +110,13 @@ function Detail({ label, value, borderBottom = false }: { label: string, value: 
 function formatDateAndTime(dateString: string): string {
     const [datePart, timePart] = dateString.split(' ');
     const [year, month, day] = datePart.split('-');
-    const [hours, minutes] = timePart.split(':');
-    return `${day}.${month}.${year} - ${hours}:${minutes}`;
+
+    if (timePart) {
+        const [hours, minutes] = timePart.split(':');
+        return `${day}.${month}.${year} - ${hours}:${minutes}`;
+    }
+
+    return `${day}.${month}.${year}`;
 }
 
 function getFormatedOrderType(type: string) {
@@ -166,7 +165,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingHorizontal: 10,
     },
-    pressableRowBorder: {
+    activeOrder: {
         borderBottomWidth: 1,
         borderColor: '#D9D9D9',
     },
@@ -181,17 +180,18 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.openSans400,
     },
     detailsWrapper: {
-        marginBottom: 10,
+        borderTopWidth: 2,
+        borderTopColor: Colors.pale,
         paddingBottom: 5,
         borderBottomWidth: 1,
-        borderColor: '#D9D9D9',
+        borderBottomColor: '#D9D9D9',
     },
     detailsContainer: {
-        backgroundColor: Colors.pale,
+        backgroundColor: 'white',
         padding: 5,
         borderBottomRightRadius: 5,
         borderBottomLeftRadius: 5,
-        position: 'relative'
+        position: 'relative',
     },
     detailRow: {
         flexDirection: 'row',
