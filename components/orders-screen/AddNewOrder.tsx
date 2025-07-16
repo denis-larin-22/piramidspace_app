@@ -1,20 +1,22 @@
 import { useEffect, useState } from "react";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
-import { Image, ImageBackground, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { useDollarRate } from "../../lib/hooks/useDollarRate";
 import { useNetworkStatus } from "../../lib/hooks/useNetworkStatus";
 import { useBalanceValue } from "../../lib/hooks/useBalanceValue";
+import { getGroupsStructure, ISubgroup, MainGroupsCode } from "../../lib/api/orders";
+import Loader from "../ui/Loader";
 
 interface INewOrderObject {
-    category: {
+    group: {
         name: string | null,
-        id: number | null
+        code: MainGroupsCode | null
     },
-    subcategory: {
+    subgroup: {
         name: string | null,
-        id: number | null
+        code: string | null
     },
 }
 
@@ -26,23 +28,26 @@ function AddNewOrder() {
     const [isModalVissible, setIsModalVissible] = useState<boolean>(false);
     //
     const initNewOrderObject: INewOrderObject = {
-        category: { id: null, name: null },
-        subcategory: { id: null, name: null }
+        group: { code: null, name: null },
+        subgroup: { code: null, name: null }
     };
 
     const [activeStep, setActiveStep] = useState<number>(1);
     const [newOrderObject, setNewOrderObject] = useState<INewOrderObject>(initNewOrderObject);
 
-    const firstStepHandler = (selectedCategory: { name: string, id: number }) => {
-        setNewOrderObject({
+
+    const firstStepHandler = async (selectedGroup: { name: string, code: MainGroupsCode }) => {
+        const updatedOrder = {
             ...newOrderObject,
-            category: {
-                id: selectedCategory.id,
-                name: selectedCategory.name
+            group: {
+                code: selectedGroup.code,
+                name: selectedGroup.name
             }
-        });
+        };
+
+        setNewOrderObject(updatedOrder);
         setActiveStep(2);
-    }
+    };
 
     const backButtonHandler = () => {
         setActiveStep(activeStep - 1);
@@ -80,17 +85,16 @@ function AddNewOrder() {
                         duration={200}
                         style={styles.modalContent}
                     >
-                        <FirstStep
-                            activeStep={activeStep}
-                            stepHandler={firstStepHandler}
-                        />
-                        <SecondStep
-                            activeStep={activeStep}
-                            selectedCategory={newOrderObject.category.name as string}
-                            balanceValue={balance}
-                            rateValue={rate}
-                        />
-
+                        {activeStep === 1 ?
+                            <FirstStep stepHandler={firstStepHandler} />
+                            :
+                            <SecondStep
+                                selectedGroupName={newOrderObject.group.name as string}
+                                selectedGroupCode={newOrderObject.group.code as MainGroupsCode}
+                                balanceValue={balance}
+                                rateValue={rate}
+                            />
+                        }
                         {(activeStep !== 1) && <BackButton backHandler={backButtonHandler} />}
                         <CloseButton closeHandler={closeButtonHandler} />
                     </AnimatedWrapper>
@@ -102,23 +106,25 @@ function AddNewOrder() {
 
 export default AddNewOrder;
 
-function FirstStep({ activeStep, stepHandler }: {
-    activeStep: number,
+interface IMainGroup {
+    code: MainGroupsCode,
+    name: string,
+    icon: any,
+}
+
+function FirstStep({ stepHandler }: {
     stepHandler: (selectedCategory: {
         name: string;
-        id: number;
+        code: MainGroupsCode;
     }) => void
 }) {
-    const STEP_ID = 1;
-    if (activeStep !== STEP_ID) return null;
-
-    const categories = [
-        { id: 3, name: 'Горизонтальні', icon: require('../../assets/orders-screen/horisontal.png') },
-        { id: 4, name: 'Вертикальні', icon: require('../../assets/orders-screen/vertical.png') },
-        { id: 1, name: 'День-Ніч', icon: require('../../assets/orders-screen/day-night.png') },
-        { id: 2, name: 'Рулонні', icon: require('../../assets/orders-screen/roller.png') },
-        { id: 5, name: 'Комплектуючі', icon: require('../../assets/orders-screen/components.png') },
-        { id: 6, name: 'Рекламна продукція', icon: require('../../assets/orders-screen/promotional-items.png') },
+    const mainGroups: IMainGroup[] = [
+        { code: "horizontal", name: 'Горизонтальні', icon: require('../../assets/orders-screen/horisontal.png') },
+        { code: "vertical", name: 'Вертикальні', icon: require('../../assets/orders-screen/vertical.png') },
+        { code: "day", name: 'День-Ніч', icon: require('../../assets/orders-screen/day-night.png') },
+        { code: "roller", name: 'Рулонні', icon: require('../../assets/orders-screen/roller.png') },
+        { code: "components", name: 'Комплектуючі', icon: require('../../assets/orders-screen/components.png') },
+        { code: "ads", name: 'Рекламна продукція', icon: require('../../assets/orders-screen/promotional-items.png') },
     ];
 
     return (
@@ -131,9 +137,9 @@ function FirstStep({ activeStep, stepHandler }: {
                 textAlign: 'center'
             }}>Оформлення <Text style={{ color: Colors.blue }}>Замовлення</Text></Text>
 
-            {categories.map((category, index) => (
+            {mainGroups.map((group, index) => (
                 <AnimatedWrapper
-                    key={category.id}
+                    key={group.code}
                     useOpacity
                     offsetY={20}
                     delay={index * 60}
@@ -146,15 +152,15 @@ function FirstStep({ activeStep, stepHandler }: {
                             styles.categoryButton
                         ]}
                         onPress={() => {
-                            stepHandler(category);
+                            stepHandler({ code: group.code, name: group.name });
                         }}
                     >
                         <Image
-                            source={category.icon}
+                            source={group.icon}
                             style={styles.categoryIcon}
                         />
                         <Text style={styles.categoryText}>
-                            {category.name}
+                            {group.name}
                         </Text>
                     </Pressable>
                 </AnimatedWrapper >
@@ -164,23 +170,37 @@ function FirstStep({ activeStep, stepHandler }: {
     );
 }
 
-function SecondStep({ activeStep, selectedCategory, rateValue, balanceValue }: { activeStep: number, selectedCategory: string, rateValue: string | null, balanceValue: number | null }) {
-    const STEP_ID = 2;
-    if (activeStep !== STEP_ID) return null;
-    //
+function SecondStep({ selectedGroupName, selectedGroupCode, rateValue, balanceValue }: {
+    selectedGroupName: string,
+    selectedGroupCode: MainGroupsCode,
+    rateValue: string | null,
+    balanceValue: number | null,
+}) {
+    const [subGroupsList, setSubGroupsList] = useState<Array<ISubgroup> | null>(null);
 
+    useEffect(() => {
+        async function getSubgroups() {
+            const groupsStructure = await getGroupsStructure(selectedGroupCode);
 
-    const subCategories = [
-        { id: 3, name: `${selectedCategory} MINI`, option: false },
-        { id: 4, name: `${selectedCategory} UNI плоскі`, option: true },
-        { id: 2, name: `${selectedCategory} UNI П-образні`, option: true },
-    ];
+            if (groupsStructure) {
+                if (groupsStructure.groups.length === 0) {
+                    setSubGroupsList(null);
+                } else {
+                    const subgroups = groupsStructure.groups[0].subgroups;
+                    setSubGroupsList(subgroups);
+                }
+            } else {
+                setSubGroupsList(null);
+            }
+        }
 
+        getSubgroups();
+    }, [selectedGroupCode]);
     return (
         <>
             <Text style={styles.stepSubtitle}>Оформлення Замовлення</Text>
 
-            <Text style={styles.stepCategory}>{selectedCategory}</Text>
+            <Text style={styles.stepCategory}>{selectedGroupName}</Text>
 
             {rateValue && balanceValue && <AnimatedWrapper
                 useOpacity
@@ -190,28 +210,44 @@ function SecondStep({ activeStep, selectedCategory, rateValue, balanceValue }: {
                 <Text style={styles.detailsText}>Готовність на: 03.07.2025</Text>
                 <Text style={styles.detailsText}>{`Курс: ${rateValue} грн`}</Text>
                 <Text style={styles.detailsText}>{`Баланс: ${balanceValue} $`}</Text>
-            </AnimatedWrapper>}
+            </AnimatedWrapper>
+            }
 
-            {subCategories.map((subCategory, index) => (
-                <AnimatedWrapper
-                    key={subCategory.id}
-                    useOpacity
-                    offsetY={5}
-                    delay={index * 60}
+            {subGroupsList !== null ?
+                <ScrollView
+                    style={{ minHeight: 200, maxHeight: 300 }}
                 >
-                    <Pressable
-                        style={styles.categoryButton}
-                        onPress={() => { }}
-                    >
-                        <Text style={styles.categoryText}>
-                            {subCategory.name}
-                        </Text>
-                        {subCategory.option && (
-                            <Text style={styles.categoryOptionText}>в коробі</Text>
-                        )}
-                    </Pressable>
-                </AnimatedWrapper>
-            ))}
+                    {subGroupsList.map((subGroup, index) => (
+                        <AnimatedWrapper
+                            key={subGroup.code}
+                            useOpacity
+                            offsetY={5}
+                            delay={index * 60}
+                        >
+                            <Pressable
+                                style={styles.categoryButton}
+                                onPress={() => { }}
+                            >
+                                <Text style={styles.categoryText}>
+                                    {subGroup.name}
+                                </Text>
+                                {/* {subGroup.option && (
+                                <Text style={styles.categoryOptionText}>в коробі</Text>
+                            )} */}
+                            </Pressable>
+                        </AnimatedWrapper>
+                    ))}
+                </ScrollView>
+                :
+                <View style={{
+                    width: '100%',
+                    height: 200,
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}>
+                    <Loader radius={150} />
+                </View>
+            }
         </>
     );
 }
@@ -381,7 +417,6 @@ const styles = StyleSheet.create({
         color: Colors.blue,
     },
     detailsBlock: {
-        marginLeft: 18,
         marginBottom: 22,
     },
     detailsText: {

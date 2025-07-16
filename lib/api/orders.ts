@@ -65,3 +65,46 @@ export async function fetchOrders(dealerLogin: string): Promise<IOrder[] | []> {
     }
 };
 
+
+//////////////////////////////////////////////////////////
+// main groups codes
+export type MainGroupsCode = 'day' | 'roller' | 'horizontal' | 'vertical' | 'components' | 'ads';
+
+interface IProductGroupsStructureResponse {
+    success: boolean,
+    groups: IGroup[]
+}
+
+export interface IGroup {
+    code: string,
+    name: string,
+    subgroups: Array<ISubgroup>
+}
+
+export interface ISubgroup {
+    code: string,
+    name: string
+}
+
+// get all sub groups (by group)
+export async function getGroupsStructure(groupCode: MainGroupsCode): Promise<IProductGroupsStructureResponse | null> {
+    try {
+        const response = await fetch(`${BASE_URL}/api/piramid/product-groups?group=${groupCode}`);
+
+        if (!response.ok) {
+            console.error(`GETTING SUBGROUPS ERROR! HTTP error: ${response.status} ${response.statusText}`);
+            return null;
+        }
+
+        const data = await response.json() as IProductGroupsStructureResponse;
+        return data;
+    } catch (error) {
+        console.error("An error occurred while fetching subgroups:", error);
+        return null;
+    }
+};
+
+
+
+
+
