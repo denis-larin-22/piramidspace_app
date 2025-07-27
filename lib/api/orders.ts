@@ -86,7 +86,7 @@ export interface ISubgroup {
     name: string
 }
 
-// get all sub groups (by group)
+// get all subgroups (by group)
 export async function getGroupsStructure(groupCode: MainGroupsCode): Promise<IProductGroupsStructureResponse | null> {
     try {
         const response = await fetch(`${BASE_URL}/api/piramid/product-groups?group=${groupCode}`);
@@ -103,6 +103,57 @@ export async function getGroupsStructure(groupCode: MainGroupsCode): Promise<IPr
         return null;
     }
 };
+
+//  get products list by group code and subgroupcode params
+interface IProductsByCodesResponse {
+    success: boolean,
+    groups: ISelectedGroup[]
+}
+
+export interface ISelectedGroup {
+    code: MainGroupsCode,
+    name: string,
+    subgroups: ISelectedSubgroup[]
+}
+
+export interface ISelectedSubgroup {
+    code: string,
+    name: string,
+    products: IProductByCodes[]
+}
+
+export interface IProductByCodes {
+    code: string,
+    name: string,
+    price: number,
+    presence: string,
+    sale_tk: boolean,
+    w_max: number,
+    h_max: number,
+    square_max: number,
+    category_fabric: number
+}
+
+export async function getProductsByCodes(groupCode: MainGroupsCode, subgroupCode: string): Promise<IProductByCodes[] | null> {
+    try {
+        const response = await fetch(`${BASE_URL}/api/piramid/products?group=${groupCode}&subgroup=${subgroupCode}`);
+
+        if (!response.ok) {
+            console.error(`GETTING PRODUCTS BY GROUP AND SUBGROUP CODES ERROR! HTTP error: ${response.status} ${response.statusText}`);
+            return null;
+        }
+
+        const data = await response.json() as IProductsByCodesResponse;
+
+        if (data.groups.length === 0 || data.groups[0].subgroups.length === 0) {
+            return [];
+        }
+        return data.groups[0].subgroups[0].products ?? [];
+    } catch (error) {
+        console.error("An error occurred while fetching products by group and subgroup codes:", error);
+        return null;
+    }
+}
 
 
 

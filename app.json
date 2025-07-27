@@ -16,7 +16,6 @@
       "supportsTablet": true
     },
     "android": {
-      "targetSdkVersion": 35,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
@@ -38,7 +37,17 @@
       "url": "https://u.expo.dev/a01f0f60-40c3-4c3d-8f59-5ccf306d9d73"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "targetSdkVersion": 35,
+            "compileSdkVersion": 35,
+            "minSdkVersion": 24
+          }
+        }
+      ]
     ],
     "owner": "den4ik-dev"
   }
