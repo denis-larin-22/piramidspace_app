@@ -7,7 +7,12 @@ import { Colors } from "../../../theme/colors";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import Loader from "../../ui/Loader";
 
-function ThirdStep({ orderObject }: { orderObject: INewOrderObject }) {
+interface IErrorStateMessage {
+    state: boolean,
+    text: string
+}
+
+function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: INewOrderObject, setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>>, stepHandler: () => void }) {
     // Product choice
     const [products, setProducts] = useState<IProductByCodes[] | null>(null);
     const [isProductsListOpen, setIsProductsListOpen] = useState(false);
@@ -25,11 +30,16 @@ function ThirdStep({ orderObject }: { orderObject: INewOrderObject }) {
 
     // Fixation choise
     const [fixationTypeList, setFixationTypeList] = useState<IFixationType[]>([]);
-    const [activeFixationType, setActiveFixationType] = useState(typeManagmentList[0]);
+    const [activeFixationType, setActiveFixationType] = useState<IFixationType | null>(null);
     const [isFixationTypeListOpen, setIsFixationTypeListOpen] = useState(false);
 
     // Error state
-    const [isError, setIsError] = useState(false);
+    const initErrorObject = {
+        state: false,
+        text: ''
+    }
+
+    const [isError, setIsError] = useState<IErrorStateMessage>(initErrorObject);
 
     const {
         group: { code: groupCode, name: groupName },
@@ -80,25 +90,11 @@ function ThirdStep({ orderObject }: { orderObject: INewOrderObject }) {
         setIsFixationTypeListOpen((prev) => !prev);
     }
 
-    // Helper functions for styles and labels
-    function getProductLabel(product: IProductByCodes) {
-        if (product.sale_tk) return "🏷️ " + product.name;
-        if (product.presence === "нет") return "🚫 " + product.name;
-        return product.name;
-    }
+    // Final form order
+    function foldOrder() {
+        // Вставить проверку на null с условиями!!!
 
-    function getProductBackgroundColor(
-        product: IProductByCodes,
-        activeProduct: IProductByCodes | null
-    ) {
-        if (activeProduct?.name === product.name) return Colors.pale;
-        if (product.sale_tk) return Colors.blue;
-        if (product.presence === "нет") return "#D1D1D6";
-        return "white";
-    }
-
-    function getProductOpacity(product: IProductByCodes) {
-        return product.presence === "нет" ? 0.6 : 1;
+        stepHandler();
     }
 
     return (
@@ -112,7 +108,7 @@ function ThirdStep({ orderObject }: { orderObject: INewOrderObject }) {
             </AnimatedWrapper>
 
             {/* Error message */}
-            {isError && <AbsentProductMessage />}
+            {isError.state && <ErrorMessage errorText={isError.text} />}
 
             {/* Product selection */}
             <AnimatedWrapper useOpacity offsetY={20} delay={200}>
@@ -150,11 +146,15 @@ function ThirdStep({ orderObject }: { orderObject: INewOrderObject }) {
                                             ]}
                                             onPress={() => {
                                                 if (product.presence === "нет") {
-                                                    setIsError(true);
-                                                    setTimeout(() => setIsError(false), 3000);
+                                                    setIsError({
+                                                        state: true,
+                                                        text: "⚠️ Цїєї тканини немає в наявності!"
+                                                    });
+                                                    setTimeout(() => setIsError(initErrorObject), 3000);
                                                 } else {
-                                                    setIsError(false);
+                                                    setIsError(initErrorObject);
                                                     setActiveProduct(product);
+                                                    setOrderObject({ ...orderObject, product: product });
                                                     setFixationTypeList(product.fixation);
                                                     setIsProductsListOpen(false);
                                                 }
@@ -183,43 +183,10 @@ function ThirdStep({ orderObject }: { orderObject: INewOrderObject }) {
                     }}
                 >
                     {/* Размеры: Ширина и Высота */}
-                    <View style={styles.row}>
-                        <View style={styles.inputContainer}>
-                            <View style={styles.rowLabel}>
-                                <Text style={styles.detailsText}>Ширина </Text>
-                                <Text style={styles.labelNote}>(габарит)</Text>
-                            </View>
-                            <TextInput keyboardType="number-pad" style={styles.input} value="0" />
-                            <Text style={styles.unitLabel}>см</Text>
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <View style={styles.rowLabel}>
-                                <Text style={styles.detailsText}>Ширина </Text>
-                                <Text style={styles.labelNoteSmall}>(по штапику)</Text>
-                            </View>
-                            <TextInput keyboardType="number-pad" style={styles.input} value="0" />
-                            <Text style={styles.unitLabel}>см</Text>
-                        </View>
-                    </View>
-
-                    <View style={styles.row}>
-                        <View style={styles.inputContainer}>
-                            <View style={styles.rowLabel}>
-                                <Text style={styles.detailsText}>Висота </Text>
-                                <Text style={styles.labelNote}>(габарит)</Text>
-                            </View>
-                            <TextInput keyboardType="number-pad" style={styles.input} value="0" />
-                            <Text style={styles.unitLabel}>см</Text>
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <View style={styles.rowLabel}>
-                                <Text style={styles.detailsText}>Ширина </Text>
-                                <Text style={styles.labelNoteSmall}>(по штапику)</Text>
-                            </View>
-                            <TextInput keyboardType="number-pad" style={styles.input} value="0" />
-                            <Text style={styles.unitLabel}>см</Text>
-                        </View>
-                    </View>
+                    <WidthAndHeight
+                        orderObject={orderObject}
+                        setOrderObject={setOrderObject}
+                    />
 
                     {/* Управление и Количество */}
                     <View style={styles.row}>
@@ -243,6 +210,7 @@ function ThirdStep({ orderObject }: { orderObject: INewOrderObject }) {
                                                     ]}
                                                     onPress={() => {
                                                         setActiveTypeManagment(type);
+                                                        setOrderObject({ ...orderObject, typeManagment: type });
                                                         setIsTypeManagmentListOpen(false);
                                                     }}
                                                 >
@@ -257,11 +225,10 @@ function ThirdStep({ orderObject }: { orderObject: INewOrderObject }) {
                             )}
                         </View>
 
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.detailsText}>Кількість</Text>
-                            <TextInput keyboardType="number-pad" style={styles.input} value="0" />
-                            <Text style={styles.unitLabel}>шт</Text>
-                        </View>
+                        <CountValue
+                            orderObject={orderObject}
+                            setOrderObject={setOrderObject}
+                        />
                     </View>
 
                     {/* Цвет системы */}
@@ -286,6 +253,7 @@ function ThirdStep({ orderObject }: { orderObject: INewOrderObject }) {
                                                 ]}
                                                 onPress={() => {
                                                     setActiveColor(color);
+                                                    setOrderObject({ ...orderObject, color_system: color });
                                                     setIsColorListOpen(false);
                                                 }}
                                             >
@@ -305,7 +273,7 @@ function ThirdStep({ orderObject }: { orderObject: INewOrderObject }) {
                         <Text style={styles.detailsText}>Фіксація</Text>
 
                         <Pressable onPress={toggleFixationTypeList}>
-                            <Text style={styles.selectField}>{activeFixationType || "Оберіть тип"}</Text>
+                            <Text style={styles.selectField}>{activeFixationType === null ? "Оберіть тип" : activeFixationType.name}</Text>
                         </Pressable>
                         <ArrowDown style={styles.arrowIcon} />
 
@@ -318,10 +286,11 @@ function ThirdStep({ orderObject }: { orderObject: INewOrderObject }) {
                                                 key={index}
                                                 style={[
                                                     styles.productItem,
-                                                    activeFixationType === fixationType.name && { backgroundColor: Colors.pale },
+                                                    (activeFixationType !== null && activeFixationType.name === fixationType.name) && { backgroundColor: Colors.pale },
                                                 ]}
                                                 onPress={() => {
-                                                    setActiveFixationType(fixationType.name);
+                                                    setActiveFixationType(fixationType);
+                                                    setOrderObject({ ...orderObject, fixation_type: fixationType });
                                                     setIsFixationTypeListOpen(false);
                                                 }}
                                             >
@@ -340,11 +309,11 @@ function ThirdStep({ orderObject }: { orderObject: INewOrderObject }) {
                     <View style={styles.row}>
                         <View style={styles.inputContainer}>
                             <Text style={styles.detailsText}>Ціна</Text>
-                            <TextInput style={styles.input} value="67.67" />
+                            <Text style={styles.input} >0</Text>
                         </View>
                         <View style={styles.inputContainer}>
                             <Text style={styles.detailsText}>Разом</Text>
-                            <TextInput style={styles.input} value="67.67" />
+                            <Text style={styles.input} >0</Text>
                         </View>
                     </View>
                 </View>
@@ -355,7 +324,7 @@ function ThirdStep({ orderObject }: { orderObject: INewOrderObject }) {
                 style={styles.submitButton}
                 offsetY={-20}
             >
-                <Pressable>
+                <Pressable onPress={foldOrder}>
                     <ImageBackground
                         source={require("../../../assets/gradient-small.png")}
                         style={styles.submitButtonBg}
@@ -368,6 +337,110 @@ function ThirdStep({ orderObject }: { orderObject: INewOrderObject }) {
     );
 }
 
+function WidthAndHeight({ orderObject, setOrderObject }: { orderObject: INewOrderObject, setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>> }) {
+    return (
+        <>
+            <View style={styles.row}>
+                <View style={styles.inputContainer}>
+                    <View style={styles.rowLabel}>
+                        <Text style={styles.detailsText}>Ширина </Text>
+                        <Text style={styles.labelNote}>(габарит)</Text>
+                    </View>
+                    <TextInput
+                        keyboardType="number-pad"
+                        style={styles.input}
+                        placeholder="0"
+                        onChangeText={(value) => {
+                            setOrderObject({
+                                ...orderObject,
+                                width_gab: value
+                            })
+                        }}
+                    />
+                    <Text style={styles.unitLabel}>см</Text>
+                </View>
+                <View style={styles.inputContainer}>
+                    <View style={styles.rowLabel}>
+                        <Text style={styles.detailsText}>Ширина </Text>
+                        <Text style={styles.labelNoteSmall}>(по штапику)</Text>
+                    </View>
+                    <TextInput
+                        keyboardType="number-pad"
+                        style={styles.input}
+                        placeholder="0"
+                        onChangeText={(value) => {
+                            setOrderObject({
+                                ...orderObject,
+                                width: value
+                            })
+                        }}
+                    />
+                    <Text style={styles.unitLabel}>см</Text>
+                </View>
+            </View>
+
+            <View style={styles.row}>
+                <View style={styles.inputContainer}>
+                    <View style={styles.rowLabel}>
+                        <Text style={styles.detailsText}>Висота </Text>
+                        <Text style={styles.labelNote}>(габарит)</Text>
+                    </View>
+                    <TextInput
+                        keyboardType="number-pad"
+                        style={styles.input}
+                        placeholder="0"
+                        onChangeText={(value) => {
+                            setOrderObject({
+                                ...orderObject,
+                                height_gab: value
+                            })
+                        }}
+                    />
+                    <Text style={styles.unitLabel}>см</Text>
+                </View>
+                <View style={styles.inputContainer}>
+                    <View style={styles.rowLabel}>
+                        <Text style={styles.detailsText}>Висота </Text>
+                        <Text style={styles.labelNoteSmall}>(по штапику)</Text>
+                    </View>
+                    <TextInput
+                        keyboardType="number-pad"
+                        style={styles.input}
+                        placeholder="0"
+                        onChangeText={(value) => {
+                            setOrderObject({
+                                ...orderObject,
+                                height: value
+                            })
+                        }}
+                    />
+                    <Text style={styles.unitLabel}>см</Text>
+                </View>
+            </View>
+        </>
+    )
+}
+
+function CountValue({ orderObject, setOrderObject }: { orderObject: INewOrderObject, setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>> }) {
+    return (
+        <View style={styles.inputContainer}>
+            <Text style={styles.detailsText}>Кількість</Text>
+            <TextInput
+                keyboardType="number-pad"
+                style={styles.input}
+                placeholder="0"
+                onChangeText={(value) => {
+                    setOrderObject({
+                        ...orderObject,
+                        count_number: value
+                    })
+                }}
+            />
+            <Text style={styles.unitLabel}>шт</Text>
+        </View>
+    )
+}
+
 function ArrowDown({ style }: { style?: ImageStyle }) {
     return (
         <Image
@@ -377,12 +450,34 @@ function ArrowDown({ style }: { style?: ImageStyle }) {
     );
 }
 
-function AbsentProductMessage() {
+function ErrorMessage({ errorText }: { errorText: string }) {
     return (
         <AnimatedWrapper style={styles.absentMessage} useOpacity offsetY={-20}>
-            <Text style={styles.absentMessageText}>⚠️ Цїєї тканини немає в наявності!</Text>
+            <Text style={styles.absentMessageText}>{errorText}</Text>
         </AnimatedWrapper>
     );
+}
+
+// utils
+// Helper functions for styles and labels
+function getProductLabel(product: IProductByCodes) {
+    if (product.sale_tk) return "🏷️ " + product.name;
+    if (product.presence === "нет") return "🚫 " + product.name;
+    return product.name;
+}
+
+function getProductBackgroundColor(
+    product: IProductByCodes,
+    activeProduct: IProductByCodes | null
+) {
+    if (activeProduct?.name === product.name) return Colors.pale;
+    if (product.sale_tk) return Colors.blue;
+    if (product.presence === "нет") return "#D1D1D6";
+    return "white";
+}
+
+function getProductOpacity(product: IProductByCodes) {
+    return product.presence === "нет" ? 0.6 : 1;
 }
 
 const styles = StyleSheet.create({

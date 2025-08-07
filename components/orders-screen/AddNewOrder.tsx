@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
-import { Image, ImageBackground, ImageStyle, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, ImageBackground, Modal, Pressable, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { useDollarRate } from "../../lib/hooks/useDollarRate";
 import { useNetworkStatus } from "../../lib/hooks/useNetworkStatus";
 import { useBalanceValue } from "../../lib/hooks/useBalanceValue";
-import { getGroupsStructure, getProductsByCodes, IProductByCodes, ISubgroup, MainGroupsCode } from "../../lib/api/orders";
-import Loader from "../ui/Loader";
+import { IFixationType, IProductByCodes, MainGroupsCode } from "../../lib/api/orders";
 import ThirdStep from "./new-order-steps/ThirdStep";
 import FirstStep from "./new-order-steps/FirstStep";
 import SecondStep from "./new-order-steps/SecondStep";
+import FinalStep from "./new-order-steps/FinalStep";
 
 export interface INewOrderObject {
     group: {
@@ -21,6 +21,17 @@ export interface INewOrderObject {
         name: string | null,
         code: string | null
     },
+    product: IProductByCodes | null,
+    width_gab: string | null, // габарит
+    height_gab: string | null, // габарит
+    width: string | null, // по штапику
+    height: string | null, // по штапику
+    typeManagment: string | null,
+    count_number: string | null, // кількість
+    color_system: string | null,
+    fixation_type: IFixationType | null,
+    price: number,
+    final_price: number
 }
 
 function AddNewOrder() {
@@ -32,7 +43,18 @@ function AddNewOrder() {
     //
     const initNewOrderObject: INewOrderObject = {
         group: { code: null, name: null },
-        subgroup: { code: null, name: null }
+        subgroup: { code: null, name: null },
+        product: null,
+        width_gab: null,
+        height_gab: null,
+        width: null,
+        height: null,
+        typeManagment: null,
+        count_number: null,
+        color_system: null,
+        fixation_type: null,
+        price: 0,
+        final_price: 0
     };
 
     const [activeStep, setActiveStep] = useState<number>(1);
@@ -65,8 +87,22 @@ function AddNewOrder() {
         setActiveStep(3);
     }
 
+    const thirdStepHandler = () => {
+        setActiveStep(4);
+    }
+
     const backButtonHandler = () => {
-        setActiveStep(activeStep - 1);
+        const { group } = newOrderObject;
+
+        if (group === null) {
+            setActiveStep(activeStep - 1);
+        } else {
+            setNewOrderObject({
+                ...initNewOrderObject,
+                group: group // saving chosen
+            });
+            setActiveStep(activeStep - 1);
+        }
     }
 
     const closeButtonHandler = () => {
@@ -112,7 +148,14 @@ function AddNewOrder() {
                                     stepHandler={secondStepHandler}
                                 />
                                 :
-                                <ThirdStep orderObject={newOrderObject} />
+                                activeStep === 3 ?
+                                    <ThirdStep
+                                        orderObject={newOrderObject}
+                                        setOrderObject={setNewOrderObject}
+                                        stepHandler={thirdStepHandler}
+                                    />
+                                    :
+                                    <FinalStep orderObject={newOrderObject} />
                         }
                         {(activeStep !== 1) && <BackButton backHandler={backButtonHandler} />}
                         <CloseButton closeHandler={closeButtonHandler} />
