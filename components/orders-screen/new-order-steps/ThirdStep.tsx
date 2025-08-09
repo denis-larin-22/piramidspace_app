@@ -9,34 +9,38 @@ import Loader from "../../ui/Loader";
 
 interface IErrorStateMessage {
     state: boolean,
-    text: string
+    text: string,
+    errorFieldNumber: 2 | 3 | 4 | 5 | 6 | null
 }
 
 function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: INewOrderObject, setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>>, stepHandler: () => void }) {
+    const { product, height, width, height_gab, width_gab, typeManagment, count_number, color_system, fixation_type } = orderObject;
+
     // Product choice
     const [products, setProducts] = useState<IProductByCodes[] | null>(null);
     const [isProductsListOpen, setIsProductsListOpen] = useState(false);
-    const [activeProduct, setActiveProduct] = useState<IProductByCodes | null>(null);
+    const [activeProduct, setActiveProduct] = useState<IProductByCodes | null>(product);
 
     // Color choice
-    const [colorsList, setColorsList] = useState([""]);
-    const [activeColor, setActiveColor] = useState(colorsList[0]);
+    const [colorsList, setColorsList] = useState<string[]>([]);
+    const [activeColor, setActiveColor] = useState(color_system);
     const [isColorListOpen, setIsColorListOpen] = useState(false);
 
     // Type management
-    const [typeManagmentList, setTypeManagmentList] = useState([""]);
-    const [activeTypeManagment, setActiveTypeManagment] = useState(typeManagmentList[0]);
+    const [typeManagmentList, setTypeManagmentList] = useState<string[]>([]);
+    const [activeTypeManagment, setActiveTypeManagment] = useState(typeManagment);
     const [isTypeManagmentListOpen, setIsTypeManagmentListOpen] = useState(false);
 
     // Fixation choise
     const [fixationTypeList, setFixationTypeList] = useState<IFixationType[]>([]);
-    const [activeFixationType, setActiveFixationType] = useState<IFixationType | null>(null);
+    const [activeFixationType, setActiveFixationType] = useState<IFixationType | null>(fixation_type);
     const [isFixationTypeListOpen, setIsFixationTypeListOpen] = useState(false);
 
     // Error state
-    const initErrorObject = {
+    const initErrorObject: IErrorStateMessage = {
         state: false,
-        text: ''
+        text: '',
+        errorFieldNumber: null
     }
 
     const [isError, setIsError] = useState<IErrorStateMessage>(initErrorObject);
@@ -90,11 +94,45 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
         setIsFixationTypeListOpen((prev) => !prev);
     }
 
-    // Final form order
+    // Final form order CHECK befor sending
     function foldOrder() {
-        // Вставить проверку на null с условиями!!!
+        if (!height || !width || !height_gab || !width_gab) {
+            setIsError({
+                state: true,
+                text: "⚠️ Введіть усі значення ширини та висоти",
+                errorFieldNumber: 2
+            });
+        } else if (typeManagmentList.length !== 0 && typeManagment === null) {
+            setIsError({
+                state: true,
+                text: "⚠️ Оберіть тип керування",
+                errorFieldNumber: 3
+            });
+        } else if (!count_number) {
+            setIsError({
+                state: true,
+                text: "⚠️ Вкажіть кількість",
+                errorFieldNumber: 4
+            });
+        } else if (colorsList.length !== 0 && color_system === null) {
+            setIsError({
+                state: true,
+                text: "⚠️ Оберіть колір системи",
+                errorFieldNumber: 5
+            });
+        } else if (fixationTypeList.length !== 0 && fixation_type === null) {
+            setIsError({
+                state: true,
+                text: "⚠️ Оберіть тип фіксації",
+                errorFieldNumber: 6
+            });
+        } else {
+            stepHandler();
+        }
 
-        stepHandler();
+        setTimeout(() => {
+            setIsError(initErrorObject);
+        }, 3000);
     }
 
     return (
@@ -148,12 +186,15 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                                                 if (product.presence === "нет") {
                                                     setIsError({
                                                         state: true,
-                                                        text: "⚠️ Цїєї тканини немає в наявності!"
+                                                        text: "⚠️ Цїєї тканини немає в наявності!",
+                                                        errorFieldNumber: null
                                                     });
                                                     setTimeout(() => setIsError(initErrorObject), 3000);
                                                 } else {
+                                                    const pressebleProduct = product.name === activeProduct?.name ? null : product;
+
                                                     setIsError(initErrorObject);
-                                                    setActiveProduct(product);
+                                                    setActiveProduct(pressebleProduct);
                                                     setOrderObject({ ...orderObject, product: product });
                                                     setFixationTypeList(product.fixation);
                                                     setIsProductsListOpen(false);
@@ -186,6 +227,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                     <WidthAndHeight
                         orderObject={orderObject}
                         setOrderObject={setOrderObject}
+                        errorFieldNumber={isError.errorFieldNumber}
                     />
 
                     {/* Управление и Количество */}
@@ -193,7 +235,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                         <View style={styles.inputContainer}>
                             <Text style={styles.detailsText}>Керування</Text>
                             <Pressable onPress={toggleTypeManagmentList}>
-                                <Text style={styles.selectField}>{activeTypeManagment || "Оберіть тип"}</Text>
+                                <Text style={[styles.selectField, isError.errorFieldNumber === 3 && styles.borderRed]}>{activeTypeManagment || "Оберіть тип"}</Text>
                             </Pressable>
                             <ArrowDown style={styles.arrowIcon} />
 
@@ -228,6 +270,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                         <CountValue
                             orderObject={orderObject}
                             setOrderObject={setOrderObject}
+                            errorFieldNumber={isError.errorFieldNumber}
                         />
                     </View>
 
@@ -236,7 +279,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                         <Text style={styles.detailsText}>Колір системи</Text>
 
                         <Pressable onPress={toggleColorList}>
-                            <Text style={styles.selectField}>{activeColor || "Оберіть колір"}</Text>
+                            <Text style={[styles.selectField, isError.errorFieldNumber === 5 && styles.borderRed]}>{activeColor || "Оберіть колір"}</Text>
                         </Pressable>
                         <ArrowDown style={styles.arrowIcon} />
 
@@ -273,7 +316,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                         <Text style={styles.detailsText}>Фіксація</Text>
 
                         <Pressable onPress={toggleFixationTypeList}>
-                            <Text style={styles.selectField}>{activeFixationType === null ? "Оберіть тип" : activeFixationType.name}</Text>
+                            <Text style={[styles.selectField, isError.errorFieldNumber === 6 && styles.borderRed]}>{activeFixationType === null ? "Оберіть тип" : activeFixationType.name}</Text>
                         </Pressable>
                         <ArrowDown style={styles.arrowIcon} />
 
@@ -320,7 +363,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
             </AnimatedWrapper>
 
             {/* Кнопка отправки */}
-            <AnimatedWrapper
+            {activeProduct && <AnimatedWrapper
                 style={styles.submitButton}
                 offsetY={-20}
             >
@@ -333,11 +376,12 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                     </ImageBackground>
                 </Pressable>
             </AnimatedWrapper>
+            }
         </>
     );
 }
 
-function WidthAndHeight({ orderObject, setOrderObject }: { orderObject: INewOrderObject, setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>> }) {
+function WidthAndHeight({ orderObject, setOrderObject, errorFieldNumber }: { orderObject: INewOrderObject, setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>>, errorFieldNumber: number | null }) {
     return (
         <>
             <View style={styles.row}>
@@ -348,8 +392,9 @@ function WidthAndHeight({ orderObject, setOrderObject }: { orderObject: INewOrde
                     </View>
                     <TextInput
                         keyboardType="number-pad"
-                        style={styles.input}
+                        style={[styles.input, errorFieldNumber === 2 && styles.borderRed]}
                         placeholder="0"
+                        value={orderObject.width_gab || ""}
                         onChangeText={(value) => {
                             setOrderObject({
                                 ...orderObject,
@@ -366,8 +411,9 @@ function WidthAndHeight({ orderObject, setOrderObject }: { orderObject: INewOrde
                     </View>
                     <TextInput
                         keyboardType="number-pad"
-                        style={styles.input}
+                        style={[styles.input, errorFieldNumber === 2 && styles.borderRed]}
                         placeholder="0"
+                        value={orderObject.width || ""}
                         onChangeText={(value) => {
                             setOrderObject({
                                 ...orderObject,
@@ -387,8 +433,9 @@ function WidthAndHeight({ orderObject, setOrderObject }: { orderObject: INewOrde
                     </View>
                     <TextInput
                         keyboardType="number-pad"
-                        style={styles.input}
+                        style={[styles.input, errorFieldNumber === 2 && styles.borderRed]}
                         placeholder="0"
+                        value={orderObject.height_gab || ""}
                         onChangeText={(value) => {
                             setOrderObject({
                                 ...orderObject,
@@ -405,8 +452,9 @@ function WidthAndHeight({ orderObject, setOrderObject }: { orderObject: INewOrde
                     </View>
                     <TextInput
                         keyboardType="number-pad"
-                        style={styles.input}
+                        style={[styles.input, errorFieldNumber === 2 && styles.borderRed]}
                         placeholder="0"
+                        value={orderObject.height || ""}
                         onChangeText={(value) => {
                             setOrderObject({
                                 ...orderObject,
@@ -421,14 +469,15 @@ function WidthAndHeight({ orderObject, setOrderObject }: { orderObject: INewOrde
     )
 }
 
-function CountValue({ orderObject, setOrderObject }: { orderObject: INewOrderObject, setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>> }) {
+function CountValue({ orderObject, setOrderObject, errorFieldNumber }: { orderObject: INewOrderObject, setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>>, errorFieldNumber: number | null }) {
     return (
         <View style={styles.inputContainer}>
             <Text style={styles.detailsText}>Кількість</Text>
             <TextInput
                 keyboardType="number-pad"
-                style={styles.input}
+                style={[styles.input, errorFieldNumber === 4 && styles.borderRed]}
                 placeholder="0"
+                value={orderObject.count_number || ""}
                 onChangeText={(value) => {
                     setOrderObject({
                         ...orderObject,
@@ -452,8 +501,8 @@ function ArrowDown({ style }: { style?: ImageStyle }) {
 
 function ErrorMessage({ errorText }: { errorText: string }) {
     return (
-        <AnimatedWrapper style={styles.absentMessage} useOpacity offsetY={-20}>
-            <Text style={styles.absentMessageText}>{errorText}</Text>
+        <AnimatedWrapper style={styles.errorMessage} useOpacity offsetY={20}>
+            <Text style={styles.errorMessageText}>{errorText}</Text>
         </AnimatedWrapper>
     );
 }
@@ -511,6 +560,8 @@ const styles = StyleSheet.create({
         paddingVertical: 9,
         paddingHorizontal: 13,
         borderRadius: 31,
+        borderWidth: 1,
+        borderColor: "transparent"
     },
     selectFieldInactive: {
         opacity: 0.5,
@@ -561,9 +612,9 @@ const styles = StyleSheet.create({
     productItemTextWhite: {
         color: "white",
     },
-    absentMessage: {
+    errorMessage: {
         position: "absolute",
-        top: -20,
+        top: 20,
         alignSelf: "center",
         backgroundColor: Colors.pale,
         paddingVertical: 10,
@@ -578,10 +629,11 @@ const styles = StyleSheet.create({
         // Android shadow
         elevation: 5,
     },
-    absentMessageText: {
-        fontFamily: Fonts.comfortaa400,
-        fontSize: 14,
-        lineHeight: 16,
+    errorMessageText: {
+        fontFamily: Fonts.comfortaa700,
+        fontSize: 16,
+        lineHeight: 18,
+        textAlign: 'center',
     },
     row: {
         flexDirection: "row",
@@ -615,6 +667,11 @@ const styles = StyleSheet.create({
         paddingVertical: 9,
         paddingHorizontal: 13,
         borderRadius: 31,
+        borderWidth: 1,
+        borderColor: 'transparent'
+    },
+    borderRed: {
+        borderColor: Colors.red,
     },
     unitLabel: {
         fontFamily: Fonts.openSans400,

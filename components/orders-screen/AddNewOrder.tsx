@@ -94,15 +94,34 @@ function AddNewOrder() {
     const backButtonHandler = () => {
         const { group } = newOrderObject;
 
-        if (group === null) {
+        if (activeStep === 2) {
             setActiveStep(activeStep - 1);
-        } else {
+        } else if (activeStep === 3) {
             setNewOrderObject({
                 ...initNewOrderObject,
                 group: group // saving chosen
             });
             setActiveStep(activeStep - 1);
+        } else if (activeStep === 4) {
+            // setNewOrderObject({
+            //     ...initNewOrderObject,
+            //     group: group // saving chosen
+            // });
+            setActiveStep(activeStep - 1);
+        } else {
+            setActiveStep(activeStep - 1);
+
         }
+
+        // if (group === null) {
+        //     setActiveStep(activeStep - 1);
+        // } else {
+        //     setNewOrderObject({
+        //         ...initNewOrderObject,
+        //         group: group // saving chosen
+        //     });
+        //     setActiveStep(activeStep - 1);
+        // }
     }
 
     const closeButtonHandler = () => {
