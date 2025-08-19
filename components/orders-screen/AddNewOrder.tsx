@@ -94,35 +94,15 @@ function AddNewOrder() {
     const backButtonHandler = () => {
         const { group } = newOrderObject;
 
-        if (activeStep === 2) {
-            setActiveStep(activeStep - 1);
-        } else if (activeStep === 3) {
+        if (activeStep === 3) {
             setNewOrderObject({
                 ...initNewOrderObject,
-                group: group // saving chosen
+                group,
             });
-            setActiveStep(activeStep - 1);
-        } else if (activeStep === 4) {
-            // setNewOrderObject({
-            //     ...initNewOrderObject,
-            //     group: group // saving chosen
-            // });
-            setActiveStep(activeStep - 1);
-        } else {
-            setActiveStep(activeStep - 1);
-
         }
 
-        // if (group === null) {
-        //     setActiveStep(activeStep - 1);
-        // } else {
-        //     setNewOrderObject({
-        //         ...initNewOrderObject,
-        //         group: group // saving chosen
-        //     });
-        //     setActiveStep(activeStep - 1);
-        // }
-    }
+        setActiveStep(prev => prev - 1);
+    };
 
     const closeButtonHandler = () => {
         setNewOrderObject(initNewOrderObject);

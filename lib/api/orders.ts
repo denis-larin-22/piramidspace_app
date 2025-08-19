@@ -43,25 +43,75 @@ export interface IOrder {
     "блок": string | null;
     sale_diler: number;
     seller: ISeller;
+    bot_status: string | null;
 };
 
-export async function fetchOrders(dealerLogin: string): Promise<IOrder[] | []> {
+export interface IOrderList {
+    current_page: number,
+    data: IOrder[],
+    last_page: number,
+}
+
+export async function fetchOrdersList(dealerLogin: string, page: number, ordersPerPage: number): Promise<IOrderList | null> {
     const encodedLogin = encodeURIComponent(dealerLogin);
-    const url = `${BASE_URL}/api/cms/getOrders?dealer_login=${encodedLogin}`;
+    const url = `${BASE_URL}/api/cms/getOrders?dealer_login=${encodedLogin}&page=${page}&per_page=${ordersPerPage}`;
 
     try {
         const response = await fetch(url);
 
         if (!response.ok) {
-            console.error(`ORDERS ERROR! HTTP error: ${response.status} ${response.statusText}`);
-            return [];
+            console.error(`ORDERS LIST ERROR! HTTP error: ${response.status} ${response.statusText}`);
+            return null;
         }
 
         const data = await response.json();
-        return data as IOrder[];
+
+        return data as IOrderList;
     } catch (error) {
-        console.error("An error occurred while fetching orders:", error);
-        return [];
+        console.error("An error occurred while fetching orders list:", error);
+        return null;
+    }
+};
+
+export async function fetchOrderById(dealerLogin: string, orderId: string, ordersPerPage: number): Promise<IOrderList | null> {
+    const encodedLogin = encodeURIComponent(dealerLogin);
+    const url = `${BASE_URL}/api/cms/getOrders?order_id=${orderId}&dealer_login=${encodedLogin}&page=1&per_page=${ordersPerPage}`;
+
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            console.error(`FETCHING ORDER BY ID ERROR! HTTP error: ${response.status} ${response.statusText}`);
+            return null;
+        }
+
+        const data = await response.json();
+
+        return data as IOrderList;
+    } catch (error) {
+        console.error("An error occurred while fetching order by id:", error);
+        return null;
+    }
+};
+
+export async function fetchOrderByStatus(dealerLogin: string, status: string, page: number, ordersPerPage: number): Promise<IOrderList | null> {
+    const encodedLogin = encodeURIComponent(dealerLogin);
+    const encodedStatus = encodeURIComponent(status);
+    const url = `${BASE_URL}/api/cms/getOrders?dealer_login=${encodedLogin}&status=${encodedStatus}&page=${page}&per_page=${ordersPerPage}`;
+
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            console.error(`FETCHING ORDER BY STATUS ERROR! HTTP error: ${response.status} ${response.statusText}`);
+            return null;
+        }
+
+        const data = await response.json();
+        return data as IOrderList;
+    } catch (error) {
+        console.error("An error occurred while fetching order by status:", error);
+        return null;
     }
 };
 

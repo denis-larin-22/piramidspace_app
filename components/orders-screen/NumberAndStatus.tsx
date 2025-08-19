@@ -1,6 +1,7 @@
 import {
     FlatList,
     Image,
+    Keyboard,
     Modal,
     Pressable,
     StyleSheet,
@@ -16,16 +17,31 @@ import { useState } from "react";
 
 function NumberAndStatus({
     statusColorsObjects,
-    getOrderByNumberHandler,
-    getOrdersByStatusHandler,
+    idValue,
+    idValueHandler,
+    statusValue,
+    statusHandler
 }: {
     statusColorsObjects: Array<IStatusColors>;
-    getOrderByNumberHandler: (numberValue: string) => void;
-    getOrdersByStatusHandler: (status: string | null) => void;
+    idValue: string,
+    idValueHandler: (numberValue: string) => void;
+    statusValue: string,
+    statusHandler: (statusValue: string) => void;
 }) {
-    const [numberInputValue, setNumberInputValue] = useState<string>('');
+    const [idValueInput, setidValueInput] = useState<string>(idValue || "");
     const [isStatusModalOpen, setIsStatusModalOpen] = useState<boolean>(false);
-    const [activeStatus, setActiveStatus] = useState<string | null>(null);
+    const [activeStatus, setActiveStatus] = useState<string>(statusValue || "");
+
+
+    function resetId() {
+        setidValueInput("");
+        idValueHandler("");
+    }
+
+    function resetStatus() {
+        setActiveStatus("");
+        statusHandler("");
+    }
 
     return (
         <View style={styles.wrapper}>
@@ -36,13 +52,19 @@ function NumberAndStatus({
                     inputMode="numeric"
                     keyboardType="number-pad"
                     maxLength={6}
-                    value={numberInputValue}
+                    value={idValueInput}
                     onChange={(e) => {
-                        setActiveStatus(null); // reset filters by status
+                        // setActiveStatus(""); // reset filters by status
+                        setidValueInput(e.nativeEvent.text);
 
-                        const numberValue = e.nativeEvent.text;
-                        setNumberInputValue(numberValue);
-                        getOrderByNumberHandler(numberValue);
+                        if (e.nativeEvent.text.length === 6) {
+                            Keyboard.dismiss();
+                            resetStatus();
+                            idValueHandler(e.nativeEvent.text); // триггерим новый запрос
+                        }
+                        if (e.nativeEvent.text.length === 0) {
+                            idValueHandler("");
+                        }
                     }}
                 />
             </AnimatedWrapper>
@@ -61,7 +83,7 @@ function NumberAndStatus({
                     <Text style={styles.statusText}>{isStatusModalOpen ? 'Оберіть статус' : 'Статус:'}</Text>
                     {!isStatusModalOpen && <AnimatedWrapper useOpacity duration={400} offsetY={10}>
 
-                        {activeStatus === null ?
+                        {activeStatus.length === 0 ?
                             <FlatList
                                 data={statusColorsObjects}
                                 renderItem={({ item }) => <Item color={item.color} />}
@@ -109,23 +131,18 @@ function NumberAndStatus({
                                                 item.status === activeStatus && styles.activeModalItem,
                                             ]}
                                             onPress={() => {
-                                                if (item.status === activeStatus) {
-                                                    getOrderByNumberHandler('') // reset filter handler bu Number
-                                                    setNumberInputValue(''); // reset number input value
-
-                                                    setActiveStatus(null);
-                                                    getOrdersByStatusHandler(null);
+                                                if (activeStatus === item.status) {
+                                                    resetId();
+                                                    statusHandler(""); // reset to full order list
+                                                    setActiveStatus("");
                                                 } else {
-                                                    getOrderByNumberHandler('') // reset filter handler bu Number
-                                                    setNumberInputValue(''); // reset number input value
-
+                                                    resetId();
+                                                    statusHandler(item.origin);
                                                     setActiveStatus(item.status);
-                                                    const originalStatus = getOriginalStatus(item.status);
-                                                    getOrdersByStatusHandler(originalStatus);
                                                 }
                                             }}
                                         >
-                                            <Item color={item.color} />
+                                            <View style={[{ backgroundColor: item.color }, styles.modalItemColor]}></View>
                                             <Text
                                                 style={[
                                                     styles.modalItemText,
@@ -228,41 +245,47 @@ const styles = StyleSheet.create({
         position: "relative",
         height: "100%",
         width: "100%",
-        backgroundColor: "#00000050",
+        backgroundColor: "#00000060",
     },
     modalInner: {
-        paddingTop: 50,
+        paddingBottom: 70,
         maxWidth: 280,
         maxHeight: 450,
         padding: 20,
         borderRadius: 20,
         position: 'absolute',
-        right: 0,
-        top: '14%',
+        right: 5,
+        top: '20%',
+        backgroundColor: Colors.grayLight
     },
     modalCloseButton: {
-        width: 30,
-        height: 30,
+        width: 50,
+        height: 50,
         position: "absolute",
-        top: 10,
-        right: 10,
+        bottom: 10,
+        right: 20,
         zIndex: 52,
         backgroundColor: Colors.pale,
-        borderRadius: 50
+        borderRadius: 50,
+        borderWidth: 1,
+        borderColor: Colors.grayLight
     },
     modalCloseIcon: {
         width: 30,
         height: 30,
+        top: 9,
+        left: 9
     },
     modalItem: {
         flexDirection: "row",
         alignItems: "center",
         gap: 10,
-        marginBottom: 8,
+        marginBottom: 7,
         paddingHorizontal: 8,
         paddingVertical: 7,
         borderRadius: 20,
         backgroundColor: Colors.pale,
+        overflow: 'hidden'
     },
     activeModalItem: {
         backgroundColor: Colors.blue,
@@ -272,6 +295,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         lineHeight: 12,
         color: "black",
+        marginLeft: -10
     },
     activeModalText: {
         color: "white",
@@ -279,5 +303,10 @@ const styles = StyleSheet.create({
     activeStatus: {
         color: Colors.gray,
         marginLeft: 10
+    },
+    modalItemColor: {
+        width: 30,
+        height: '230%',
+        left: -10
     }
 });

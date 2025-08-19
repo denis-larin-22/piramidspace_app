@@ -6,6 +6,7 @@ import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import Loader from "../../ui/Loader";
+import { Keyboard } from 'react-native';
 
 interface IErrorStateMessage {
     state: boolean,
@@ -70,24 +71,28 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
 
     // Dropdown togglers
     function toggleProductsList() {
+        Keyboard.dismiss();
         setIsTypeManagmentListOpen(false);
         setIsColorListOpen(false);
         setIsFixationTypeListOpen(false);
         setIsProductsListOpen((prev) => !prev);
     }
     function toggleTypeManagmentList() {
+        Keyboard.dismiss();
         setIsProductsListOpen(false);
         setIsColorListOpen(false);
         setIsFixationTypeListOpen(false);
         setIsTypeManagmentListOpen((prev) => !prev);
     }
     function toggleColorList() {
+        Keyboard.dismiss();
         setIsProductsListOpen(false);
         setIsTypeManagmentListOpen(false);
         setIsFixationTypeListOpen(false);
         setIsColorListOpen((prev) => !prev);
     }
     function toggleFixationTypeList() {
+        Keyboard.dismiss();
         setIsProductsListOpen(false);
         setIsTypeManagmentListOpen(false);
         setIsColorListOpen(false);

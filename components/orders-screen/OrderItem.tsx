@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { IOrder } from "../../lib/api/orders";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
@@ -166,8 +165,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
     },
     activeOrder: {
-        borderBottomWidth: 1,
-        borderColor: '#D9D9D9',
+        borderBottomWidth: 2,
+        borderColor: Colors.grayLight,
     },
     cell: {
         fontFamily: Fonts.comfortaa700,
@@ -200,22 +199,23 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     detailLabel: {
-        fontFamily: Fonts.openSans400,
+        fontFamily: Fonts.comfortaa400,
         fontSize: 12,
         color: Colors.gray,
     },
     detailValue: {
-        fontFamily: Fonts.openSans700,
+        fontFamily: Fonts.comfortaa600,
         fontSize: 12,
-        color: Colors.gray,
+        lineHeight: 20,
+        color: 'black',
         maxWidth: '60%',
     },
     rowPressed: {
-        backgroundColor: Colors.pale,
+        backgroundColor: Colors.grayLight,
     },
     bordeBottom: {
-        borderBottomWidth: 1,
-        borderColor: '#A2A2A830',
+        borderBottomWidth: 2,
+        borderColor: Colors.grayLight,
         paddingBottom: 5,
         marginBottom: 5
     }

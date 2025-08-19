@@ -1,40 +1,37 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, Pressable } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Fonts } from '../../theme/fonts';
 import AnimatedWrapper from '../animation/AnimatedWrapper';
 import { IOrder } from '../../lib/api/orders';
 import OrderItem from './OrderItem';
 import { Colors } from '../../theme/colors';
+import Loader from '../ui/Loader';
+import { styles } from '../ui/CustomModal';
 
-const ITEMS_PER_PAGE = 30;
 
-export default function TableOrders({ ordersList }: { ordersList: Array<IOrder> }) {
+export default function TableOrders({
+    isLoading,
+    ordersList,
+    activePage,
+    setActivePage,
+    totalPages,
+}: {
+    isLoading: boolean,
+    ordersList: Array<IOrder>,
+    activePage: number,
+    setActivePage: (page: number) => void,
+    totalPages: number | undefined,
+}) {
     const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
 
     const scrollRef = useRef<ScrollView>(null);
-    const [currentPage, setCurrentPage] = useState(1);
-
-    const totalPages = Math.ceil(ordersList.length / ITEMS_PER_PAGE);
-
-    const paginatedOrders = useMemo(() => {
-        if (ordersList.length < ITEMS_PER_PAGE) return ordersList;
-        const start = (currentPage - 1) * ITEMS_PER_PAGE;
-        const end = start + ITEMS_PER_PAGE;
-        return ordersList.slice(start, end);
-    }, [ordersList, currentPage]);
-
-    const handlePageChange = (newPage: number) => {
-        setCurrentPage(newPage);
-        scrollRef.current?.scrollTo({ y: 0, animated: true });
-    };
 
     return (
         <AnimatedWrapper
             style={tableStyles.ordersTable}
             useOpacity
             offsetX={50}
-            duration={300}
-            delay={300}
+            duration={150}
         >
             <ScrollView
                 style={tableStyles.scrollVertical}
@@ -50,88 +47,94 @@ export default function TableOrders({ ordersList }: { ordersList: Array<IOrder> 
                 </View>
 
                 {/* Rows */}
-                {paginatedOrders.map((order, index) => (
-                    <OrderItem
-                        key={order['N_заказа']}
-                        order={order}
-                        activeOrderId={activeOrderId}
-                        setActiveOrderId={setActiveOrderId}
-                    />
-                ))}
-            </ScrollView>
+                {isLoading ?
+                    <LoadingView />
+                    :
+                    ordersList.map((order) => (
+                        <OrderItem
+                            key={order['N_заказа']}
+                            order={order}
+                            activeOrderId={activeOrderId}
+                            setActiveOrderId={setActiveOrderId}
+                        />
+                    ))
+                }
+            </ScrollView >
 
             {/* Pagination */}
-            {ordersList.length > ITEMS_PER_PAGE && (
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
-                />
-            )}
-        </AnimatedWrapper>
+            < Pagination
+                currentPage={activePage}
+                totalPages={totalPages}
+                onPageChange={setActivePage}
+            />
+        </AnimatedWrapper >
     );
 }
 
+
 type PaginationProps = {
     currentPage: number;
-    totalPages: number;
+    totalPages?: number;
     onPageChange: (page: number) => void;
 };
 
 const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
-    const pages: (number | 'dots')[] = [];
+    if (!totalPages || totalPages <= 1) return null;
 
-    const windowSize = 5; // общее количество в центре (2 слева, 1 текущая, 2 справа)
-    const half = Math.floor(windowSize / 2);
+    const safeCurrentPage = Math.max(currentPage || 1, 1);
 
-    let start = Math.max(currentPage - half, 1);
-    let end = Math.min(currentPage + half, totalPages);
+    const getPages = (): (number | 'dots')[] => {
+        const windowSize = 5;
+        const half = Math.floor(windowSize / 2);
+        const pages: (number | 'dots')[] = [];
 
-    // Сдвигаем окно вправо, если не хватает слева
-    if (currentPage <= half) {
-        end = Math.min(windowSize, totalPages);
-    }
+        let start = Math.max(safeCurrentPage - half, 1);
+        let end = Math.min(safeCurrentPage + half, totalPages);
 
-    // Сдвигаем влево, если не хватает справа
-    if (currentPage + half > totalPages) {
-        start = Math.max(totalPages - windowSize + 1, 1);
-    }
+        if (safeCurrentPage <= half) end = Math.min(windowSize, totalPages);
+        if (safeCurrentPage + half > totalPages) start = Math.max(totalPages - windowSize + 1, 1);
 
-    // Первая страница
-    if (start > 1) {
-        pages.push(1);
-        if (start > 2) pages.push('dots');
-    }
+        if (start > 1) {
+            pages.push(1);
+            if (start > 2) pages.push('dots');
+        }
 
-    // Окно из 5 страниц
-    for (let i = start; i <= end; i++) {
-        pages.push(i);
-    }
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
 
-    // Последняя страница
-    if (end < totalPages) {
-        if (end < totalPages - 1) pages.push('dots');
-        pages.push(totalPages);
-    }
+        if (end < totalPages) {
+            if (end < totalPages - 1) pages.push('dots');
+            pages.push(totalPages);
+        }
+
+        return pages;
+    };
+
+    const pages = getPages();
 
     return (
-        <View style={paginationStyles.container}>
+        <AnimatedWrapper useOpacity offsetY={10} style={paginationStyles.container}>
+            {/* Левая стрелка */}
             <Pressable
-                onPress={() => onPageChange(Math.max(currentPage - 1, 1))}
-                disabled={currentPage === 1}
+                onPress={() => onPageChange(Math.max(safeCurrentPage - 1, 1))}
+                disabled={safeCurrentPage === 1}
                 style={({ pressed }) => [
                     paginationStyles.pageButton,
-                    currentPage === 1 && paginationStyles.disabled,
+                    safeCurrentPage === 1 && paginationStyles.disabled,
                     pressed && paginationStyles.pressed,
                 ]}
             >
-                <Text style={[paginationStyles.pageText, paginationStyles.arrowButton]}>{'<'}</Text>
+                <Image source={require('../../assets/orders-screen/arrow.webp')} style={paginationStyles.arrowLeft} />
             </Pressable>
 
+            {/* Номера страниц */}
             <View style={paginationStyles.numbersWrap}>
                 {pages.map((page, index) =>
                     page === 'dots' ? (
-                        <Text key={`dots-${index}`} style={paginationStyles.pageText}>...</Text>
+                        <Text key={`dots-${index}`} style={[paginationStyles.pageText, paginationStyles.dots]}>
+                            ...
+                        </Text>
                     ) : (
                         <Pressable
                             key={page}
@@ -139,10 +142,17 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
                             style={({ pressed }) => [
                                 paginationStyles.pageButton,
                                 pressed && paginationStyles.pressed,
-                                page === currentPage ? paginationStyles.activePage : paginationStyles.notActivePage
+                                page === safeCurrentPage ? paginationStyles.activePage : paginationStyles.notActivePage,
                             ]}
                         >
-                            <Text style={[paginationStyles.pageText, page === currentPage ? paginationStyles.activeText : paginationStyles.notActiveText]}>
+                            <Text
+                                style={[
+                                    paginationStyles.pageText,
+                                    page === safeCurrentPage
+                                        ? paginationStyles.activeText
+                                        : paginationStyles.notActiveText,
+                                ]}
+                            >
                                 {page}
                             </Text>
                         </Pressable>
@@ -150,20 +160,37 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
                 )}
             </View>
 
+            {/* Правая стрелка */}
             <Pressable
-                onPress={() => onPageChange(Math.min(currentPage + 1, totalPages))}
-                disabled={currentPage === totalPages}
+                onPress={() => onPageChange(Math.min(safeCurrentPage + 1, totalPages))}
+                disabled={safeCurrentPage === totalPages}
                 style={({ pressed }) => [
                     paginationStyles.pageButton,
-                    currentPage === totalPages && paginationStyles.disabled,
+                    safeCurrentPage === totalPages && paginationStyles.disabled,
                     pressed && paginationStyles.pressed,
                 ]}
             >
-                <Text style={[paginationStyles.pageText, paginationStyles.arrowButton]}>{'>'}</Text>
+                <Image source={require('../../assets/orders-screen/arrow.webp')} style={paginationStyles.arrowRight} />
             </Pressable>
-        </View>
+        </AnimatedWrapper>
     );
 };
+
+
+function LoadingView() {
+    return (
+        <AnimatedWrapper
+            useOpacity
+            offsetX={100}
+            style={tableStyles.loadingWrap}>
+            <AnimatedWrapper
+                delay={1000}
+                style={tableStyles.loadiingBlock}>
+                <Loader radius={100} />
+            </AnimatedWrapper>
+        </AnimatedWrapper>
+    )
+}
 
 const COLUMN_WIDTH = {
     col1: 50,
@@ -180,10 +207,13 @@ const paginationStyles = StyleSheet.create({
         paddingVertical: 10,
         alignItems: 'center',
         justifyContent: 'space-between',
+        margin: 5,
+        borderWidth: 1,
+        borderColor: Colors.grayLight
     },
     numbersWrap: {
         flexDirection: 'row',
-        gap: 5
+        gap: 7
     },
     pageButton: {
         borderRadius: 50,
@@ -201,14 +231,18 @@ const paginationStyles = StyleSheet.create({
         backgroundColor: Colors.blue,
     },
     notActivePage: {
-        backgroundColor: Colors.pale,
+        backgroundColor: 'transparent',
     },
     pageText: {
-        fontSize: 15,
+        fontSize: 13,
         lineHeight: 27,
         textAlign: 'center',
         verticalAlign: 'middle',
         borderRadius: 50
+    },
+    dots: {
+        opacity: 0.2,
+        fontWeight: 600
     },
     activeText: {
         color: 'white',
@@ -221,6 +255,18 @@ const paginationStyles = StyleSheet.create({
     arrowButton: {
         fontSize: 20,
         color: Colors.blue
+    },
+    arrowRight: {
+        width: 10,
+        height: 20,
+        top: 5
+    },
+    arrowLeft: {
+        width: 10,
+        height: 20,
+        top: 5,
+        left: 15,
+        transform: [{ rotate: '180deg' }],
     }
 });
 
@@ -238,8 +284,8 @@ export const tableStyles = StyleSheet.create({
     },
     row: {
         flexDirection: 'row',
-        borderBottomWidth: 1,
-        borderColor: '#D9D9D9',
+        borderBottomWidth: 2,
+        borderColor: Colors.grayLight,
         padding: 10
     },
     cellTitle: {
@@ -281,33 +327,17 @@ export const tableStyles = StyleSheet.create({
         width: COLUMN_WIDTH.col5,
         textAlign: 'center',
     },
-    pagination: {
-        flexDirection: 'row',
-        justifyContent: 'center',
+    loadingWrap: {
+        width: '100%', height: '1200%',
+        backgroundColor: Colors.pale,
+        opacity: 0.3,
+        borderLeftWidth: 20,
+        borderColor: Colors.pale
+    },
+    loadiingBlock: {
+        width: '100%',
+        height: '100%',
         alignItems: 'center',
-        paddingVertical: 10,
-        gap: 20,
-    },
-    pageButton: {
-        width: 30,
-        height: 30,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#337ef7',
-        borderRadius: 50,
-    },
-    pageText: {
-        color: 'white',
-        fontWeight: 'bold',
-    },
-    pageInfo: {
-        fontSize: 14,
-        color: '#333',
-    },
-    disabled: {
-        backgroundColor: '#ccc',
-    },
-    pressed: {
-        opacity: 0.7,
-    },
+        paddingTop: 160
+    }
 });
