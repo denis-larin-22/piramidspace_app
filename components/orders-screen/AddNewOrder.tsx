@@ -24,8 +24,8 @@ export interface INewOrderObject {
     product: IProductByCodes | null,
     width_gab: string | null, // габарит
     height_gab: string | null, // габарит
-    width: string | null, // по штапику
-    height: string | null, // по штапику
+    width_shtapik: string | null, // по штапику
+    height_shtapik: string | null, // по штапику
     typeManagment: string | null,
     count_number: string | null, // кількість
     color_system: string | null,
@@ -47,8 +47,8 @@ function AddNewOrder() {
         product: null,
         width_gab: null,
         height_gab: null,
-        width: null,
-        height: null,
+        width_shtapik: null,
+        height_shtapik: null,
         typeManagment: null,
         count_number: null,
         color_system: null,

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { ScrollView, View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Fonts } from '../../theme/fonts';
 import AnimatedWrapper from '../animation/AnimatedWrapper';
@@ -6,7 +6,6 @@ import { IOrder } from '../../lib/api/orders';
 import OrderItem from './OrderItem';
 import { Colors } from '../../theme/colors';
 import Loader from '../ui/Loader';
-import { styles } from '../ui/CustomModal';
 
 
 export default function TableOrders({
@@ -25,6 +24,11 @@ export default function TableOrders({
     const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
 
     const scrollRef = useRef<ScrollView>(null);
+
+    const paginationHandler = (page: number) => {
+        setActiveOrderId(null);
+        setActivePage(page);
+    }
 
     return (
         <AnimatedWrapper
@@ -62,10 +66,10 @@ export default function TableOrders({
             </ScrollView >
 
             {/* Pagination */}
-            < Pagination
+            <Pagination
                 currentPage={activePage}
                 totalPages={totalPages}
-                onPageChange={setActivePage}
+                onPageChange={paginationHandler}
             />
         </AnimatedWrapper >
     );

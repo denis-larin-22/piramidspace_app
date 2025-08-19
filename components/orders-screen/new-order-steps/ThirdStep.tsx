@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { INewOrderObject } from "../AddNewOrder";
 import { getStructureProductsGroupByCodes, IFixationType, IProductByCodes } from "../../../lib/api/orders";
-import { Image, ImageBackground, ImageStyle, Pressable, ScrollView, StyleSheet, Text, TextInput, View, } from "react-native";
+import { Image, ImageBackground, ImageStyle, Pressable, ScrollView, Text, TextInput, View, StyleSheet, } from "react-native";
 import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import Loader from "../../ui/Loader";
 import { Keyboard } from 'react-native';
+import WidthAndHeight from "./third-step-components/WidthAndHeight";
 
 interface IErrorStateMessage {
     state: boolean,
@@ -15,7 +16,7 @@ interface IErrorStateMessage {
 }
 
 function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: INewOrderObject, setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>>, stepHandler: () => void }) {
-    const { product, height, width, height_gab, width_gab, typeManagment, count_number, color_system, fixation_type } = orderObject;
+    const { product, height_shtapik, width_shtapik, height_gab, width_gab, typeManagment, count_number, color_system, fixation_type } = orderObject;
 
     // Product choice
     const [products, setProducts] = useState<IProductByCodes[] | null>(null);
@@ -101,7 +102,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
 
     // Final form order CHECK befor sending
     function foldOrder() {
-        if (!height || !width || !height_gab || !width_gab) {
+        if (!height_shtapik || !width_shtapik || !height_gab || !width_gab) {
             setIsError({
                 state: true,
                 text: "⚠️ Введіть усі значення ширини та висоти",
@@ -144,10 +145,10 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
         <>
             {/* Titles */}
             <AnimatedWrapper useOpacity offsetY={20}>
-                <Text style={styles.stepSubtitle}>Оформлення Замовлення</Text>
+                <Text style={thirdStepStyles.stepSubtitle}>Оформлення Замовлення</Text>
             </AnimatedWrapper>
             <AnimatedWrapper useOpacity offsetY={20} delay={100}>
-                <Text style={styles.stepCategory}>{groupName}</Text>
+                <Text style={thirdStepStyles.stepCategory}>{groupName}</Text>
             </AnimatedWrapper>
 
             {/* Error message */}
@@ -155,30 +156,30 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
 
             {/* Product selection */}
             <AnimatedWrapper useOpacity offsetY={20} delay={200}>
-                <Text style={styles.detailsText}>Оберіть тканину</Text>
+                <Text style={thirdStepStyles.detailsText}>Оберіть тканину</Text>
                 <View style={{ position: "relative" }}>
                     <Pressable onPress={toggleProductsList}>
-                        <Text style={styles.selectField}>
+                        <Text style={thirdStepStyles.selectField}>
                             {activeProduct === null ? "Оберіть зі списку" : activeProduct.name}
                         </Text>
                     </Pressable>
-                    <ArrowDown style={styles.arrowIcon} />
+                    <ArrowDown style={thirdStepStyles.arrowIcon} />
 
                     {isProductsListOpen && (
-                        <AnimatedWrapper useOpacity offsetY={-20} style={styles.dropdownMenu}>
+                        <AnimatedWrapper useOpacity offsetY={-20} style={thirdStepStyles.dropdownMenu}>
                             {products === null ? (
-                                <View style={styles.loaderContainer}>
+                                <View style={thirdStepStyles.loaderContainer}>
                                     <Loader />
                                 </View>
                             ) : products.length === 0 ? (
                                 <Text>Товари за обраними параметрами відсутні</Text>
                             ) : (
-                                <ScrollView style={styles.scrollModal}>
+                                <ScrollView style={thirdStepStyles.scrollModal}>
                                     {products.map((product, index) => (
                                         <Pressable
                                             key={index}
                                             style={[
-                                                styles.productItem,
+                                                thirdStepStyles.productItem,
                                                 {
                                                     backgroundColor: getProductBackgroundColor(
                                                         product,
@@ -208,8 +209,8 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                                         >
                                             <Text
                                                 style={[
-                                                    styles.productItemText,
-                                                    product.sale_tk && styles.productItemTextWhite,
+                                                    thirdStepStyles.productItemText,
+                                                    product.sale_tk && thirdStepStyles.productItemTextWhite,
                                                 ]}
                                             >
                                                 {getProductLabel(product)}
@@ -236,23 +237,23 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                     />
 
                     {/* Управление и Количество */}
-                    <View style={styles.row}>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.detailsText}>Керування</Text>
+                    <View style={thirdStepStyles.row}>
+                        <View style={thirdStepStyles.inputContainer}>
+                            <Text style={thirdStepStyles.detailsText}>Керування</Text>
                             <Pressable onPress={toggleTypeManagmentList}>
-                                <Text style={[styles.selectField, isError.errorFieldNumber === 3 && styles.borderRed]}>{activeTypeManagment || "Оберіть тип"}</Text>
+                                <Text style={[thirdStepStyles.selectField, isError.errorFieldNumber === 3 && thirdStepStyles.borderRed]}>{activeTypeManagment || "Оберіть тип"}</Text>
                             </Pressable>
-                            <ArrowDown style={styles.arrowIcon} />
+                            <ArrowDown style={thirdStepStyles.arrowIcon} />
 
                             {isTypeManagmentListOpen && (
-                                <AnimatedWrapper useOpacity offsetY={-20} style={styles.dropdownMenu}>
-                                    <ScrollView style={styles.scrollModal}>
+                                <AnimatedWrapper useOpacity offsetY={-20} style={thirdStepStyles.dropdownMenu}>
+                                    <ScrollView style={thirdStepStyles.scrollModal}>
                                         {typeManagmentList.length ?
                                             typeManagmentList.map((type, index) => (
                                                 <Pressable
                                                     key={index}
                                                     style={[
-                                                        styles.productItem,
+                                                        thirdStepStyles.productItem,
                                                         activeTypeManagment === type && { backgroundColor: Colors.pale },
                                                     ]}
                                                     onPress={() => {
@@ -261,11 +262,11 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                                                         setIsTypeManagmentListOpen(false);
                                                     }}
                                                 >
-                                                    <Text style={styles.productItemText}>{type}</Text>
+                                                    <Text style={thirdStepStyles.productItemText}>{type}</Text>
                                                 </Pressable>
                                             ))
                                             :
-                                            <Text style={styles.absentValueText}>Значення відсутні</Text>
+                                            <Text style={thirdStepStyles.absentValueText}>Значення відсутні</Text>
                                         }
                                     </ScrollView>
                                 </AnimatedWrapper>
@@ -280,23 +281,23 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                     </View>
 
                     {/* Цвет системы */}
-                    <View style={styles.colorContainer}>
-                        <Text style={styles.detailsText}>Колір системи</Text>
+                    <View style={thirdStepStyles.colorContainer}>
+                        <Text style={thirdStepStyles.detailsText}>Колір системи</Text>
 
                         <Pressable onPress={toggleColorList}>
-                            <Text style={[styles.selectField, isError.errorFieldNumber === 5 && styles.borderRed]}>{activeColor || "Оберіть колір"}</Text>
+                            <Text style={[thirdStepStyles.selectField, isError.errorFieldNumber === 5 && thirdStepStyles.borderRed]}>{activeColor || "Оберіть колір"}</Text>
                         </Pressable>
-                        <ArrowDown style={styles.arrowIcon} />
+                        <ArrowDown style={thirdStepStyles.arrowIcon} />
 
                         {isColorListOpen && (
-                            <AnimatedWrapper useOpacity offsetY={-20} style={styles.dropdownMenu}>
-                                <ScrollView style={styles.scrollModal}>
+                            <AnimatedWrapper useOpacity offsetY={-20} style={thirdStepStyles.dropdownMenu}>
+                                <ScrollView style={thirdStepStyles.scrollModal}>
                                     {colorsList.length ?
                                         colorsList.map((color, index) => (
                                             <Pressable
                                                 key={index}
                                                 style={[
-                                                    styles.productItem,
+                                                    thirdStepStyles.productItem,
                                                     activeColor === color && { backgroundColor: Colors.pale },
                                                 ]}
                                                 onPress={() => {
@@ -305,11 +306,11 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                                                     setIsColorListOpen(false);
                                                 }}
                                             >
-                                                <Text style={styles.productItemText}>{color}</Text>
+                                                <Text style={thirdStepStyles.productItemText}>{color}</Text>
                                             </Pressable>
                                         ))
                                         :
-                                        <Text style={styles.absentValueText}>значення відсутні</Text>
+                                        <Text style={thirdStepStyles.absentValueText}>значення відсутні</Text>
                                     }
                                 </ScrollView>
                             </AnimatedWrapper>
@@ -317,23 +318,23 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                     </View>
 
                     {/* Фиксация */}
-                    <View style={styles.colorContainer}>
-                        <Text style={styles.detailsText}>Фіксація</Text>
+                    <View style={thirdStepStyles.colorContainer}>
+                        <Text style={thirdStepStyles.detailsText}>Фіксація</Text>
 
                         <Pressable onPress={toggleFixationTypeList}>
-                            <Text style={[styles.selectField, isError.errorFieldNumber === 6 && styles.borderRed]}>{activeFixationType === null ? "Оберіть тип" : activeFixationType.name}</Text>
+                            <Text style={[thirdStepStyles.selectField, isError.errorFieldNumber === 6 && thirdStepStyles.borderRed]}>{activeFixationType === null ? "Оберіть тип" : activeFixationType.name}</Text>
                         </Pressable>
-                        <ArrowDown style={styles.arrowIcon} />
+                        <ArrowDown style={thirdStepStyles.arrowIcon} />
 
                         {isFixationTypeListOpen && (
-                            <AnimatedWrapper useOpacity offsetY={-20} style={styles.dropdownMenu}>
-                                <ScrollView style={styles.scrollModal}>
+                            <AnimatedWrapper useOpacity offsetY={-20} style={thirdStepStyles.dropdownMenu}>
+                                <ScrollView style={thirdStepStyles.scrollModal}>
                                     {fixationTypeList.length ?
                                         fixationTypeList.map((fixationType, index) => (
                                             <Pressable
                                                 key={index}
                                                 style={[
-                                                    styles.productItem,
+                                                    thirdStepStyles.productItem,
                                                     (activeFixationType !== null && activeFixationType.name === fixationType.name) && { backgroundColor: Colors.pale },
                                                 ]}
                                                 onPress={() => {
@@ -342,11 +343,11 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                                                     setIsFixationTypeListOpen(false);
                                                 }}
                                             >
-                                                <Text style={styles.productItemText}>{fixationType.name}</Text>
+                                                <Text style={thirdStepStyles.productItemText}>{fixationType.name}</Text>
                                             </Pressable>
                                         ))
                                         :
-                                        <Text style={styles.absentValueText}>значення відсутні</Text>
+                                        <Text style={thirdStepStyles.absentValueText}>значення відсутні</Text>
                                     }
                                 </ScrollView>
                             </AnimatedWrapper>
@@ -354,14 +355,14 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                     </View>
 
                     {/* Цена / Разом */}
-                    <View style={styles.row}>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.detailsText}>Ціна</Text>
-                            <Text style={styles.input} >0</Text>
+                    <View style={thirdStepStyles.row}>
+                        <View style={thirdStepStyles.inputContainer}>
+                            <Text style={thirdStepStyles.detailsText}>Ціна</Text>
+                            <Text style={thirdStepStyles.input} >0</Text>
                         </View>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.detailsText}>Разом</Text>
-                            <Text style={styles.input} >0</Text>
+                        <View style={thirdStepStyles.inputContainer}>
+                            <Text style={thirdStepStyles.detailsText}>Разом</Text>
+                            <Text style={thirdStepStyles.input} >0</Text>
                         </View>
                     </View>
                 </View>
@@ -369,15 +370,15 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
 
             {/* Кнопка отправки */}
             {activeProduct && <AnimatedWrapper
-                style={styles.submitButton}
+                style={thirdStepStyles.submitButton}
                 offsetY={-20}
             >
                 <Pressable onPress={foldOrder}>
                     <ImageBackground
                         source={require("../../../assets/gradient-small.png")}
-                        style={styles.submitButtonBg}
+                        style={thirdStepStyles.submitButtonBg}
                     >
-                        <Text style={styles.submitButtonText}>Покласти</Text>
+                        <Text style={thirdStepStyles.submitButtonText}>Покласти</Text>
                     </ImageBackground>
                 </Pressable>
             </AnimatedWrapper>
@@ -386,101 +387,13 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
     );
 }
 
-function WidthAndHeight({ orderObject, setOrderObject, errorFieldNumber }: { orderObject: INewOrderObject, setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>>, errorFieldNumber: number | null }) {
-    return (
-        <>
-            <View style={styles.row}>
-                <View style={styles.inputContainer}>
-                    <View style={styles.rowLabel}>
-                        <Text style={styles.detailsText}>Ширина </Text>
-                        <Text style={styles.labelNote}>(габарит)</Text>
-                    </View>
-                    <TextInput
-                        keyboardType="number-pad"
-                        style={[styles.input, errorFieldNumber === 2 && styles.borderRed]}
-                        placeholder="0"
-                        value={orderObject.width_gab || ""}
-                        onChangeText={(value) => {
-                            setOrderObject({
-                                ...orderObject,
-                                width_gab: value
-                            })
-                        }}
-                    />
-                    <Text style={styles.unitLabel}>см</Text>
-                </View>
-                <View style={styles.inputContainer}>
-                    <View style={styles.rowLabel}>
-                        <Text style={styles.detailsText}>Ширина </Text>
-                        <Text style={styles.labelNoteSmall}>(по штапику)</Text>
-                    </View>
-                    <TextInput
-                        keyboardType="number-pad"
-                        style={[styles.input, errorFieldNumber === 2 && styles.borderRed]}
-                        placeholder="0"
-                        value={orderObject.width || ""}
-                        onChangeText={(value) => {
-                            setOrderObject({
-                                ...orderObject,
-                                width: value
-                            })
-                        }}
-                    />
-                    <Text style={styles.unitLabel}>см</Text>
-                </View>
-            </View>
-
-            <View style={styles.row}>
-                <View style={styles.inputContainer}>
-                    <View style={styles.rowLabel}>
-                        <Text style={styles.detailsText}>Висота </Text>
-                        <Text style={styles.labelNote}>(габарит)</Text>
-                    </View>
-                    <TextInput
-                        keyboardType="number-pad"
-                        style={[styles.input, errorFieldNumber === 2 && styles.borderRed]}
-                        placeholder="0"
-                        value={orderObject.height_gab || ""}
-                        onChangeText={(value) => {
-                            setOrderObject({
-                                ...orderObject,
-                                height_gab: value
-                            })
-                        }}
-                    />
-                    <Text style={styles.unitLabel}>см</Text>
-                </View>
-                <View style={styles.inputContainer}>
-                    <View style={styles.rowLabel}>
-                        <Text style={styles.detailsText}>Висота </Text>
-                        <Text style={styles.labelNoteSmall}>(по штапику)</Text>
-                    </View>
-                    <TextInput
-                        keyboardType="number-pad"
-                        style={[styles.input, errorFieldNumber === 2 && styles.borderRed]}
-                        placeholder="0"
-                        value={orderObject.height || ""}
-                        onChangeText={(value) => {
-                            setOrderObject({
-                                ...orderObject,
-                                height: value
-                            })
-                        }}
-                    />
-                    <Text style={styles.unitLabel}>см</Text>
-                </View>
-            </View>
-        </>
-    )
-}
-
 function CountValue({ orderObject, setOrderObject, errorFieldNumber }: { orderObject: INewOrderObject, setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>>, errorFieldNumber: number | null }) {
     return (
-        <View style={styles.inputContainer}>
-            <Text style={styles.detailsText}>Кількість</Text>
+        <View style={thirdStepStyles.inputContainer}>
+            <Text style={thirdStepStyles.detailsText}>Кількість</Text>
             <TextInput
                 keyboardType="number-pad"
-                style={[styles.input, errorFieldNumber === 4 && styles.borderRed]}
+                style={[thirdStepStyles.input, errorFieldNumber === 4 && thirdStepStyles.borderRed]}
                 placeholder="0"
                 value={orderObject.count_number || ""}
                 onChangeText={(value) => {
@@ -490,7 +403,7 @@ function CountValue({ orderObject, setOrderObject, errorFieldNumber }: { orderOb
                     })
                 }}
             />
-            <Text style={styles.unitLabel}>шт</Text>
+            <Text style={thirdStepStyles.unitLabel}>шт</Text>
         </View>
     )
 }
@@ -506,14 +419,14 @@ function ArrowDown({ style }: { style?: ImageStyle }) {
 
 function ErrorMessage({ errorText }: { errorText: string }) {
     return (
-        <AnimatedWrapper style={styles.errorMessage} useOpacity offsetY={20}>
-            <Text style={styles.errorMessageText}>{errorText}</Text>
+        <AnimatedWrapper style={thirdStepStyles.errorMessage} useOpacity offsetY={20}>
+            <Text style={thirdStepStyles.errorMessageText}>{errorText}</Text>
         </AnimatedWrapper>
     );
 }
 
 // utils
-// Helper functions for styles and labels
+// Helper functions for thirdStepStyles and labels
 function getProductLabel(product: IProductByCodes) {
     if (product.sale_tk) return "🏷️ " + product.name;
     if (product.presence === "нет") return "🚫 " + product.name;
@@ -534,7 +447,7 @@ function getProductOpacity(product: IProductByCodes) {
     return product.presence === "нет" ? 0.6 : 1;
 }
 
-const styles = StyleSheet.create({
+export const thirdStepStyles = StyleSheet.create({
     stepSubtitle: {
         fontFamily: Fonts.comfortaa400,
         fontSize: 16,

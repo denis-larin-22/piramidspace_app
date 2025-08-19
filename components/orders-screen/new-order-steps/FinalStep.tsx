@@ -53,10 +53,10 @@ function FinalOrderInfo({ orderObject }: { orderObject: INewOrderObject }) {
         { label: "Продукт", value: orderObject.product?.name || "Не обрано" },
         { label: "Код товару", value: orderObject.product?.code || "Не обрано", dashedBorder: true },
 
-        { label: "Ширина (по штапику)", value: orderObject.width },
-        { label: "Висота (по штапику)", value: orderObject.height },
         { label: "Ширина (габарит)", value: orderObject.width_gab },
-        { label: "Висота (габарит)", value: orderObject.height_gab, dashedBorder: true },
+        { label: "Ширина (по штапику)", value: orderObject.width_shtapik },
+        { label: "Висота (габарит)", value: orderObject.height_gab },
+        { label: "Висота (по штапику)", value: orderObject.height_shtapik, dashedBorder: true },
 
         { label: "⚙ Тип управління", value: orderObject.typeManagment || "Не обрано" },
         { label: "🔧 Тип фіксації", value: orderObject.fixation_type?.name || "Не обрано" },
