@@ -11,10 +11,7 @@ function SecondStep({ orderObject, rateValue, balanceValue, stepHandler }: {
     orderObject: INewOrderObject
     rateValue: string | null,
     balanceValue: number | null,
-    stepHandler: (selectedSubgroup: {
-        name: string;
-        code: string;
-    }) => void
+    stepHandler: (selectedSubgroup: ISubgroup) => void
 }) {
     const { group: { code, name } } = orderObject;
     const [subGroupsList, setSubGroupsList] = useState<Array<ISubgroup> | null>(null);

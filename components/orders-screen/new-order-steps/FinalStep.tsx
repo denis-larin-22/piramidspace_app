@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Image,
     ImageBackground,
@@ -11,25 +11,102 @@ import { INewOrderObject } from "../AddNewOrder";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
+import { calculateOrderPrice, ICulculateOrderObject, MainGroupsCode } from "../../../lib/api/orders";
+import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
+import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
+import Loader from "../../ui/Loader";
 
 interface IProps {
     orderObject: INewOrderObject;
 };
 
+interface IOrderPrice {
+    price_per_unit: null | number,
+    total_price: null | number,
+}
 
 function FinalStep({ orderObject }: IProps) {
-    const [isSent, setIsSent] = useState<boolean>(false);
+    // const initOrderPrice: IOrderPrice = {
+    //     price_per_unit: null,
+    //     total_price: null
+    // }
+
+    // const [isSent, setIsSent] = useState<boolean>(false);
+    // const [isLoading, setIsLoading] = useState<boolean>(true);
+    // const [isError, setIsError] = useState<boolean>(false);
+    // const [error, setError] = useState<string | null>(null);
+    // const [orderPrice, setOrderPrice] = useState<IOrderPrice>(initOrderPrice);
+
+
+
+    // useEffect(() => {
+    //     async function calculatePrice() {
+    //         setIsLoading(true);
+    //         const login = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
+    //         if (!login) {
+    //             setIsError(true);
+    //             setError("Користувач не авторизований (відсутнє значення логіну)")
+    //             return;
+    //         };
+
+    //         const calculateOrderObject: ICulculateOrderObject = {
+    //             product_code: orderObject.product?.code ?? "",   // или ошибка, если null
+    //             subgroup_code: orderObject.subgroup?.code ?? "",
+    //             group_code: orderObject.group.code as MainGroupsCode,
+    //             width: orderObject.width_gab ? +orderObject.width_gab : 0,
+    //             height: orderObject.height_gab ? +orderObject.height_gab : 0,
+    //             side: orderObject.controlType || 'right', // "right" by default
+    //             quantity: orderObject.count_number ? +orderObject.count_number : 0,
+    //             system_color: orderObject.color_system,
+    //             fixation_type: orderObject.fixation_type ?? null,
+    //             add_to_cart: false,
+    //             login: login
+    //         }
+
+    //         const priceResponce = await calculateOrderPrice(calculateOrderObject);
+
+    //         if (priceResponce === null) {
+    //             setIsError(true);
+    //             setError("Помилка запиту розрахунку вартості замовлення")
+    //             return;
+    //         } else if (priceResponce.status === 200) {
+    //             setOrderPrice({
+    //                 price_per_unit: priceResponce.data.price_per_unit,
+    //                 total_price: priceResponce.data.total_price
+    //             });
+    //         } else {
+    //             setIsError(true);
+    //             setError(priceResponce.data.error);
+    //         }
+    //         setIsLoading(false);
+    //     }
+
+    //     calculatePrice();
+    // }, []);
 
     return (
         <>
-            {
-                isSent ?
-                    <Report />
+            {/* {isLoading ?
+                <Loader radius={100} />
+                :
+                isError ?
+                    // ОБЛОГОРОДИТЬ ОКНО ОШИБОК, ВІВОДИТЬ СООБЩЕНИЯ ОШИБОК!!!!!!!
+                    <Text>Помилка розрахунку вартості товару: {error}</Text>
                     :
-                    <FinalOrderInfo orderObject={orderObject} />
-            }
+                    <FinalOrderInfo
+                        orderObject={orderObject}
+                        price_per_unit={orderPrice.price_per_unit as number}
+                        total_price={orderPrice.total_price as number}
+                    />
+                // <Report />
+            } */}
+            <FinalOrderInfo
+                orderObject={orderObject}
+                price_per_unit={0}
+                total_price={0}
+            />
 
-            <AnimatedWrapper style={styles.submitButton} offsetY={-20}>
+            {/* <AnimatedWrapper style={styles.submitButton} offsetY={-20}>
                 <Pressable onPress={() => { setIsSent(true) }}>
                     <ImageBackground
                         source={require("../../../assets/gradient-small.png")}
@@ -38,7 +115,7 @@ function FinalStep({ orderObject }: IProps) {
                         <Text style={styles.submitButtonText}>Створити</Text>
                     </ImageBackground>
                 </Pressable>
-            </AnimatedWrapper>
+            </AnimatedWrapper> */}
         </>
     );
 };
@@ -46,10 +123,10 @@ function FinalStep({ orderObject }: IProps) {
 export default FinalStep;
 
 
-function FinalOrderInfo({ orderObject }: { orderObject: INewOrderObject }) {
+function FinalOrderInfo({ orderObject, price_per_unit, total_price }: { orderObject: INewOrderObject, price_per_unit: number, total_price: number }) {
     const rows = [
         { label: "Група", value: orderObject.group.name },
-        { label: "Підгрупа", value: orderObject.subgroup.name },
+        { label: "Підгрупа", value: orderObject.subgroup?.name },
         { label: "Продукт", value: orderObject.product?.name || "Не обрано" },
         { label: "Код товару", value: orderObject.product?.code || "Не обрано", dashedBorder: true },
 
@@ -58,12 +135,12 @@ function FinalOrderInfo({ orderObject }: { orderObject: INewOrderObject }) {
         { label: "Висота (габарит)", value: orderObject.height_gab },
         { label: "Висота (по штапику)", value: orderObject.height_shtapik, dashedBorder: true },
 
-        { label: "⚙ Тип управління", value: orderObject.typeManagment || "Не обрано" },
-        { label: "🔧 Тип фіксації", value: orderObject.fixation_type?.name || "Не обрано" },
+        { label: "⚙ Тип управління", value: orderObject.controlType || "Не обрано" },
+        { label: "🔧 Тип фіксації", value: orderObject.fixation_type || "Не обрано" },
         { label: "🎨 Колір системи", value: orderObject.color_system },
         { label: "🔢 Кількість", value: `${orderObject.count_number} шт.`, dashedBorder: true },
 
-        { label: "💰 Ціна за одиницю", value: `${orderObject.price} грн`, dashedBorder: true },
+        { label: "💰 Ціна за одиницю", value: `${price_per_unit} грн`, dashedBorder: true },
     ];
 
     return (
@@ -90,7 +167,7 @@ function FinalOrderInfo({ orderObject }: { orderObject: INewOrderObject }) {
 
                 <AnimatedWrapper useOpacity offsetY={20} delay={400} style={{ flexDirection: "row", justifyContent: "space-between" }}>
                     <Text style={styles.totalAmount}>💰 Загальна сума</Text>
-                    <Text style={styles.totalAmountText}>{orderObject.final_price} грн</Text>
+                    <Text style={styles.totalAmountText}>{total_price} грн</Text>
                 </AnimatedWrapper>
             </View>
         </>

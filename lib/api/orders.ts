@@ -132,8 +132,13 @@ export interface IGroup {
 }
 
 export interface ISubgroup {
-    code: string,
-    name: string
+    code: string;
+    name: string;
+    fixations: IFixationType[];
+    control: string[];
+    colors: string[];
+    rb3: string;
+    options: string[];
 }
 
 // get all subgroups (by group)
@@ -189,7 +194,6 @@ export interface IProductByCodes {
 
 export interface IFixationType {
     name: string,
-    category: number,
     presence: string,
     unit: string
 }
@@ -221,6 +225,75 @@ export async function getStructureProductsGroupByCodes(groupCode: MainGroupsCode
         };
     } catch (error) {
         console.error("An error occurred while fetching products by group and subgroup codes:", error);
+        return null;
+    }
+}
+
+// Calculate full order price
+export interface ICulculateOrderObject {
+    product_code: string,
+    subgroup_code: string,
+    group_code: MainGroupsCode,
+    width: number,
+    height: number,
+    side: string,
+    quantity: number,
+    system_color: null | string,
+    fixation_type: null | string,
+    add_to_cart: boolean,
+    login: string
+}
+
+interface ICalculateResponceSuccess {
+    success: boolean,
+    price_per_unit: number,
+    total_price: number,
+    details: {
+        base_price: number,
+        color_markup: number,
+        fixation_markup: number
+    },
+    added_to_cart: boolean
+}
+
+interface ICalculateResponceError {
+    success: boolean,
+    error: string
+}
+
+export type ICalculateResponse =
+    { status: 200; data: ICalculateResponceSuccess }
+    | { status: 500; data: ICalculateResponceError }
+    | null
+
+export async function calculateOrderPrice(
+    orderObject: ICulculateOrderObject
+): Promise<ICalculateResponse> {
+    try {
+        const response = await fetch(`${BASE_URL}/api/piramid/calculate-product`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orderObject),
+        });
+
+        if (!response.ok) {
+            console.error(`Error fetching calculate order price: ${response.status}`);
+            return null;
+        }
+
+        if (response.status === 200) {
+            const data: ICalculateResponceSuccess = await response.json();
+            return { status: 200, data };
+        }
+
+        const errorData: ICalculateResponceError = await response.json();
+
+        return {
+            status: 500,
+            data: errorData,
+        };
+    } catch (err) {
+        console.error(`Unknown error fetching calculate order price: ${err}`)
         return null;
     }
 }

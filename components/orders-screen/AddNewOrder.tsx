@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
-import { Image, ImageBackground, Modal, Pressable, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { Image, ImageBackground, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { useDollarRate } from "../../lib/hooks/useDollarRate";
 import { useNetworkStatus } from "../../lib/hooks/useNetworkStatus";
 import { useBalanceValue } from "../../lib/hooks/useBalanceValue";
-import { IFixationType, IProductByCodes, MainGroupsCode } from "../../lib/api/orders";
+import { IFixationType, IProductByCodes, ISubgroup, MainGroupsCode } from "../../lib/api/orders";
 import ThirdStep from "./new-order-steps/ThirdStep";
 import FirstStep from "./new-order-steps/FirstStep";
 import SecondStep from "./new-order-steps/SecondStep";
@@ -17,19 +17,16 @@ export interface INewOrderObject {
         name: string | null,
         code: MainGroupsCode | null
     },
-    subgroup: {
-        name: string | null,
-        code: string | null
-    },
+    subgroup: ISubgroup | null,
     product: IProductByCodes | null,
     width_gab: string | null, // габарит
     height_gab: string | null, // габарит
     width_shtapik: string | null, // по штапику
     height_shtapik: string | null, // по штапику
-    typeManagment: string | null,
+    controlType: string | null,
     count_number: string | null, // кількість
     color_system: string | null,
-    fixation_type: IFixationType | null,
+    fixation_type: string | null,
     price: number,
     final_price: number
 }
@@ -43,13 +40,13 @@ function AddNewOrder() {
     //
     const initNewOrderObject: INewOrderObject = {
         group: { code: null, name: null },
-        subgroup: { code: null, name: null },
+        subgroup: null,
         product: null,
         width_gab: null,
         height_gab: null,
         width_shtapik: null,
         height_shtapik: null,
-        typeManagment: null,
+        controlType: null,
         count_number: null,
         color_system: null,
         fixation_type: null,
@@ -59,7 +56,6 @@ function AddNewOrder() {
 
     const [activeStep, setActiveStep] = useState<number>(1);
     const [newOrderObject, setNewOrderObject] = useState<INewOrderObject>(initNewOrderObject);
-
 
     const firstStepHandler = (selectedGroup: { name: string, code: MainGroupsCode }) => {
         const updatedOrder: INewOrderObject = {
@@ -74,13 +70,10 @@ function AddNewOrder() {
         setActiveStep(2);
     };
 
-    const secondStepHandler = (selectedSubgroup: { name: string, code: string }) => {
+    const secondStepHandler = (selectedSubgroup: ISubgroup) => {
         const updatedOrder: INewOrderObject = {
             ...newOrderObject,
-            subgroup: {
-                code: selectedSubgroup.code,
-                name: selectedSubgroup.name
-            }
+            subgroup: selectedSubgroup
         };
 
         setNewOrderObject(updatedOrder);
@@ -136,6 +129,7 @@ function AddNewOrder() {
                         duration={200}
                         style={styles.modalContent}
                     >
+                        {/* Steps */}
                         {activeStep === 1 ?
                             <FirstStep stepHandler={firstStepHandler} />
                             :
@@ -156,8 +150,12 @@ function AddNewOrder() {
                                     :
                                     <FinalStep orderObject={newOrderObject} />
                         }
-                        {(activeStep !== 1) && <BackButton backHandler={backButtonHandler} />}
-                        <CloseButton closeHandler={closeButtonHandler} />
+
+                        {/* Back and close */}
+                        <View style={{ zIndex: -1 }}>
+                            {(activeStep !== 1) && <BackButton backHandler={backButtonHandler} />}
+                            <CloseButton closeHandler={closeButtonHandler} />
+                        </View>
                     </AnimatedWrapper>
                 </AnimatedWrapper>
             </Modal>
@@ -233,7 +231,7 @@ const styles = StyleSheet.create({
         borderRadius: 13,
         width: '100%',
         position: 'relative',
-        top: '-5%'
+        top: '-5%',
     },
     button: {
         width: 59,
@@ -249,7 +247,7 @@ const styles = StyleSheet.create({
     backButton: {
         position: 'absolute',
         bottom: -90,
-        left: 0
+        left: 0,
     },
     buttonBg: {
         width: '100%',

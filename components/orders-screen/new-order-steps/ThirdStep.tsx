@@ -1,22 +1,28 @@
 import { useEffect, useState } from "react";
 import { INewOrderObject } from "../AddNewOrder";
-import { getStructureProductsGroupByCodes, IFixationType, IProductByCodes } from "../../../lib/api/orders";
+import { getStructureProductsGroupByCodes, IFixationType, IProductByCodes, MainGroupsCode } from "../../../lib/api/orders";
 import { Image, ImageBackground, ImageStyle, Pressable, ScrollView, Text, TextInput, View, StyleSheet, } from "react-native";
 import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
-import Loader from "../../ui/Loader";
 import { Keyboard } from 'react-native';
 import WidthAndHeight from "./third-step-components/WidthAndHeight";
+import ProductsList from "./third-step-components/ProductsList";
+import CountValue from "./third-step-components/CountValue";
+import ControlType from "./third-step-components/ControlType";
+import Color from "./third-step-components/Color";
+import FixationType from "./third-step-components/FixationType";
 
-interface IErrorStateMessage {
+export interface IErrorStateMessage {
     state: boolean,
     text: string,
     errorFieldNumber: 2 | 3 | 4 | 5 | 6 | null
 }
 
 function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: INewOrderObject, setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>>, stepHandler: () => void }) {
-    const { product, height_shtapik, width_shtapik, height_gab, width_gab, typeManagment, count_number, color_system, fixation_type } = orderObject;
+    const { group, subgroup, product, height_shtapik, width_shtapik, height_gab, width_gab, controlType, count_number, color_system, fixation_type } = orderObject;
+
+    if (subgroup === null) return null;
 
     // Product choice
     const [products, setProducts] = useState<IProductByCodes[] | null>(null);
@@ -24,18 +30,18 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
     const [activeProduct, setActiveProduct] = useState<IProductByCodes | null>(product);
 
     // Color choice
-    const [colorsList, setColorsList] = useState<string[]>([]);
+    const [colorsList] = useState<string[]>(subgroup.colors);
     const [activeColor, setActiveColor] = useState(color_system);
     const [isColorListOpen, setIsColorListOpen] = useState(false);
 
-    // Type management
-    const [typeManagmentList, setTypeManagmentList] = useState<string[]>([]);
-    const [activeTypeManagment, setActiveTypeManagment] = useState(typeManagment);
-    const [isTypeManagmentListOpen, setIsTypeManagmentListOpen] = useState(false);
+    // Control type
+    const [cotrolTypesList] = useState<string[]>(subgroup.control);
+    const [activeControlType, setActiveControlType] = useState(controlType);
+    const [isControlTypeListOpen, setIsControlTypeListOpen] = useState(false);
 
     // Fixation choise
-    const [fixationTypeList, setFixationTypeList] = useState<IFixationType[]>([]);
-    const [activeFixationType, setActiveFixationType] = useState<IFixationType | null>(fixation_type);
+    const [fixationTypeList] = useState<string[]>(group.code === 'vertical' ? [subgroup.rb3] : subgroup.fixations.map(type => type.name));
+    const [activeFixationType, setActiveFixationType] = useState<string | null>(fixation_type);
     const [isFixationTypeListOpen, setIsFixationTypeListOpen] = useState(false);
 
     // Error state
@@ -47,24 +53,30 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
 
     const [isError, setIsError] = useState<IErrorStateMessage>(initErrorObject);
 
-    const {
-        group: { code: groupCode, name: groupName },
-        subgroup: { code: subgroupCode, name: subgroupName },
-    } = orderObject;
+    // Check subgroup === null
+    useEffect(() => {
+        if (subgroup === null) {
+            setIsError({
+                state: true,
+                text: "⚠️ Не знайдено підгрупу товару!",
+                errorFieldNumber: null
+            });
+            setTimeout(() => setIsError(initErrorObject), 3000);
+        };
+    }, [subgroup]);
 
+    // Getting products list and params
     useEffect(() => {
         async function getProducts() {
-            if (groupCode === null || subgroupCode === null) {
+            if (orderObject.group.code === null || orderObject.subgroup === null) {
                 setProducts([]);
                 return;
             }
-            const data = await getStructureProductsGroupByCodes(groupCode, subgroupCode);
+            const data = await getStructureProductsGroupByCodes(orderObject.group.code, orderObject.subgroup.code);
             if (data === null) {
                 return;
             } else {
                 setProducts(data.products);
-                setColorsList(data.colors);
-                setTypeManagmentList(data.control);
             }
         }
         getProducts();
@@ -73,31 +85,67 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
     // Dropdown togglers
     function toggleProductsList() {
         Keyboard.dismiss();
-        setIsTypeManagmentListOpen(false);
+        setIsControlTypeListOpen(false);
         setIsColorListOpen(false);
         setIsFixationTypeListOpen(false);
         setIsProductsListOpen((prev) => !prev);
     }
-    function toggleTypeManagmentList() {
+    function toggleControlTypeList() {
         Keyboard.dismiss();
         setIsProductsListOpen(false);
         setIsColorListOpen(false);
         setIsFixationTypeListOpen(false);
-        setIsTypeManagmentListOpen((prev) => !prev);
+        setIsControlTypeListOpen((prev) => !prev);
     }
     function toggleColorList() {
         Keyboard.dismiss();
         setIsProductsListOpen(false);
-        setIsTypeManagmentListOpen(false);
+        setIsControlTypeListOpen(false);
         setIsFixationTypeListOpen(false);
         setIsColorListOpen((prev) => !prev);
     }
     function toggleFixationTypeList() {
         Keyboard.dismiss();
         setIsProductsListOpen(false);
-        setIsTypeManagmentListOpen(false);
+        setIsControlTypeListOpen(false);
         setIsColorListOpen(false);
         setIsFixationTypeListOpen((prev) => !prev);
+    }
+
+    const productsListHandler = (product: IProductByCodes) => {
+        if (product.presence === "нет") {
+            setIsError({
+                state: true,
+                text: "⚠️ Цїєї тканини немає в наявності!",
+                errorFieldNumber: null
+            });
+            setTimeout(() => setIsError(initErrorObject), 3000);
+        } else {
+            const pressebleProduct = product.name === activeProduct?.name ? null : product;
+
+            setIsError(initErrorObject);
+            setActiveProduct(pressebleProduct);
+            setOrderObject({ ...orderObject, product: product });
+            setIsProductsListOpen(false);
+        }
+    }
+
+    const controlTypesListHandler = (type: string) => {
+        setActiveControlType(type);
+        setOrderObject({ ...orderObject, controlType: type });
+        setIsControlTypeListOpen(false);
+    }
+
+    const colorsListHandler = (color: string) => {
+        setActiveColor(color);
+        setOrderObject({ ...orderObject, color_system: color });
+        setIsColorListOpen(false);
+    }
+
+    const fixationTypesListHandler = (type: string) => {
+        setActiveFixationType(type);
+        setOrderObject({ ...orderObject, fixation_type: type });
+        setIsFixationTypeListOpen(false);
     }
 
     // Final form order CHECK befor sending
@@ -108,7 +156,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                 text: "⚠️ Введіть усі значення ширини та висоти",
                 errorFieldNumber: 2
             });
-        } else if (typeManagmentList.length !== 0 && typeManagment === null) {
+        } else if (cotrolTypesList.length !== 0 && controlType === null) {
             setIsError({
                 state: true,
                 text: "⚠️ Оберіть тип керування",
@@ -141,6 +189,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
         }, 3000);
     }
 
+
     return (
         <>
             {/* Titles */}
@@ -148,7 +197,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                 <Text style={thirdStepStyles.stepSubtitle}>Оформлення Замовлення</Text>
             </AnimatedWrapper>
             <AnimatedWrapper useOpacity offsetY={20} delay={100}>
-                <Text style={thirdStepStyles.stepCategory}>{groupName}</Text>
+                <Text style={thirdStepStyles.stepCategory}>{orderObject.group.name}</Text>
             </AnimatedWrapper>
 
             {/* Error message */}
@@ -156,72 +205,15 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
 
             {/* Product selection */}
             <AnimatedWrapper useOpacity offsetY={20} delay={200}>
+                {/* Product list */}
                 <Text style={thirdStepStyles.detailsText}>Оберіть тканину</Text>
-                <View style={{ position: "relative" }}>
-                    <Pressable onPress={toggleProductsList}>
-                        <Text style={thirdStepStyles.selectField}>
-                            {activeProduct === null ? "Оберіть зі списку" : activeProduct.name}
-                        </Text>
-                    </Pressable>
-                    <ArrowDown style={thirdStepStyles.arrowIcon} />
-
-                    {isProductsListOpen && (
-                        <AnimatedWrapper useOpacity offsetY={-20} style={thirdStepStyles.dropdownMenu}>
-                            {products === null ? (
-                                <View style={thirdStepStyles.loaderContainer}>
-                                    <Loader />
-                                </View>
-                            ) : products.length === 0 ? (
-                                <Text>Товари за обраними параметрами відсутні</Text>
-                            ) : (
-                                <ScrollView style={thirdStepStyles.scrollModal}>
-                                    {products.map((product, index) => (
-                                        <Pressable
-                                            key={index}
-                                            style={[
-                                                thirdStepStyles.productItem,
-                                                {
-                                                    backgroundColor: getProductBackgroundColor(
-                                                        product,
-                                                        activeProduct
-                                                    ),
-                                                    opacity: getProductOpacity(product),
-                                                },
-                                            ]}
-                                            onPress={() => {
-                                                if (product.presence === "нет") {
-                                                    setIsError({
-                                                        state: true,
-                                                        text: "⚠️ Цїєї тканини немає в наявності!",
-                                                        errorFieldNumber: null
-                                                    });
-                                                    setTimeout(() => setIsError(initErrorObject), 3000);
-                                                } else {
-                                                    const pressebleProduct = product.name === activeProduct?.name ? null : product;
-
-                                                    setIsError(initErrorObject);
-                                                    setActiveProduct(pressebleProduct);
-                                                    setOrderObject({ ...orderObject, product: product });
-                                                    setFixationTypeList(product.fixation);
-                                                    setIsProductsListOpen(false);
-                                                }
-                                            }}
-                                        >
-                                            <Text
-                                                style={[
-                                                    thirdStepStyles.productItemText,
-                                                    product.sale_tk && thirdStepStyles.productItemTextWhite,
-                                                ]}
-                                            >
-                                                {getProductLabel(product)}
-                                            </Text>
-                                        </Pressable>
-                                    ))}
-                                </ScrollView>
-                            )}
-                        </AnimatedWrapper>
-                    )}
-                </View>
+                <ProductsList
+                    activeProduct={activeProduct}
+                    productsList={products}
+                    productsListHandler={productsListHandler}
+                    isProductsListOpen={isProductsListOpen}
+                    toggleProductsList={toggleProductsList}
+                />
 
                 <View
                     style={{
@@ -238,40 +230,14 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
 
                     {/* Управление и Количество */}
                     <View style={thirdStepStyles.row}>
-                        <View style={thirdStepStyles.inputContainer}>
-                            <Text style={thirdStepStyles.detailsText}>Керування</Text>
-                            <Pressable onPress={toggleTypeManagmentList}>
-                                <Text style={[thirdStepStyles.selectField, isError.errorFieldNumber === 3 && thirdStepStyles.borderRed]}>{activeTypeManagment || "Оберіть тип"}</Text>
-                            </Pressable>
-                            <ArrowDown style={thirdStepStyles.arrowIcon} />
-
-                            {isTypeManagmentListOpen && (
-                                <AnimatedWrapper useOpacity offsetY={-20} style={thirdStepStyles.dropdownMenu}>
-                                    <ScrollView style={thirdStepStyles.scrollModal}>
-                                        {typeManagmentList.length ?
-                                            typeManagmentList.map((type, index) => (
-                                                <Pressable
-                                                    key={index}
-                                                    style={[
-                                                        thirdStepStyles.productItem,
-                                                        activeTypeManagment === type && { backgroundColor: Colors.pale },
-                                                    ]}
-                                                    onPress={() => {
-                                                        setActiveTypeManagment(type);
-                                                        setOrderObject({ ...orderObject, typeManagment: type });
-                                                        setIsTypeManagmentListOpen(false);
-                                                    }}
-                                                >
-                                                    <Text style={thirdStepStyles.productItemText}>{type}</Text>
-                                                </Pressable>
-                                            ))
-                                            :
-                                            <Text style={thirdStepStyles.absentValueText}>Значення відсутні</Text>
-                                        }
-                                    </ScrollView>
-                                </AnimatedWrapper>
-                            )}
-                        </View>
+                        {subgroup.control.length !== 0 && <ControlType
+                            isControlTypeListOpen={isControlTypeListOpen}
+                            toggleControlTypeList={toggleControlTypeList}
+                            activeControlType={activeControlType}
+                            cotrolTypesList={cotrolTypesList}
+                            controlTypesListHandler={controlTypesListHandler}
+                            isError={isError}
+                        />}
 
                         <CountValue
                             orderObject={orderObject}
@@ -281,81 +247,27 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                     </View>
 
                     {/* Цвет системы */}
-                    <View style={thirdStepStyles.colorContainer}>
-                        <Text style={thirdStepStyles.detailsText}>Колір системи</Text>
-
-                        <Pressable onPress={toggleColorList}>
-                            <Text style={[thirdStepStyles.selectField, isError.errorFieldNumber === 5 && thirdStepStyles.borderRed]}>{activeColor || "Оберіть колір"}</Text>
-                        </Pressable>
-                        <ArrowDown style={thirdStepStyles.arrowIcon} />
-
-                        {isColorListOpen && (
-                            <AnimatedWrapper useOpacity offsetY={-20} style={thirdStepStyles.dropdownMenu}>
-                                <ScrollView style={thirdStepStyles.scrollModal}>
-                                    {colorsList.length ?
-                                        colorsList.map((color, index) => (
-                                            <Pressable
-                                                key={index}
-                                                style={[
-                                                    thirdStepStyles.productItem,
-                                                    activeColor === color && { backgroundColor: Colors.pale },
-                                                ]}
-                                                onPress={() => {
-                                                    setActiveColor(color);
-                                                    setOrderObject({ ...orderObject, color_system: color });
-                                                    setIsColorListOpen(false);
-                                                }}
-                                            >
-                                                <Text style={thirdStepStyles.productItemText}>{color}</Text>
-                                            </Pressable>
-                                        ))
-                                        :
-                                        <Text style={thirdStepStyles.absentValueText}>значення відсутні</Text>
-                                    }
-                                </ScrollView>
-                            </AnimatedWrapper>
-                        )}
-                    </View>
+                    {subgroup.colors.length !== 0 && <Color
+                        activeColor={activeColor}
+                        colorsList={colorsList}
+                        isColorListOpen={isColorListOpen}
+                        isError={isError}
+                        toggleColorList={toggleColorList}
+                        colorsListHandler={colorsListHandler}
+                    />}
 
                     {/* Фиксация */}
-                    <View style={thirdStepStyles.colorContainer}>
-                        <Text style={thirdStepStyles.detailsText}>Фіксація</Text>
-
-                        <Pressable onPress={toggleFixationTypeList}>
-                            <Text style={[thirdStepStyles.selectField, isError.errorFieldNumber === 6 && thirdStepStyles.borderRed]}>{activeFixationType === null ? "Оберіть тип" : activeFixationType.name}</Text>
-                        </Pressable>
-                        <ArrowDown style={thirdStepStyles.arrowIcon} />
-
-                        {isFixationTypeListOpen && (
-                            <AnimatedWrapper useOpacity offsetY={-20} style={thirdStepStyles.dropdownMenu}>
-                                <ScrollView style={thirdStepStyles.scrollModal}>
-                                    {fixationTypeList.length ?
-                                        fixationTypeList.map((fixationType, index) => (
-                                            <Pressable
-                                                key={index}
-                                                style={[
-                                                    thirdStepStyles.productItem,
-                                                    (activeFixationType !== null && activeFixationType.name === fixationType.name) && { backgroundColor: Colors.pale },
-                                                ]}
-                                                onPress={() => {
-                                                    setActiveFixationType(fixationType);
-                                                    setOrderObject({ ...orderObject, fixation_type: fixationType });
-                                                    setIsFixationTypeListOpen(false);
-                                                }}
-                                            >
-                                                <Text style={thirdStepStyles.productItemText}>{fixationType.name}</Text>
-                                            </Pressable>
-                                        ))
-                                        :
-                                        <Text style={thirdStepStyles.absentValueText}>значення відсутні</Text>
-                                    }
-                                </ScrollView>
-                            </AnimatedWrapper>
-                        )}
-                    </View>
+                    {(subgroup.fixations.length !== 0 || subgroup.rb3.length !== 0) && <FixationType
+                        activeFixationType={activeFixationType}
+                        fixationTypeList={fixationTypeList}
+                        fixationTypesListHandler={fixationTypesListHandler}
+                        isError={isError}
+                        isFixationTypeListOpen={isFixationTypeListOpen}
+                        toggleFixationTypeList={toggleFixationTypeList}
+                    />}
 
                     {/* Цена / Разом */}
-                    <View style={thirdStepStyles.row}>
+                    {/* <View style={thirdStepStyles.row}>
                         <View style={thirdStepStyles.inputContainer}>
                             <Text style={thirdStepStyles.detailsText}>Ціна</Text>
                             <Text style={thirdStepStyles.input} >0</Text>
@@ -364,7 +276,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                             <Text style={thirdStepStyles.detailsText}>Разом</Text>
                             <Text style={thirdStepStyles.input} >0</Text>
                         </View>
-                    </View>
+                    </View> */}
                 </View>
             </AnimatedWrapper>
 
@@ -387,33 +299,37 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
     );
 }
 
-function CountValue({ orderObject, setOrderObject, errorFieldNumber }: { orderObject: INewOrderObject, setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>>, errorFieldNumber: number | null }) {
-    return (
-        <View style={thirdStepStyles.inputContainer}>
-            <Text style={thirdStepStyles.detailsText}>Кількість</Text>
-            <TextInput
-                keyboardType="number-pad"
-                style={[thirdStepStyles.input, errorFieldNumber === 4 && thirdStepStyles.borderRed]}
-                placeholder="0"
-                value={orderObject.count_number || ""}
-                onChangeText={(value) => {
-                    setOrderObject({
-                        ...orderObject,
-                        count_number: value
-                    })
-                }}
-            />
-            <Text style={thirdStepStyles.unitLabel}>шт</Text>
-        </View>
-    )
-}
 
-function ArrowDown({ style }: { style?: ImageStyle }) {
+export function ArrowDown({ style, isRotate = false }: { style?: ImageStyle, isRotate?: boolean }) {
     return (
-        <Image
-            source={require("../../../assets/catalog-screen/arrow.png")}
-            style={[{ width: 18, height: 11, resizeMode: "contain" }, style]}
-        />
+        <>
+            {isRotate ?
+                <AnimatedWrapper
+                    key="rotated"
+                    useOpacity
+                    offsetY={10}
+                >
+                    <Image
+                        source={require("../../../assets/catalog-screen/arrow.png")}
+                        style={[
+                            { width: 18, height: 11, resizeMode: "contain", top: -27, transform: [{ rotate: "180deg" }] },
+                            style
+                        ]}
+                    />
+                </AnimatedWrapper>
+                :
+                <AnimatedWrapper
+                    key="notrotated"
+                    useOpacity
+                    offsetY={-10}
+                >
+                    <Image
+                        source={require("../../../assets/catalog-screen/arrow.png")}
+                        style={[{ width: 18, height: 11, resizeMode: "contain", top: -25 }, style]}
+                    />
+                </AnimatedWrapper>
+            }
+        </>
     );
 }
 
@@ -423,28 +339,6 @@ function ErrorMessage({ errorText }: { errorText: string }) {
             <Text style={thirdStepStyles.errorMessageText}>{errorText}</Text>
         </AnimatedWrapper>
     );
-}
-
-// utils
-// Helper functions for thirdStepStyles and labels
-function getProductLabel(product: IProductByCodes) {
-    if (product.sale_tk) return "🏷️ " + product.name;
-    if (product.presence === "нет") return "🚫 " + product.name;
-    return product.name;
-}
-
-function getProductBackgroundColor(
-    product: IProductByCodes,
-    activeProduct: IProductByCodes | null
-) {
-    if (activeProduct?.name === product.name) return Colors.pale;
-    if (product.sale_tk) return Colors.blue;
-    if (product.presence === "нет") return "#D1D1D6";
-    return "white";
-}
-
-function getProductOpacity(product: IProductByCodes) {
-    return product.presence === "нет" ? 0.6 : 1;
 }
 
 export const thirdStepStyles = StyleSheet.create({
@@ -497,8 +391,9 @@ export const thirdStepStyles = StyleSheet.create({
         borderRadius: 17,
         position: "absolute",
         top: "105%",
-        zIndex: 20,
+        zIndex: 50,
         padding: 8,
+        paddingBottom: 4,
 
         // iOS shadow
         shadowColor: "#000",
@@ -517,7 +412,8 @@ export const thirdStepStyles = StyleSheet.create({
         maxHeight: 321,
     },
     productItem: {
-        paddingVertical: 5,
+        paddingTop: 3,
+        paddingBottom: 5,
         marginBottom: 5,
         borderRadius: 70,
         paddingHorizontal: 10,
@@ -613,6 +509,7 @@ export const thirdStepStyles = StyleSheet.create({
         borderRadius: 31,
         overflow: "hidden",
         position: "absolute",
+        zIndex: -1,
         bottom: -70,
         alignSelf: "center",
     },

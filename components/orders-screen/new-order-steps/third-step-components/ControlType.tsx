@@ -1,0 +1,52 @@
+import { Pressable, ScrollView, Text, View } from "react-native";
+import AnimatedWrapper from "../../../animation/AnimatedWrapper";
+import { ArrowDown, IErrorStateMessage, thirdStepStyles } from "../ThirdStep";
+import { Colors } from "../../../../theme/colors";
+
+export default function ControlType({
+    isControlTypeListOpen,
+    toggleControlTypeList,
+    cotrolTypesList,
+    activeControlType,
+    controlTypesListHandler,
+    isError
+}: {
+    isControlTypeListOpen: boolean,
+    toggleControlTypeList: () => void,
+    cotrolTypesList: string[],
+    activeControlType: string | null,
+    controlTypesListHandler: (type: string) => void,
+    isError: IErrorStateMessage
+}) {
+    return (
+        <View style={thirdStepStyles.inputContainer}>
+            <Text style={thirdStepStyles.detailsText}>Керування</Text>
+            <Pressable onPress={toggleControlTypeList}>
+                <Text style={[thirdStepStyles.selectField, isError.errorFieldNumber === 3 && thirdStepStyles.borderRed]}>{activeControlType || "Оберіть тип"}</Text>
+            </Pressable>
+            <ArrowDown isRotate={isControlTypeListOpen} style={thirdStepStyles.arrowIcon} />
+
+            {isControlTypeListOpen && <AnimatedWrapper useOpacity offsetY={-20} style={thirdStepStyles.dropdownMenu}>
+                <ScrollView style={thirdStepStyles.scrollModal}>
+                    {cotrolTypesList.length ?
+                        cotrolTypesList.map((type, index) => (
+                            <Pressable
+                                key={index}
+                                style={[
+                                    thirdStepStyles.productItem,
+                                    activeControlType === type && { backgroundColor: Colors.pale },
+                                ]}
+                                onPress={() => controlTypesListHandler(type)}
+                            >
+                                <Text style={thirdStepStyles.productItemText}>{type}</Text>
+                            </Pressable>
+                        ))
+                        :
+                        <Text style={thirdStepStyles.absentValueText}>Значення відсутні</Text>
+                    }
+                </ScrollView>
+            </AnimatedWrapper>
+            }
+        </View>
+    )
+}
