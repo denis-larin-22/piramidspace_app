@@ -6,6 +6,8 @@ import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import Loader from "../../ui/Loader";
 import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
+import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
+import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
 
 function SecondStep({ orderObject, rateValue, balanceValue, stepHandler }: {
     orderObject: INewOrderObject
@@ -18,12 +20,13 @@ function SecondStep({ orderObject, rateValue, balanceValue, stepHandler }: {
 
     useEffect(() => {
         async function getSubgroups() {
-            if (code === null || name === null) {
+            const login = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
+            if (code === null || name === null || login === undefined) {
                 setSubGroupsList([]);
                 return;
             }
 
-            const groupsStructure = await getGroupsStructure(code);
+            const groupsStructure = await getGroupsStructure(code, login);
 
             if (groupsStructure) {
                 if (groupsStructure.groups.length === 0) {

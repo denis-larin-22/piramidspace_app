@@ -18,6 +18,7 @@ export default function ProductsList({
     productsListHandler: (product: IProductByCodes) => void,
     toggleProductsList: () => void
 }) {
+
     return (
         <View style={{ position: "relative" }}>
             <Pressable onPress={toggleProductsList}>

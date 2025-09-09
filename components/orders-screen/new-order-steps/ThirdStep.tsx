@@ -12,6 +12,8 @@ import CountValue from "./third-step-components/CountValue";
 import ControlType from "./third-step-components/ControlType";
 import Color from "./third-step-components/Color";
 import FixationType from "./third-step-components/FixationType";
+import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
+import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
 
 export interface IErrorStateMessage {
     state: boolean,
@@ -68,11 +70,12 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
     // Getting products list and params
     useEffect(() => {
         async function getProducts() {
-            if (orderObject.group.code === null || orderObject.subgroup === null) {
+            const login = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
+            if (orderObject.group.code === null || orderObject.subgroup === null || login === undefined) {
                 setProducts([]);
                 return;
             }
-            const data = await getStructureProductsGroupByCodes(orderObject.group.code, orderObject.subgroup.code);
+            const data = await getStructureProductsGroupByCodes(orderObject.group.code, orderObject.subgroup.code, login);
             if (data === null) {
                 return;
             } else {
@@ -189,7 +192,6 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
         }, 3000);
     }
 
-
     return (
         <>
             {/* Titles */}
@@ -230,7 +232,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
 
                     {/* Управление и Количество */}
                     <View style={thirdStepStyles.row}>
-                        {subgroup.control.length !== 0 && <ControlType
+                        {cotrolTypesList.length !== 0 && <ControlType
                             isControlTypeListOpen={isControlTypeListOpen}
                             toggleControlTypeList={toggleControlTypeList}
                             activeControlType={activeControlType}
@@ -247,7 +249,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                     </View>
 
                     {/* Цвет системы */}
-                    {subgroup.colors.length !== 0 && <Color
+                    {colorsList.length !== 0 && <Color
                         activeColor={activeColor}
                         colorsList={colorsList}
                         isColorListOpen={isColorListOpen}
@@ -257,7 +259,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                     />}
 
                     {/* Фиксация */}
-                    {(subgroup.fixations.length !== 0 || subgroup.rb3.length !== 0) && <FixationType
+                    {(fixationTypeList.length !== 0 || subgroup.rb3.length !== 0) && <FixationType
                         activeFixationType={activeFixationType}
                         fixationTypeList={fixationTypeList}
                         fixationTypesListHandler={fixationTypesListHandler}
@@ -265,7 +267,6 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                         isFixationTypeListOpen={isFixationTypeListOpen}
                         toggleFixationTypeList={toggleFixationTypeList}
                     />}
-
                     {/* Цена / Разом */}
                     {/* <View style={thirdStepStyles.row}>
                         <View style={thirdStepStyles.inputContainer}>

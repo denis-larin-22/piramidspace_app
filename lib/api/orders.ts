@@ -142,9 +142,9 @@ export interface ISubgroup {
 }
 
 // get all subgroups (by group)
-export async function getGroupsStructure(groupCode: MainGroupsCode): Promise<IProductGroupsStructureResponse | null> {
+export async function getGroupsStructure(groupCode: MainGroupsCode, login: string): Promise<IProductGroupsStructureResponse | null> {
     try {
-        const response = await fetch(`${BASE_URL}/api/piramid/product-groups?group=${groupCode}`);
+        const response = await fetch(`${BASE_URL}/api/piramid/product-groups?login=${login}&group=${groupCode}`);
 
         if (!response.ok) {
             console.error(`GETTING SUBGROUPS ERROR! HTTP error: ${response.status} ${response.statusText}`);
@@ -185,8 +185,6 @@ export interface IProductByCodes {
     price: number,
     presence: string,
     sale_tk: boolean,
-    w_max: number,
-    h_max: number,
     square_max: number,
     category_fabric: number,
     fixation: IFixationType[]
@@ -204,9 +202,9 @@ export interface IProductsAndParams {
     colors: string[]
 }
 
-export async function getStructureProductsGroupByCodes(groupCode: MainGroupsCode, subgroupCode: string): Promise<IProductsAndParams | null> {
+export async function getStructureProductsGroupByCodes(groupCode: MainGroupsCode, subgroupCode: string, login: string): Promise<IProductsAndParams | null> {
     try {
-        const response = await fetch(`${BASE_URL}/api/piramid/products?group=${groupCode}&subgroup=${subgroupCode}`);
+        const response = await fetch(`${BASE_URL}/api/piramid/products?group=${groupCode}&subgroup=${subgroupCode}&login=${login}`);
 
         if (!response.ok) {
             console.error(`GETTING PRODUCTS BY GROUP AND SUBGROUP CODES ERROR! HTTP error: ${response.status} ${response.statusText}`);
