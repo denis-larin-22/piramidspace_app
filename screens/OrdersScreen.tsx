@@ -6,16 +6,14 @@ import {
     View
 } from "react-native";
 import { Colors } from "../theme/colors";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import { Fonts } from "../theme/fonts";
 import OrdersHeader from "../components/orders-screen/OrdersHeader";
 import NumberAndStatus from "../components/orders-screen/NumberAndStatus";
 import TableOrders from "../components/orders-screen/TableOrders";
 import AnimatedWrapper from "../components/animation/AnimatedWrapper";
-import LoaderWithWords from "../components/ui/LoaderWithWords";
 import { useOrdersList } from "../lib/hooks/useOrdersList";
 import { useNetworkStatus } from "../lib/hooks/useNetworkStatus";
-import { IOrder } from "../lib/api/orders";
 import BackButton from "../components/ui/BackButton";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppStack";

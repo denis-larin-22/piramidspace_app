@@ -11,7 +11,7 @@ import { INewOrderObject } from "../AddNewOrder";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
-import { calculateOrderPrice, ICulculateOrderObject, MainGroupsCode } from "../../../lib/api/orders";
+
 import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
 import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
 import Loader from "../../ui/Loader";

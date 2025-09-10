@@ -2,7 +2,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import AnimatedWrapper from "../../../animation/AnimatedWrapper";
 import { ArrowDown, thirdStepStyles } from "../ThirdStep";
 import Loader from "../../../ui/Loader";
-import { IProductByCodes, MainGroupsCode } from "../../../../lib/api/orders";
+import { IProductByCodes, MainGroupsCode } from "../../../../lib/api/orders-screen/groups-and-products";
 import { Colors } from "../../../../theme/colors";
 
 export default function ProductsList({
@@ -22,7 +22,11 @@ export default function ProductsList({
     return (
         <View style={{ position: "relative" }}>
             <Pressable onPress={toggleProductsList}>
-                <Text style={thirdStepStyles.selectField}>
+                <Text
+                    style={[thirdStepStyles.selectField, {
+                        borderColor: isProductsListOpen ? Colors.blue : 'transparent'
+                    }]}
+                >
                     {activeProduct === null ? "Оберіть зі списку" : activeProduct.name}
                 </Text>
             </Pressable>

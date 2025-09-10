@@ -1,23 +1,24 @@
 import { useState } from "react";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
-import { Image, ImageBackground, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ImageBackground, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { useDollarRate } from "../../lib/hooks/useDollarRate";
 import { useNetworkStatus } from "../../lib/hooks/useNetworkStatus";
 import { useBalanceValue } from "../../lib/hooks/useBalanceValue";
-import { IFixationType, IProductByCodes, ISubgroup, MainGroupsCode } from "../../lib/api/orders";
+import { IProductByCodes, ISubgroup, MainGroupsCode } from "../../lib/api/orders-screen/groups-and-products";
 import ThirdStep from "./new-order-steps/ThirdStep";
 import FirstStep from "./new-order-steps/FirstStep";
 import SecondStep from "./new-order-steps/SecondStep";
 import FinalStep from "./new-order-steps/FinalStep";
+import { ISubgroupDayNightAndRoller } from "../../lib/api/orders-screen/day-night-roller-groups";
 
 export interface INewOrderObject {
     group: {
         name: string | null,
         code: MainGroupsCode | null
     },
-    subgroup: ISubgroup | null,
+    subgroup: ISubgroup | ISubgroupDayNightAndRoller | null,
     product: IProductByCodes | null,
     width_gab: string | null, // габарит
     height_gab: string | null, // габарит
@@ -70,7 +71,7 @@ function AddNewOrder() {
         setActiveStep(2);
     };
 
-    const secondStepHandler = (selectedSubgroup: ISubgroup) => {
+    const secondStepHandler = (selectedSubgroup: ISubgroup | ISubgroupDayNightAndRoller) => {
         const updatedOrder: INewOrderObject = {
             ...newOrderObject,
             subgroup: selectedSubgroup

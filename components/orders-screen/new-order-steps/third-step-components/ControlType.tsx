@@ -22,7 +22,12 @@ export default function ControlType({
         <View style={thirdStepStyles.inputContainer}>
             <Text style={thirdStepStyles.detailsText}>Керування</Text>
             <Pressable onPress={toggleControlTypeList}>
-                <Text style={[thirdStepStyles.selectField, isError.errorFieldNumber === 3 && thirdStepStyles.borderRed]}>{activeControlType || "Оберіть тип"}</Text>
+                <Text
+                    style={[
+                        thirdStepStyles.selectField,
+                        { borderColor: isControlTypeListOpen ? Colors.blue : 'transparent' },
+                        isError.errorFieldNumber === 3 && thirdStepStyles.borderRed
+                    ]}>{activeControlType || "Оберіть тип"}</Text>
             </Pressable>
             <ArrowDown isRotate={isControlTypeListOpen} style={thirdStepStyles.arrowIcon} />
 

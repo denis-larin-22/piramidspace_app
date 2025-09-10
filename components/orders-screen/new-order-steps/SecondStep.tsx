@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { INewOrderObject } from "../AddNewOrder";
-import { getGroupsStructure, ISubgroup } from "../../../lib/api/orders";
+import { getGroupsStructure, ISubgroup } from "../../../lib/api/orders-screen/groups-and-products";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import Loader from "../../ui/Loader";
@@ -8,15 +8,17 @@ import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
 import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
 import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
+import { ISubgroupDayNightAndRoller } from "../../../lib/api/orders-screen/day-night-roller-groups";
 
 function SecondStep({ orderObject, rateValue, balanceValue, stepHandler }: {
     orderObject: INewOrderObject
     rateValue: string | null,
     balanceValue: number | null,
-    stepHandler: (selectedSubgroup: ISubgroup) => void
+    stepHandler: (selectedSubgroup: ISubgroup | ISubgroupDayNightAndRoller) => void
 }) {
     const { group: { code, name } } = orderObject;
-    const [subGroupsList, setSubGroupsList] = useState<Array<ISubgroup> | null>(null);
+
+    const [subGroupsList, setSubGroupsList] = useState<ISubgroup[] | ISubgroupDayNightAndRoller[] | null>(null);
 
     useEffect(() => {
         async function getSubgroups() {

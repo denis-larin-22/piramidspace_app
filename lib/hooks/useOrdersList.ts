@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { getDataFromAcyncStorage } from '../async-storage/acyncStorage'
-import { fetchOrderById, fetchOrderByStatus, fetchOrdersList, IOrderList } from '../api/orders'
 import {
     ASYNC_STORAGE_USER_LOGIN
 } from '../async-storage/asyncStorageKeys'
+import { fetchOrderById, fetchOrderByStatus, fetchOrdersList, IOrderList } from '../api/orders-screen/ordersList';
 
 export const useOrdersList = (
     orderId: string,

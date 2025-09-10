@@ -1,5 +1,5 @@
 import { Image, Pressable, StyleSheet, Text } from "react-native";
-import { MainGroupsCode } from "../../../lib/api/orders";
+import { MainGroupsCode } from "../../../lib/api/orders-screen/groups-and-products";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { Colors } from "../../../theme/colors";
 import { Fonts } from "../../../theme/fonts";

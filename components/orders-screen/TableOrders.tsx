@@ -2,10 +2,10 @@ import React, { useRef, useState } from 'react';
 import { ScrollView, View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Fonts } from '../../theme/fonts';
 import AnimatedWrapper from '../animation/AnimatedWrapper';
-import { IOrder } from '../../lib/api/orders';
 import OrderItem from './OrderItem';
 import { Colors } from '../../theme/colors';
 import Loader from '../ui/Loader';
+import { IOrder } from '../../lib/api/orders-screen/ordersList';
 
 
 export default function TableOrders({

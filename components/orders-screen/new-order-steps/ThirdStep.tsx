@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { INewOrderObject } from "../AddNewOrder";
-import { getStructureProductsGroupByCodes, IFixationType, IProductByCodes, MainGroupsCode } from "../../../lib/api/orders";
+import { getProductsByGroupCodes, IFixationType, IProductByCodes, ISubgroup, MainGroupsCode } from "../../../lib/api/orders-screen/groups-and-products";
 import { Image, ImageBackground, ImageStyle, Pressable, ScrollView, Text, TextInput, View, StyleSheet, } from "react-native";
 import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
@@ -14,6 +14,7 @@ import Color from "./third-step-components/Color";
 import FixationType from "./third-step-components/FixationType";
 import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
 import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
+import { ColorPrice } from "../../../lib/api/orders-screen/day-night-roller-groups";
 
 export interface IErrorStateMessage {
     state: boolean,
@@ -32,7 +33,12 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
     const [activeProduct, setActiveProduct] = useState<IProductByCodes | null>(product);
 
     // Color choice
-    const [colorsList] = useState<string[]>(subgroup.colors);
+    const subgroupColors =
+        (group.code === 'day' || group.code === 'roller')
+            ? Object.keys(subgroup.colors as Record<string, ColorPrice[]>)
+            : (subgroup.colors as string[]);
+
+    const [colorsList] = useState<string[]>(subgroupColors);
     const [activeColor, setActiveColor] = useState(color_system);
     const [isColorListOpen, setIsColorListOpen] = useState(false);
 
@@ -42,7 +48,19 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
     const [isControlTypeListOpen, setIsControlTypeListOpen] = useState(false);
 
     // Fixation choise
-    const [fixationTypeList] = useState<string[]>(group.code === 'vertical' ? [subgroup.rb3] : subgroup.fixations.map(type => type.name));
+    const [fixationTypeList] = useState<string[]>(() => {
+        if (!subgroup) return [];
+
+        if ("rb3" in subgroup) {
+            // ISubgroup
+            return group.code === "vertical"
+                ? [subgroup.rb3] // from rb3
+                : subgroup.fixations.map(type => type.name); // string[]
+        } else {
+            // ISubgroupDayNightAndRoller
+            return subgroup.fixations.map(type => type.name); // string[]
+        }
+    });
     const [activeFixationType, setActiveFixationType] = useState<string | null>(fixation_type);
     const [isFixationTypeListOpen, setIsFixationTypeListOpen] = useState(false);
 
@@ -75,11 +93,11 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                 setProducts([]);
                 return;
             }
-            const data = await getStructureProductsGroupByCodes(orderObject.group.code, orderObject.subgroup.code, login);
+            const data = await getProductsByGroupCodes(orderObject.group.code, orderObject.subgroup.code, login);
             if (data === null) {
                 return;
             } else {
-                setProducts(data.products);
+                setProducts(data);
             }
         }
         getProducts();
@@ -232,14 +250,14 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
 
                     {/* Управление и Количество */}
                     <View style={thirdStepStyles.row}>
-                        {cotrolTypesList.length !== 0 && <ControlType
+                        {cotrolTypesList.length !== 0 ? <ControlType
                             isControlTypeListOpen={isControlTypeListOpen}
                             toggleControlTypeList={toggleControlTypeList}
                             activeControlType={activeControlType}
                             cotrolTypesList={cotrolTypesList}
                             controlTypesListHandler={controlTypesListHandler}
                             isError={isError}
-                        />}
+                        /> : null}
 
                         <CountValue
                             orderObject={orderObject}
@@ -249,24 +267,24 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                     </View>
 
                     {/* Цвет системы */}
-                    {colorsList.length !== 0 && <Color
+                    {colorsList.length !== 0 ? <Color
                         activeColor={activeColor}
                         colorsList={colorsList}
                         isColorListOpen={isColorListOpen}
                         isError={isError}
                         toggleColorList={toggleColorList}
                         colorsListHandler={colorsListHandler}
-                    />}
+                    /> : null}
 
                     {/* Фиксация */}
-                    {(fixationTypeList.length !== 0 || subgroup.rb3.length !== 0) && <FixationType
+                    {fixationTypeList.length !== 0 ? <FixationType
                         activeFixationType={activeFixationType}
                         fixationTypeList={fixationTypeList}
                         fixationTypesListHandler={fixationTypesListHandler}
                         isError={isError}
                         isFixationTypeListOpen={isFixationTypeListOpen}
                         toggleFixationTypeList={toggleFixationTypeList}
-                    />}
+                    /> : null}
                     {/* Цена / Разом */}
                     {/* <View style={thirdStepStyles.row}>
                         <View style={thirdStepStyles.inputContainer}>
@@ -373,7 +391,7 @@ export const thirdStepStyles = StyleSheet.create({
         paddingVertical: 9,
         paddingHorizontal: 13,
         borderRadius: 31,
-        borderWidth: 1,
+        borderWidth: 2,
         borderColor: "transparent"
     },
     selectFieldInactive: {
@@ -482,8 +500,10 @@ export const thirdStepStyles = StyleSheet.create({
         paddingVertical: 9,
         paddingHorizontal: 13,
         borderRadius: 31,
-        borderWidth: 1,
-        borderColor: 'transparent'
+        borderWidth: 2,
+        borderColor: 'transparent',
+        position: 'relative',
+        zIndex: 10
     },
     borderRed: {
         borderColor: Colors.red,
@@ -493,7 +513,7 @@ export const thirdStepStyles = StyleSheet.create({
         fontSize: 16,
         color: Colors.gray,
         position: "absolute",
-        bottom: 10,
+        bottom: 12,
         right: 10,
     },
     colorContainer: {

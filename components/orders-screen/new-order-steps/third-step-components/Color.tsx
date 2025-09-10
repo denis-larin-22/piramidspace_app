@@ -23,7 +23,11 @@ export default function Color({
             <Text style={thirdStepStyles.detailsText}>Колір системи</Text>
 
             <Pressable onPress={toggleColorList}>
-                <Text style={[thirdStepStyles.selectField, isError.errorFieldNumber === 5 && thirdStepStyles.borderRed]}>{activeColor || "Оберіть колір"}</Text>
+                <Text style={[
+                    thirdStepStyles.selectField,
+                    { borderColor: isColorListOpen ? Colors.blue : 'transparent' },
+                    isError.errorFieldNumber === 5 && thirdStepStyles.borderRed
+                ]}>{activeColor || "Оберіть колір"}</Text>
             </Pressable>
             <ArrowDown isRotate={isColorListOpen} style={thirdStepStyles.arrowIcon} />
 

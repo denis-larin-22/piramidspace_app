@@ -1,9 +1,9 @@
-import { IOrder } from "../../lib/api/orders";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { tableStyles } from "./TableOrders";
+import { IOrder } from "../../lib/api/orders-screen/ordersList";
 
 function OrderItem({
     order,

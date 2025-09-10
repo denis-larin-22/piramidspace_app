@@ -23,7 +23,11 @@ export default function FixationType({
             <Text style={thirdStepStyles.detailsText}>Фіксація</Text>
 
             <Pressable onPress={toggleFixationTypeList}>
-                <Text style={[thirdStepStyles.selectField, isError.errorFieldNumber === 6 && thirdStepStyles.borderRed]}>{activeFixationType === null ? "Оберіть тип" : activeFixationType}</Text>
+                <Text style={[
+                    thirdStepStyles.selectField,
+                    { borderColor: isFixationTypeListOpen ? Colors.blue : 'transparent' },
+                    isError.errorFieldNumber === 6 && thirdStepStyles.borderRed
+                ]}>{activeFixationType === null ? "Оберіть тип" : activeFixationType}</Text>
             </Pressable>
             <ArrowDown isRotate={isFixationTypeListOpen} style={thirdStepStyles.arrowIcon} />
 
