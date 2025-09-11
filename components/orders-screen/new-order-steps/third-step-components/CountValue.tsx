@@ -14,7 +14,7 @@ export default function CountValue({ orderObject, setOrderObject, errorFieldNumb
                 keyboardType="number-pad"
                 style={[
                     thirdStepStyles.input,
-                    { borderColor: isFocused ? Colors.blue : 'transparent' },
+                    { borderColor: isFocused ? Colors.blue : Colors.blueLight },
                     errorFieldNumber === 4 && thirdStepStyles.borderRed
                 ]}
                 placeholder="0"

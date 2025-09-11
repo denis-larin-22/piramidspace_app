@@ -25,26 +25,39 @@ export default function ControlType({
                 <Text
                     style={[
                         thirdStepStyles.selectField,
-                        { borderColor: isControlTypeListOpen ? Colors.blue : 'transparent' },
+                        { borderColor: isControlTypeListOpen ? Colors.blue : Colors.blueLight },
                         isError.errorFieldNumber === 3 && thirdStepStyles.borderRed
                     ]}>{activeControlType || "Оберіть тип"}</Text>
             </Pressable>
             <ArrowDown isRotate={isControlTypeListOpen} style={thirdStepStyles.arrowIcon} />
 
-            {isControlTypeListOpen && <AnimatedWrapper useOpacity offsetY={-20} style={thirdStepStyles.dropdownMenu}>
+            {isControlTypeListOpen && <AnimatedWrapper
+                useOpacity
+                useScale
+                offsetY={-20}
+                style={[thirdStepStyles.dropdownMenu, {
+                    minHeight: 50,
+                }]}
+            >
                 <ScrollView style={thirdStepStyles.scrollModal}>
                     {cotrolTypesList.length ?
                         cotrolTypesList.map((type, index) => (
-                            <Pressable
+                            <AnimatedWrapper
                                 key={index}
-                                style={[
-                                    thirdStepStyles.productItem,
-                                    activeControlType === type && { backgroundColor: Colors.pale },
-                                ]}
-                                onPress={() => controlTypesListHandler(type)}
+                                useOpacity
+                                offsetY={10}
+                                delay={150 + (30 * index)}
                             >
-                                <Text style={thirdStepStyles.productItemText}>{type}</Text>
-                            </Pressable>
+                                <Pressable
+                                    style={[
+                                        thirdStepStyles.productItem,
+                                        activeControlType === type && { backgroundColor: Colors.pale },
+                                    ]}
+                                    onPress={() => controlTypesListHandler(type)}
+                                >
+                                    <Text style={thirdStepStyles.productItemText}>{type}</Text>
+                                </Pressable>
+                            </AnimatedWrapper>
                         ))
                         :
                         <Text style={thirdStepStyles.absentValueText}>Значення відсутні</Text>

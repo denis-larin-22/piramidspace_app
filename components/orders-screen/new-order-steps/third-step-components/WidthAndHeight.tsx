@@ -17,8 +17,48 @@ function WidthAndHeight({ orderObject, setOrderObject, errorFieldNumber }: {
     const [focusedInput, setFocusedInput] = useState<number | null>(null);
     const [warningInput, setWarningInput] = useState<number | null>(null);
 
-    const w_max = orderObject.product?.w_max || 0;
-    const h_max = orderObject.product?.h_max || 0;
+    const w_max = orderObject.product?.w_max;
+    const h_max = orderObject.product?.h_max;
+
+    const showWarning = (id: number) => {
+        setWarningInput(id);
+        setTimeout(() => setWarningInput(null), 3000);
+    };
+
+    const updateDimension = (
+        field: keyof INewOrderObject,
+        pairField: keyof INewOrderObject,
+        value: string,
+        max?: number,
+        diff: number = 0,
+        warnId?: number,
+        mode: "subtract" | "add" = "subtract"
+    ) => {
+        if (!max) {
+            setOrderObject({
+                ...orderObject,
+                [field]: value,
+                [pairField]: value
+                    ? String(mode === "subtract" ? Math.max(0, +value - diff) : +value + diff)
+                    : ""
+            });
+            return;
+        }
+
+        const limit = mode === "subtract" ? max - diff : max;
+        if (+value > limit) {
+            if (warnId) showWarning(warnId);
+            return;
+        }
+
+        setOrderObject({
+            ...orderObject,
+            [field]: value,
+            [pairField]: value
+                ? String(mode === "subtract" ? Math.max(0, +value - diff) : +value + diff)
+                : ""
+        });
+    };
 
     return (
         <>
@@ -31,31 +71,19 @@ function WidthAndHeight({ orderObject, setOrderObject, errorFieldNumber }: {
                         <Text style={thirdStepStyles.labelNote}>(габарит)</Text>
                     </View>
 
-                    <Warning
-                        isVissible={warningInput === 1}
-                        text={w_max}
-                    />
+                    <Warning isVissible={warningInput === 1} text={w_max} />
                     <TextInput
                         keyboardType="number-pad"
                         style={[
                             thirdStepStyles.input,
-                            { borderColor: focusedInput === 1 ? Colors.blue : 'transparent' },
+                            { borderColor: focusedInput === 1 ? Colors.blue : Colors.blueLight },
                             (errorFieldNumber === 2 || warningInput === 1) && thirdStepStyles.borderRed
                         ]}
                         placeholder="0"
                         value={orderObject.width_gab || ""}
-                        onChangeText={(value) => {
-                            if (+value > +w_max) {
-                                setWarningInput(1);
-                                setTimeout(() => { setWarningInput(null) }, 3000);
-                            } else {
-                                setOrderObject({
-                                    ...orderObject,
-                                    width_gab: value,
-                                    width_shtapik: value ? String(Math.max(0, +value - WIDTH_DIFFERENCE)) : ""
-                                });
-                            }
-                        }}
+                        onChangeText={(value) =>
+                            updateDimension("width_gab", "width_shtapik", value, w_max, WIDTH_DIFFERENCE, 1, "subtract")
+                        }
                         onFocus={() => setFocusedInput(1)}
                         onBlur={() => setFocusedInput(null)}
                         maxLength={3}
@@ -70,31 +98,19 @@ function WidthAndHeight({ orderObject, setOrderObject, errorFieldNumber }: {
                         <Text style={thirdStepStyles.labelNoteSmall}>(по штапику)</Text>
                     </View>
 
-                    <Warning
-                        isVissible={warningInput === 2}
-                        text={w_max - WIDTH_DIFFERENCE}
-                    />
+                    <Warning isVissible={warningInput === 2} text={w_max ? w_max - WIDTH_DIFFERENCE : undefined} />
                     <TextInput
                         keyboardType="number-pad"
                         style={[
                             thirdStepStyles.input,
-                            { borderColor: focusedInput === 2 ? Colors.blue : 'transparent' },
+                            { borderColor: focusedInput === 2 ? Colors.blue : Colors.blueLight },
                             errorFieldNumber === 2 && thirdStepStyles.borderRed
                         ]}
                         placeholder="0"
                         value={orderObject.width_shtapik || ""}
-                        onChangeText={(value) => {
-                            if (+value > (w_max - WIDTH_DIFFERENCE)) {
-                                setWarningInput(2);
-                                setTimeout(() => { setWarningInput(null) }, 3000);
-                            } else {
-                                setOrderObject({
-                                    ...orderObject,
-                                    width_shtapik: value,
-                                    width_gab: value ? String(+value + WIDTH_DIFFERENCE) : ""
-                                })
-                            }
-                        }}
+                        onChangeText={(value) =>
+                            updateDimension("width_shtapik", "width_gab", value, w_max, WIDTH_DIFFERENCE, 2, "add")
+                        }
                         onFocus={() => setFocusedInput(2)}
                         onBlur={() => setFocusedInput(null)}
                         maxLength={3}
@@ -112,31 +128,19 @@ function WidthAndHeight({ orderObject, setOrderObject, errorFieldNumber }: {
                         <Text style={thirdStepStyles.labelNote}>(габарит)</Text>
                     </View>
 
-                    <Warning
-                        isVissible={warningInput === 3}
-                        text={h_max}
-                    />
+                    <Warning isVissible={warningInput === 3} text={h_max} />
                     <TextInput
                         keyboardType="number-pad"
                         style={[
                             thirdStepStyles.input,
-                            { borderColor: focusedInput === 3 ? Colors.blue : 'transparent' },
+                            { borderColor: focusedInput === 3 ? Colors.blue : Colors.blueLight },
                             (errorFieldNumber === 2 || warningInput === 3) && thirdStepStyles.borderRed
                         ]}
                         placeholder="0"
                         value={orderObject.height_gab || ""}
-                        onChangeText={(value) => {
-                            if (+value > +h_max) {
-                                setWarningInput(3);
-                                setTimeout(() => { setWarningInput(null) }, 3000);
-                            } else {
-                                setOrderObject({
-                                    ...orderObject,
-                                    height_gab: value,
-                                    height_shtapik: value ? String(Math.max(0, +value - HEIGHT_DIFFERENCE)) : ""
-                                });
-                            }
-                        }}
+                        onChangeText={(value) =>
+                            updateDimension("height_gab", "height_shtapik", value, h_max, HEIGHT_DIFFERENCE, 3, "subtract")
+                        }
                         onFocus={() => setFocusedInput(3)}
                         onBlur={() => setFocusedInput(null)}
                         maxLength={3}
@@ -151,31 +155,19 @@ function WidthAndHeight({ orderObject, setOrderObject, errorFieldNumber }: {
                         <Text style={thirdStepStyles.labelNoteSmall}>(по штапику)</Text>
                     </View>
 
-                    <Warning
-                        isVissible={warningInput === 4}
-                        text={h_max - HEIGHT_DIFFERENCE}
-                    />
+                    <Warning isVissible={warningInput === 4} text={h_max ? h_max - HEIGHT_DIFFERENCE : undefined} />
                     <TextInput
                         keyboardType="number-pad"
                         style={[
                             thirdStepStyles.input,
-                            { borderColor: focusedInput === 4 ? Colors.blue : 'transparent' },
+                            { borderColor: focusedInput === 4 ? Colors.blue : Colors.blueLight },
                             errorFieldNumber === 2 && thirdStepStyles.borderRed
                         ]}
                         placeholder="0"
                         value={orderObject.height_shtapik || ""}
-                        onChangeText={(value) => {
-                            if (+value > (h_max - HEIGHT_DIFFERENCE)) {
-                                setWarningInput(4);
-                                setTimeout(() => { setWarningInput(null) }, 3000);
-                            } else {
-                                setOrderObject({
-                                    ...orderObject,
-                                    height_shtapik: value,
-                                    height_gab: value ? String(+value + HEIGHT_DIFFERENCE) : ""
-                                });
-                            }
-                        }}
+                        onChangeText={(value) =>
+                            updateDimension("height_shtapik", "height_gab", value, h_max, HEIGHT_DIFFERENCE, 4, "add")
+                        }
                         onFocus={() => setFocusedInput(4)}
                         onBlur={() => setFocusedInput(null)}
                         maxLength={3}
@@ -188,7 +180,6 @@ function WidthAndHeight({ orderObject, setOrderObject, errorFieldNumber }: {
 }
 
 export default WidthAndHeight;
-
 
 function Warning({ isVissible, text }: { isVissible: boolean, text: number | undefined }) {
     if (text === undefined) return null;
@@ -216,7 +207,7 @@ function Warning({ isVissible, text }: { isVissible: boolean, text: number | und
                         elevation: 5,
                     }}
                 >
-                    <Text style={{ fontFamily: Fonts.openSans400 }}>
+                    <Text style={{ fontFamily: Fonts.openSans400, color: Colors.gray }}>
                         max: {text}
                     </Text>
                 </AnimatedWrapper>}

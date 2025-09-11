@@ -25,27 +25,40 @@ export default function Color({
             <Pressable onPress={toggleColorList}>
                 <Text style={[
                     thirdStepStyles.selectField,
-                    { borderColor: isColorListOpen ? Colors.blue : 'transparent' },
+                    { borderColor: isColorListOpen ? Colors.blue : Colors.blueLight },
                     isError.errorFieldNumber === 5 && thirdStepStyles.borderRed
                 ]}>{activeColor || "Оберіть колір"}</Text>
             </Pressable>
             <ArrowDown isRotate={isColorListOpen} style={thirdStepStyles.arrowIcon} />
 
             {isColorListOpen && (
-                <AnimatedWrapper useOpacity offsetY={-20} style={thirdStepStyles.dropdownMenu}>
+                <AnimatedWrapper
+                    useOpacity
+                    useScale
+                    offsetY={-20}
+                    style={[thirdStepStyles.dropdownMenu, {
+                        minHeight: 50,
+                    }]}
+                >
                     <ScrollView style={thirdStepStyles.scrollModal}>
                         {colorsList.length ?
                             colorsList.map((color, index) => (
-                                <Pressable
+                                <AnimatedWrapper
                                     key={index}
-                                    style={[
-                                        thirdStepStyles.productItem,
-                                        activeColor === color && { backgroundColor: Colors.pale },
-                                    ]}
-                                    onPress={() => colorsListHandler(color)}
+                                    useOpacity
+                                    offsetY={10}
+                                    delay={150 + (30 * index)}
                                 >
-                                    <Text style={thirdStepStyles.productItemText}>{color}</Text>
-                                </Pressable>
+                                    <Pressable
+                                        style={[
+                                            thirdStepStyles.productItem,
+                                            activeColor === color && { backgroundColor: Colors.pale },
+                                        ]}
+                                        onPress={() => colorsListHandler(color)}
+                                    >
+                                        <Text style={thirdStepStyles.productItemText}>{color}</Text>
+                                    </Pressable>
+                                </AnimatedWrapper>
                             ))
                             :
                             <Text style={thirdStepStyles.absentValueText}>значення відсутні</Text>

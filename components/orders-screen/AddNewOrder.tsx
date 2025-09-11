@@ -6,19 +6,18 @@ import { Fonts } from "../../theme/fonts";
 import { useDollarRate } from "../../lib/hooks/useDollarRate";
 import { useNetworkStatus } from "../../lib/hooks/useNetworkStatus";
 import { useBalanceValue } from "../../lib/hooks/useBalanceValue";
-import { IProductByCodes, ISubgroup, MainGroupsCode } from "../../lib/api/orders-screen/groups-and-products";
+import { Fixation, IProductByCodes, ISubgroup, MainGroupsCode } from "../../lib/api/orders-screen/groups-and-products";
 import ThirdStep from "./new-order-steps/ThirdStep";
 import FirstStep from "./new-order-steps/FirstStep";
 import SecondStep from "./new-order-steps/SecondStep";
 import FinalStep from "./new-order-steps/FinalStep";
-import { ISubgroupDayNightAndRoller } from "../../lib/api/orders-screen/day-night-roller-groups";
 
 export interface INewOrderObject {
     group: {
         name: string | null,
         code: MainGroupsCode | null
     },
-    subgroup: ISubgroup | ISubgroupDayNightAndRoller | null,
+    subgroup: ISubgroup | null,
     product: IProductByCodes | null,
     width_gab: string | null, // габарит
     height_gab: string | null, // габарит
@@ -27,7 +26,7 @@ export interface INewOrderObject {
     controlType: string | null,
     count_number: string | null, // кількість
     color_system: string | null,
-    fixation_type: string | null,
+    fixation_type: Fixation | null,
     price: number,
     final_price: number
 }
@@ -71,7 +70,7 @@ function AddNewOrder() {
         setActiveStep(2);
     };
 
-    const secondStepHandler = (selectedSubgroup: ISubgroup | ISubgroupDayNightAndRoller) => {
+    const secondStepHandler = (selectedSubgroup: ISubgroup) => {
         const updatedOrder: INewOrderObject = {
             ...newOrderObject,
             subgroup: selectedSubgroup
@@ -126,6 +125,7 @@ function AddNewOrder() {
                     <AnimatedWrapper
                         useOpacity
                         useScale
+                        offsetY={100}
                         delay={100}
                         duration={200}
                         style={styles.modalContent}

@@ -2,7 +2,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import AnimatedWrapper from "../../../animation/AnimatedWrapper";
 import { ArrowDown, thirdStepStyles } from "../ThirdStep";
 import Loader from "../../../ui/Loader";
-import { IProductByCodes, MainGroupsCode } from "../../../../lib/api/orders-screen/groups-and-products";
+import { IProductByCodes } from "../../../../lib/api/orders-screen/groups-and-products";
 import { Colors } from "../../../../theme/colors";
 
 export default function ProductsList({
@@ -24,7 +24,7 @@ export default function ProductsList({
             <Pressable onPress={toggleProductsList}>
                 <Text
                     style={[thirdStepStyles.selectField, {
-                        borderColor: isProductsListOpen ? Colors.blue : 'transparent'
+                        borderColor: isProductsListOpen ? Colors.blue : Colors.blueLight
                     }]}
                 >
                     {activeProduct === null ? "Оберіть зі списку" : activeProduct.name}
@@ -32,39 +32,52 @@ export default function ProductsList({
             </Pressable>
             <ArrowDown isRotate={isProductsListOpen} style={thirdStepStyles.arrowIcon} />
 
-            {isProductsListOpen && <AnimatedWrapper useOpacity offsetY={-20} style={thirdStepStyles.dropdownMenu}>
-                {productsList === null ? (
+            {isProductsListOpen && <AnimatedWrapper
+                useOpacity
+                useScale
+                offsetY={-30}
+                style={[thirdStepStyles.dropdownMenu, {
+                    minHeight: 321,
+                }]}
+            >
+                {productsList == null ? (
                     <View style={thirdStepStyles.loaderContainer}>
-                        <Loader />
+                        <Loader radius={100} />
                     </View>
                 ) : productsList.length === 0 ? (
                     <Text>Товари за обраними параметрами відсутні</Text>
                 ) : (
                     <ScrollView style={thirdStepStyles.scrollModal}>
                         {productsList.map((product, index) => (
-                            <Pressable
+                            <AnimatedWrapper
                                 key={index}
-                                style={[
-                                    thirdStepStyles.productItem,
-                                    {
-                                        backgroundColor: getProductBackgroundColor(
-                                            product,
-                                            activeProduct
-                                        ),
-                                        opacity: getProductOpacity(product),
-                                    },
-                                ]}
-                                onPress={() => productsListHandler(product)}
+                                useOpacity
+                                offsetY={10}
+                                delay={200 + (30 * index)}
                             >
-                                <Text
+                                <Pressable
                                     style={[
-                                        thirdStepStyles.productItemText,
-                                        product.sale_tk && thirdStepStyles.productItemTextWhite,
+                                        thirdStepStyles.productItem,
+                                        {
+                                            backgroundColor: getProductBackgroundColor(
+                                                product,
+                                                activeProduct
+                                            ),
+                                            opacity: getProductOpacity(product),
+                                        },
                                     ]}
+                                    onPress={() => productsListHandler(product)}
                                 >
-                                    {getProductLabel(product)}
-                                </Text>
-                            </Pressable>
+                                    <Text
+                                        style={[
+                                            thirdStepStyles.productItemText,
+                                            product.sale_tk && thirdStepStyles.productItemTextWhite,
+                                        ]}
+                                    >
+                                        {getProductLabel(product)}
+                                    </Text>
+                                </Pressable>
+                            </AnimatedWrapper>
                         ))}
                     </ScrollView>
                 )}

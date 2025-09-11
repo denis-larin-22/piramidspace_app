@@ -136,7 +136,7 @@ function FinalOrderInfo({ orderObject, price_per_unit, total_price }: { orderObj
         { label: "Висота (по штапику)", value: orderObject.height_shtapik, dashedBorder: true },
 
         { label: "⚙ Тип управління", value: orderObject.controlType || "Не обрано" },
-        { label: "🔧 Тип фіксації", value: orderObject.fixation_type || "Не обрано" },
+        { label: "🔧 Тип фіксації", value: orderObject.fixation_type?.name || "Не обрано" },
         { label: "🎨 Колір системи", value: orderObject.color_system },
         { label: "🔢 Кількість", value: `${orderObject.count_number} шт.`, dashedBorder: true },
 

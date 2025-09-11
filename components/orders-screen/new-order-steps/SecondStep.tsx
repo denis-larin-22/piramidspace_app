@@ -8,17 +8,17 @@ import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
 import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
 import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
-import { ISubgroupDayNightAndRoller } from "../../../lib/api/orders-screen/day-night-roller-groups";
+import { mainGroupsIcons } from "./FirstStep";
 
 function SecondStep({ orderObject, rateValue, balanceValue, stepHandler }: {
     orderObject: INewOrderObject
     rateValue: string | null,
     balanceValue: number | null,
-    stepHandler: (selectedSubgroup: ISubgroup | ISubgroupDayNightAndRoller) => void
+    stepHandler: (selectedSubgroup: ISubgroup) => void
 }) {
     const { group: { code, name } } = orderObject;
 
-    const [subGroupsList, setSubGroupsList] = useState<ISubgroup[] | ISubgroupDayNightAndRoller[] | null>(null);
+    const [subGroupsList, setSubGroupsList] = useState<ISubgroup[] | null>(null);
 
     useEffect(() => {
         async function getSubgroups() {
@@ -46,16 +46,28 @@ function SecondStep({ orderObject, rateValue, balanceValue, stepHandler }: {
     }, [orderObject]);
     return (
         <>
-            <Text style={styles.stepSubtitle}>Оформлення Замовлення</Text>
+            <AnimatedWrapper
+                useOpacity
+                delay={100}
+                offsetY={25}
+            >
+                <Text style={styles.stepSubtitle}>Оформлення Замовлення</Text>
+            </AnimatedWrapper>
 
-            <Text style={styles.stepCategory}>{name}</Text>
+            <AnimatedWrapper
+                useOpacity
+                delay={150}
+                offsetY={25}
+            >
+                <Text style={styles.stepCategory}>{name}</Text>
+            </AnimatedWrapper>
 
             {rateValue && balanceValue && <AnimatedWrapper
                 useOpacity
-                offsetY={20}
+                offsetY={25}
+                delay={200}
                 style={styles.detailsBlock}
             >
-                <Text style={styles.detailsText}>Готовність на: 03.07.2025</Text>
                 <Text style={styles.detailsText}>{`Курс: ${rateValue} грн`}</Text>
                 <Text style={styles.detailsText}>{`Баланс: ${balanceValue} $`}</Text>
             </AnimatedWrapper>
@@ -69,8 +81,8 @@ function SecondStep({ orderObject, rateValue, balanceValue, stepHandler }: {
                         <AnimatedWrapper
                             key={subGroup.code}
                             useOpacity
-                            offsetY={5}
-                            delay={index * 60}
+                            offsetY={20}
+                            delay={100 + (index * 60)}
                         >
                             <Pressable
                                 style={styles.categoryButton}
@@ -108,19 +120,21 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textTransform: 'uppercase',
         marginBottom: 7,
-        textAlign: 'right',
+        textAlign: 'center',
         color: Colors.gray,
     },
     stepCategory: {
         fontFamily: Fonts.comfortaa700,
         fontSize: 30,
         textTransform: 'uppercase',
-        marginBottom: 20,
+        marginBottom: 15,
+        marginLeft: 10,
         textAlign: 'left',
         color: Colors.blue,
     },
     detailsBlock: {
         marginBottom: 22,
+        marginLeft: 10,
     },
     detailsText: {
         fontFamily: Fonts.comfortaa600,

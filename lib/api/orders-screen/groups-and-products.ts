@@ -1,6 +1,4 @@
 import { BASE_URL } from "../base-url";
-import { ISubgroupDayNightAndRoller } from "./day-night-roller-groups";
-
 
 //////////////////////////////////////////////////////////
 // main groups codes
@@ -14,18 +12,60 @@ export interface IProductGroupsStructureResponse {
 export interface IGroup {
     code: string,
     name: string,
-    subgroups: ISubgroupDayNightAndRoller[] | ISubgroup[]
+    subgroups: ISubgroup[]
 }
 
 export interface ISubgroup {
     code: string;
     name: string;
-    fixations: IFixationType[];
+    fixations: Fixation[];
     control: string[];
-    colors: string[];
-    rb3: string;
-    options: string[];
+    colors: Record<string, ColorPrice[]> | string[];
+    nacenki: Nacenka[];
+    nacenkiTkaniCat: NacenkaTkaniCat[];
+    tkani: Tkan[];
+    options: any[];
 }
+
+export interface Fixation {
+    name: string;
+    unit: string;
+    price: number;
+}
+
+export interface ColorPrice {
+    width: number;
+    price: string;
+}
+
+export interface Nacenka {
+    price_step: string;
+    step_height: string;
+    min_height_calculate: string;
+}
+
+export interface NacenkaTkaniCat {
+    category_id: number;
+    category_price: string;
+}
+
+export interface Tkan {
+    name: string;
+    short_name: string;
+    category_id: number;
+    unit: string;
+    price: number;
+    max_width: number;
+    max_height: number;
+    max_area: number;
+}
+
+export interface OptionPrice {
+    width: string;
+    price: string;
+}
+
+// ----------------------- API ----------------------- //
 
 // get all subgroups (by group)
 export async function getGroupsStructure(groupCode: MainGroupsCode, login: string): Promise<IProductGroupsStructureResponse | null> {

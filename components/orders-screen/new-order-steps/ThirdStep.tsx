@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { INewOrderObject } from "../AddNewOrder";
-import { getProductsByGroupCodes, IFixationType, IProductByCodes, ISubgroup, MainGroupsCode } from "../../../lib/api/orders-screen/groups-and-products";
+import { ColorPrice, Fixation, getProductsByGroupCodes, IFixationType, IProductByCodes, ISubgroup, MainGroupsCode } from "../../../lib/api/orders-screen/groups-and-products";
 import { Image, ImageBackground, ImageStyle, Pressable, ScrollView, Text, TextInput, View, StyleSheet, } from "react-native";
 import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
@@ -14,7 +14,6 @@ import Color from "./third-step-components/Color";
 import FixationType from "./third-step-components/FixationType";
 import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
 import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
-import { ColorPrice } from "../../../lib/api/orders-screen/day-night-roller-groups";
 
 export interface IErrorStateMessage {
     state: boolean,
@@ -48,20 +47,8 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
     const [isControlTypeListOpen, setIsControlTypeListOpen] = useState(false);
 
     // Fixation choise
-    const [fixationTypeList] = useState<string[]>(() => {
-        if (!subgroup) return [];
-
-        if ("rb3" in subgroup) {
-            // ISubgroup
-            return group.code === "vertical"
-                ? [subgroup.rb3] // from rb3
-                : subgroup.fixations.map(type => type.name); // string[]
-        } else {
-            // ISubgroupDayNightAndRoller
-            return subgroup.fixations.map(type => type.name); // string[]
-        }
-    });
-    const [activeFixationType, setActiveFixationType] = useState<string | null>(fixation_type);
+    const [fixationTypeList] = useState<Fixation[]>(subgroup.fixations);
+    const [activeFixationType, setActiveFixationType] = useState<Fixation | null>(fixation_type);
     const [isFixationTypeListOpen, setIsFixationTypeListOpen] = useState(false);
 
     // Error state
@@ -163,7 +150,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
         setIsColorListOpen(false);
     }
 
-    const fixationTypesListHandler = (type: string) => {
+    const fixationTypesListHandler = (type: Fixation) => {
         setActiveFixationType(type);
         setOrderObject({ ...orderObject, fixation_type: type });
         setIsFixationTypeListOpen(false);
@@ -213,10 +200,19 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
     return (
         <>
             {/* Titles */}
-            <AnimatedWrapper useOpacity offsetY={20}>
+            <AnimatedWrapper
+                useOpacity
+                offsetY={20}
+                delay={100}
+            >
                 <Text style={thirdStepStyles.stepSubtitle}>Оформлення Замовлення</Text>
             </AnimatedWrapper>
-            <AnimatedWrapper useOpacity offsetY={20} delay={100}>
+
+            <AnimatedWrapper
+                useOpacity
+                offsetY={20}
+                delay={200}
+            >
                 <Text style={thirdStepStyles.stepCategory}>{orderObject.group.name}</Text>
             </AnimatedWrapper>
 
@@ -224,7 +220,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
             {isError.state && <ErrorMessage errorText={isError.text} />}
 
             {/* Product selection */}
-            <AnimatedWrapper useOpacity offsetY={20} delay={200}>
+            <AnimatedWrapper useOpacity offsetY={30} delay={300}>
                 {/* Product list */}
                 <Text style={thirdStepStyles.detailsText}>Оберіть тканину</Text>
                 <ProductsList
@@ -355,6 +351,7 @@ export function ArrowDown({ style, isRotate = false }: { style?: ImageStyle, isR
 function ErrorMessage({ errorText }: { errorText: string }) {
     return (
         <AnimatedWrapper style={thirdStepStyles.errorMessage} useOpacity offsetY={20}>
+            <View style={thirdStepStyles.errorMarker}></View>
             <Text style={thirdStepStyles.errorMessageText}>{errorText}</Text>
         </AnimatedWrapper>
     );
@@ -366,7 +363,7 @@ export const thirdStepStyles = StyleSheet.create({
         fontSize: 16,
         textTransform: "uppercase",
         marginBottom: 0,
-        textAlign: "right",
+        textAlign: "center",
         color: Colors.gray,
     },
     stepCategory: {
@@ -374,8 +371,11 @@ export const thirdStepStyles = StyleSheet.create({
         fontSize: 30,
         textTransform: "uppercase",
         marginBottom: 10,
-        textAlign: "left",
+        textAlign: "center",
         color: Colors.blue,
+        borderBottomWidth: 2,
+        paddingBottom: 5,
+        borderColor: Colors.blueLight
     },
     detailsText: {
         fontFamily: Fonts.comfortaa600,
@@ -392,7 +392,6 @@ export const thirdStepStyles = StyleSheet.create({
         paddingHorizontal: 13,
         borderRadius: 31,
         borderWidth: 2,
-        borderColor: "transparent"
     },
     selectFieldInactive: {
         opacity: 0.5,
@@ -424,6 +423,7 @@ export const thirdStepStyles = StyleSheet.create({
         elevation: 5,
     },
     loaderContainer: {
+        height: '100%',
         alignItems: "center",
         justifyContent: "center",
     },
@@ -436,6 +436,8 @@ export const thirdStepStyles = StyleSheet.create({
         marginBottom: 5,
         borderRadius: 70,
         paddingHorizontal: 10,
+        borderBottomWidth: 1,
+        borderColor: Colors.pale,
     },
     productItemText: {
         fontFamily: Fonts.openSans400,
@@ -446,12 +448,14 @@ export const thirdStepStyles = StyleSheet.create({
         color: "white",
     },
     errorMessage: {
+        overflow: 'hidden',
         position: "absolute",
         top: 20,
         alignSelf: "center",
         backgroundColor: Colors.pale,
         paddingVertical: 10,
         paddingHorizontal: 12,
+        paddingLeft: 30,
         borderRadius: 31,
         // iOS shadow
         shadowColor: "#000",
@@ -463,10 +467,18 @@ export const thirdStepStyles = StyleSheet.create({
         elevation: 5,
     },
     errorMessageText: {
-        fontFamily: Fonts.comfortaa700,
+        fontFamily: Fonts.comfortaa600,
         fontSize: 16,
         lineHeight: 18,
         textAlign: 'center',
+    },
+    errorMarker: {
+        width: 22,
+        height: '500%',
+        backgroundColor: Colors.red,
+        position: 'absolute',
+        top: 0,
+        left: 0
     },
     row: {
         flexDirection: "row",
@@ -501,7 +513,6 @@ export const thirdStepStyles = StyleSheet.create({
         paddingHorizontal: 13,
         borderRadius: 31,
         borderWidth: 2,
-        borderColor: 'transparent',
         position: 'relative',
         zIndex: 10
     },
