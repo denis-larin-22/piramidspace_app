@@ -3,6 +3,7 @@ import { MainGroupsCode } from "../../../lib/api/orders-screen/groups-and-produc
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { Colors } from "../../../theme/colors";
 import { Fonts } from "../../../theme/fonts";
+import { INewOrderObject, useCreateOrder } from "../NewOrderProvider";
 
 interface IMainGroupIcons {
     code: MainGroupsCode,
@@ -19,13 +20,26 @@ export const mainGroupsIcons: IMainGroupIcons[] = [
     { code: "ads", name: 'Рекламна продукція', icon: require('../../../assets/orders-screen/promotional-items.png') },
 ];
 
-function FirstStep({ stepHandler }: {
-    stepHandler: (selectedCategory: {
-        name: string;
-        code: MainGroupsCode;
-    }) => void
-}) {
+function FirstStep({ stepHandler }: { stepHandler: () => void }) {
+    const { orderParams, setOrderParams } = useCreateOrder();
 
+    const selectHandler = (selectedGroup: { name: string, code: MainGroupsCode }) => {
+        const updatedOrder: INewOrderObject = {
+            ...orderParams.newOrderObject,
+            id: orderParams.newOrderObject.id || generateId(),
+            group: {
+                code: selectedGroup.code,
+                name: selectedGroup.name
+            }
+        };
+
+        setOrderParams({
+            ...orderParams,
+            activeGroup: selectedGroup.code,
+            newOrderObject: updatedOrder
+        });
+        stepHandler();
+    };
 
     return (
         <>
@@ -53,7 +67,7 @@ function FirstStep({ stepHandler }: {
                     <Pressable
                         style={styles.categoryButton}
                         onPress={() => {
-                            stepHandler({ code: group.code, name: group.name });
+                            selectHandler({ code: group.code, name: group.name });
                         }}
                     >
                         <Image
@@ -72,6 +86,11 @@ function FirstStep({ stepHandler }: {
 }
 
 export default FirstStep;
+
+export function generateId(): string {
+    return Math.floor(1000 + Math.random() * 9000).toString();
+}
+
 
 const styles = StyleSheet.create({
     categoryButton: {

@@ -9,38 +9,35 @@ export interface ICulculateOrderObject {
     width: number,
     height: number,
     side: string,
+    units: string,
     quantity: number,
-    system_color: null | string,
-    fixation_type: null | string,
+    system_color: string,
     add_to_cart: boolean,
-    login: string
+    login: string,
+    fixation_type?: string,
+    options?: string,
 }
 
-interface ICalculateResponceSuccess {
+export interface ICalculateResponce {
     success: boolean,
     price_per_unit: number,
+    price_per_unit_uah: number,
     total_price: number,
+    total_price_uah: number,
     details: {
         base_price: number,
+        base_price_ua: number,
         color_markup: number,
-        fixation_markup: number
+        color_markup_ua: number,
+        fixation_markup: number,
+        fixation_markup_ua: number,
+        option_markup: number,
+        option_markup_ua: number
     },
     added_to_cart: boolean
 }
 
-interface ICalculateResponceError {
-    success: boolean,
-    error: string
-}
-
-export type ICalculateResponse =
-    { status: 200; data: ICalculateResponceSuccess }
-    | { status: 500; data: ICalculateResponceError }
-    | null
-
-export async function calculateOrderPrice(
-    orderObject: ICulculateOrderObject
-): Promise<ICalculateResponse> {
+export async function calculateOrderPriceDayNight(orderObject: ICulculateOrderObject): Promise<ICalculateResponce | null> {
     try {
         const response = await fetch(`${BASE_URL}/api/piramid/calculate-product`, {
             method: "POST",
@@ -53,17 +50,8 @@ export async function calculateOrderPrice(
             return null;
         }
 
-        if (response.status === 200) {
-            const data: ICalculateResponceSuccess = await response.json();
-            return { status: 200, data };
-        }
-
-        const errorData: ICalculateResponceError = await response.json();
-
-        return {
-            status: 500,
-            data: errorData,
-        };
+        const data: ICalculateResponce = await response.json();
+        return data;
     } catch (err) {
         console.error(`Unknown error fetching calculate order price: ${err}`)
         return null;

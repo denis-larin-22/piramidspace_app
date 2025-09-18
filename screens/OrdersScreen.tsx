@@ -18,6 +18,7 @@ import BackButton from "../components/ui/BackButton";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppStack";
 import AddNewOrder from "../components/orders-screen/AddNewOrder";
+import { CreateOrderProvider } from "../components/orders-screen/NewOrderProvider";
 
 export interface IStatusColors {
     color: string;
@@ -65,7 +66,7 @@ function OrdersScreen({ navigation }: { navigation: OrdersScreenNavigationProp }
     };
 
     return (
-        <Fragment>
+        <CreateOrderProvider>
             <StatusBar
                 hidden={false}
                 translucent={false}
@@ -104,7 +105,7 @@ function OrdersScreen({ navigation }: { navigation: OrdersScreenNavigationProp }
                     onPressAction={() => navigation.goBack()}
                 />
             </View>
-        </Fragment>
+        </CreateOrderProvider>
     );
 }
 

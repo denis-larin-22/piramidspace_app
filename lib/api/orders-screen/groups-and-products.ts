@@ -24,7 +24,7 @@ export interface ISubgroup {
     nacenki: Nacenka[];
     nacenkiTkaniCat: NacenkaTkaniCat[];
     tkani: Tkan[];
-    options: any[];
+    options: Record<string, OptionPrice[]> | string[];
 }
 
 export interface Fixation {
@@ -35,6 +35,11 @@ export interface Fixation {
 
 export interface ColorPrice {
     width: number;
+    price: string;
+}
+
+export interface OptionPrice {
+    width: string;
     price: string;
 }
 
@@ -143,7 +148,3 @@ export async function getProductsByGroupCodes(groupCode: MainGroupsCode, subgrou
         return null;
     }
 }
-
-
-
-

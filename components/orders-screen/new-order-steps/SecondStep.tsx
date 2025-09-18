@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { INewOrderObject } from "../AddNewOrder";
 import { getGroupsStructure, ISubgroup } from "../../../lib/api/orders-screen/groups-and-products";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
@@ -8,15 +7,15 @@ import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
 import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
 import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
-import { mainGroupsIcons } from "./FirstStep";
+import { INewOrderObject, useCreateOrder } from "../NewOrderProvider";
 
-function SecondStep({ orderObject, rateValue, balanceValue, stepHandler }: {
-    orderObject: INewOrderObject
+function SecondStep({ rateValue, balanceValue, stepHandler }: {
     rateValue: string | null,
     balanceValue: number | null,
-    stepHandler: (selectedSubgroup: ISubgroup) => void
+    stepHandler: () => void
 }) {
-    const { group: { code, name } } = orderObject;
+    const { orderParams, setOrderParams } = useCreateOrder();
+    const { group: { code, name } } = orderParams.newOrderObject;
 
     const [subGroupsList, setSubGroupsList] = useState<ISubgroup[] | null>(null);
 
@@ -43,7 +42,17 @@ function SecondStep({ orderObject, rateValue, balanceValue, stepHandler }: {
         }
 
         getSubgroups();
-    }, [orderObject]);
+    }, [orderParams.newOrderObject]);
+
+    const selectHandler = (selectedSubgroup: ISubgroup) => {
+        const updatedOrder: INewOrderObject = {
+            ...orderParams.newOrderObject,
+            subgroup: selectedSubgroup
+        };
+
+        setOrderParams({ ...orderParams, newOrderObject: updatedOrder });
+        stepHandler();
+    }
     return (
         <>
             <AnimatedWrapper
@@ -86,7 +95,7 @@ function SecondStep({ orderObject, rateValue, balanceValue, stepHandler }: {
                         >
                             <Pressable
                                 style={styles.categoryButton}
-                                onPress={() => stepHandler(subGroup)}
+                                onPress={() => selectHandler(subGroup)}
                             >
                                 <Text style={styles.categoryText}>
                                     {subGroup.name}

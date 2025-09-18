@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
 import { ImageBackground, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../theme/colors";
@@ -6,99 +6,41 @@ import { Fonts } from "../../theme/fonts";
 import { useDollarRate } from "../../lib/hooks/useDollarRate";
 import { useNetworkStatus } from "../../lib/hooks/useNetworkStatus";
 import { useBalanceValue } from "../../lib/hooks/useBalanceValue";
-import { Fixation, IProductByCodes, ISubgroup, MainGroupsCode } from "../../lib/api/orders-screen/groups-and-products";
 import ThirdStep from "./new-order-steps/ThirdStep";
-import FirstStep from "./new-order-steps/FirstStep";
+import FirstStep, { generateId } from "./new-order-steps/FirstStep";
 import SecondStep from "./new-order-steps/SecondStep";
 import FinalStep from "./new-order-steps/FinalStep";
-
-export interface INewOrderObject {
-    group: {
-        name: string | null,
-        code: MainGroupsCode | null
-    },
-    subgroup: ISubgroup | null,
-    product: IProductByCodes | null,
-    width_gab: string | null, // габарит
-    height_gab: string | null, // габарит
-    width_shtapik: string | null, // по штапику
-    height_shtapik: string | null, // по штапику
-    controlType: string | null,
-    count_number: string | null, // кількість
-    color_system: string | null,
-    fixation_type: Fixation | null,
-    price: number,
-    final_price: number
-}
+import { INewOrderObject, initCreateOrderParams, useCreateOrder } from "./NewOrderProvider";
 
 function AddNewOrder() {
     const { isConnected } = useNetworkStatus();
     const { rate } = useDollarRate(isConnected);
     const { balance } = useBalanceValue(isConnected);
-
+    // context
+    const { orderParams, setOrderParams } = useCreateOrder();
+    // 
     const [isModalVissible, setIsModalVissible] = useState<boolean>(false);
-    //
-    const initNewOrderObject: INewOrderObject = {
-        group: { code: null, name: null },
-        subgroup: null,
-        product: null,
-        width_gab: null,
-        height_gab: null,
-        width_shtapik: null,
-        height_shtapik: null,
-        controlType: null,
-        count_number: null,
-        color_system: null,
-        fixation_type: null,
-        price: 0,
-        final_price: 0
-    };
-
     const [activeStep, setActiveStep] = useState<number>(1);
-    const [newOrderObject, setNewOrderObject] = useState<INewOrderObject>(initNewOrderObject);
 
-    const firstStepHandler = (selectedGroup: { name: string, code: MainGroupsCode }) => {
-        const updatedOrder: INewOrderObject = {
-            ...newOrderObject,
-            group: {
-                code: selectedGroup.code,
-                name: selectedGroup.name
-            }
-        };
-
-        setNewOrderObject(updatedOrder);
-        setActiveStep(2);
-    };
-
-    const secondStepHandler = (selectedSubgroup: ISubgroup) => {
-        const updatedOrder: INewOrderObject = {
-            ...newOrderObject,
-            subgroup: selectedSubgroup
-        };
-
-        setNewOrderObject(updatedOrder);
-        setActiveStep(3);
-    }
-
-    const thirdStepHandler = () => {
-        setActiveStep(4);
-    }
-
+    // buttons handlers
     const backButtonHandler = () => {
-        const { group } = newOrderObject;
+        const { group } = orderParams.newOrderObject;
 
         if (activeStep === 3) {
-            setNewOrderObject({
-                ...initNewOrderObject,
-                group,
+            setOrderParams({
+                ...orderParams,
+                newOrderObject: {
+                    ...initCreateOrderParams.newOrderObject,
+                    group,
+                }
             });
         }
 
         setActiveStep(prev => prev - 1);
     };
 
-    const closeButtonHandler = () => {
-        setNewOrderObject(initNewOrderObject);
+    function closeButtonHandler() {
+        setOrderParams(initCreateOrderParams);
         setActiveStep(1);
         setIsModalVissible(false);
     }
@@ -132,29 +74,51 @@ function AddNewOrder() {
                     >
                         {/* Steps */}
                         {activeStep === 1 ?
-                            <FirstStep stepHandler={firstStepHandler} />
+                            // #1
+                            <FirstStep stepHandler={() => setActiveStep(2)} />
                             :
                             activeStep === 2 ?
+                                // #2
                                 <SecondStep
-                                    orderObject={newOrderObject}
                                     balanceValue={balance}
                                     rateValue={rate}
-                                    stepHandler={secondStepHandler}
+                                    stepHandler={() => setActiveStep(3)}
                                 />
                                 :
                                 activeStep === 3 ?
+                                    // #3
                                     <ThirdStep
-                                        orderObject={newOrderObject}
-                                        setOrderObject={setNewOrderObject}
-                                        stepHandler={thirdStepHandler}
+                                        stepHandler={() => setActiveStep(4)}
                                     />
                                     :
-                                    <FinalStep orderObject={newOrderObject} />
+                                    // #4
+                                    <FinalStep
+                                        closeHandler={() => {
+                                            setOrderParams(initCreateOrderParams);
+                                            setIsModalVissible(false);
+                                            setActiveStep(1);
+                                        }}
+                                        stepHandler={() => {
+                                            const oneMoreItem: INewOrderObject = {
+                                                ...initCreateOrderParams.newOrderObject,
+                                                group: orderParams.newOrderObject.group,
+                                                subgroup: orderParams.newOrderObject.subgroup,
+                                                id: generateId()
+                                            }
+
+                                            setOrderParams({
+                                                ...orderParams,
+                                                newOrderObject: oneMoreItem
+                                            });
+                                            setActiveStep(3);
+                                        }} />
                         }
 
                         {/* Back and close */}
                         <View style={{ zIndex: -1 }}>
-                            {(activeStep !== 1) && <BackButton backHandler={backButtonHandler} />}
+                            {!(activeStep === 1 || (activeStep === 3 && orderParams.ordersList.length !== 0)) && (
+                                <BackButton backHandler={backButtonHandler} />
+                            )}
                             <CloseButton closeHandler={closeButtonHandler} />
                         </View>
                     </AnimatedWrapper>

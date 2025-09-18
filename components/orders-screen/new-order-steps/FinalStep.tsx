@@ -1,205 +1,80 @@
-import React, { useEffect, useState } from "react";
 import {
     Image,
-    ImageBackground,
     Pressable,
+    ScrollView,
     StyleSheet,
     Text,
     View,
 } from "react-native";
-import { INewOrderObject } from "../AddNewOrder";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
+import { useCreateOrder } from "../NewOrderProvider";
+import OrderItem from "./final-step/OrderItem";
 
-import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
-import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
-import Loader from "../../ui/Loader";
+function FinalStep({ stepHandler, closeHandler }: { stepHandler: () => void, closeHandler: () => void }) {
+    const { orderParams, setOrderParams } = useCreateOrder();
 
-interface IProps {
-    orderObject: INewOrderObject;
-};
+    const deleteItemHandler = (itemId: string) => {
+        const updatedList = orderParams.ordersList.filter((order) => order.id !== itemId);
+        setOrderParams({
+            ...orderParams,
+            ordersList: updatedList
+        });
 
-interface IOrderPrice {
-    price_per_unit: null | number,
-    total_price: null | number,
-}
-
-function FinalStep({ orderObject }: IProps) {
-    // const initOrderPrice: IOrderPrice = {
-    //     price_per_unit: null,
-    //     total_price: null
-    // }
-
-    // const [isSent, setIsSent] = useState<boolean>(false);
-    // const [isLoading, setIsLoading] = useState<boolean>(true);
-    // const [isError, setIsError] = useState<boolean>(false);
-    // const [error, setError] = useState<string | null>(null);
-    // const [orderPrice, setOrderPrice] = useState<IOrderPrice>(initOrderPrice);
-
-
-
-    // useEffect(() => {
-    //     async function calculatePrice() {
-    //         setIsLoading(true);
-    //         const login = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
-    //         if (!login) {
-    //             setIsError(true);
-    //             setError("Користувач не авторизований (відсутнє значення логіну)")
-    //             return;
-    //         };
-
-    //         const calculateOrderObject: ICulculateOrderObject = {
-    //             product_code: orderObject.product?.code ?? "",   // или ошибка, если null
-    //             subgroup_code: orderObject.subgroup?.code ?? "",
-    //             group_code: orderObject.group.code as MainGroupsCode,
-    //             width: orderObject.width_gab ? +orderObject.width_gab : 0,
-    //             height: orderObject.height_gab ? +orderObject.height_gab : 0,
-    //             side: orderObject.controlType || 'right', // "right" by default
-    //             quantity: orderObject.count_number ? +orderObject.count_number : 0,
-    //             system_color: orderObject.color_system,
-    //             fixation_type: orderObject.fixation_type ?? null,
-    //             add_to_cart: false,
-    //             login: login
-    //         }
-
-    //         const priceResponce = await calculateOrderPrice(calculateOrderObject);
-
-    //         if (priceResponce === null) {
-    //             setIsError(true);
-    //             setError("Помилка запиту розрахунку вартості замовлення")
-    //             return;
-    //         } else if (priceResponce.status === 200) {
-    //             setOrderPrice({
-    //                 price_per_unit: priceResponce.data.price_per_unit,
-    //                 total_price: priceResponce.data.total_price
-    //             });
-    //         } else {
-    //             setIsError(true);
-    //             setError(priceResponce.data.error);
-    //         }
-    //         setIsLoading(false);
-    //     }
-
-    //     calculatePrice();
-    // }, []);
+        if (updatedList.length === 0) {
+            closeHandler();
+        }
+    }
 
     return (
-        <>
-            {/* {isLoading ?
-                <Loader radius={100} />
-                :
-                isError ?
-                    // ОБЛОГОРОДИТЬ ОКНО ОШИБОК, ВІВОДИТЬ СООБЩЕНИЯ ОШИБОК!!!!!!!
-                    <Text>Помилка розрахунку вартості товару: {error}</Text>
-                    :
-                    <FinalOrderInfo
-                        orderObject={orderObject}
-                        price_per_unit={orderPrice.price_per_unit as number}
-                        total_price={orderPrice.total_price as number}
-                    />
-                // <Report />
-            } */}
-            <FinalOrderInfo
-                orderObject={orderObject}
-                price_per_unit={0}
-                total_price={0}
-            />
+        <View>
+            <AnimatedWrapper useOpacity offsetY={20} style={styles.orderHeader}>
+                <Image
+                    source={require("../../../assets/orders-screen/cart.webp")}
+                    style={styles.cartIcon}
+                />
+                <View>
+                    <Text style={styles.title}>Нове замовлення</Text>
+                    <Text style={styles.subtitle}>{orderParams.ordersList[0].group.name}</Text>
+                </View>
+            </AnimatedWrapper>
 
-            {/* <AnimatedWrapper style={styles.submitButton} offsetY={-20}>
-                <Pressable onPress={() => { setIsSent(true) }}>
-                    <ImageBackground
-                        source={require("../../../assets/gradient-small.png")}
-                        style={styles.submitButtonBg}
-                    >
-                        <Text style={styles.submitButtonText}>Створити</Text>
-                    </ImageBackground>
-                </Pressable>
-            </AnimatedWrapper> */}
-        </>
+            <ScrollView
+                style={{ maxHeight: 450 }}
+                contentContainerStyle={{ paddingVertical: 8 }}
+                showsVerticalScrollIndicator={true} // можно убрать, если не нужно
+            >
+                {orderParams.ordersList.map((itemOrder, index) => (
+                    <OrderItem
+                        key={index}
+                        index={index}
+                        orderObject={itemOrder}
+                        deleteHandler={deleteItemHandler}
+                    />
+                ))}
+            </ScrollView>
+
+            <Pressable onPress={stepHandler} style={styles.addButton}>
+                <Text style={styles.addButtonText}>+</Text>
+            </Pressable>
+
+            <AnimatedWrapper
+                useOpacity
+                offsetY={20}
+                delay={400}
+                style={styles.totalRow}
+            >
+                <Text style={styles.totalAmount}>💰 Загальна сума</Text>
+                <Text style={styles.totalAmountText}>{ } грн</Text>
+            </AnimatedWrapper>
+        </View>
     );
-};
+}
 
 export default FinalStep;
 
-
-function FinalOrderInfo({ orderObject, price_per_unit, total_price }: { orderObject: INewOrderObject, price_per_unit: number, total_price: number }) {
-    const rows = [
-        { label: "Група", value: orderObject.group.name },
-        { label: "Підгрупа", value: orderObject.subgroup?.name },
-        { label: "Продукт", value: orderObject.product?.name || "Не обрано" },
-        { label: "Код товару", value: orderObject.product?.code || "Не обрано", dashedBorder: true },
-
-        { label: "Ширина (габарит)", value: orderObject.width_gab },
-        { label: "Ширина (по штапику)", value: orderObject.width_shtapik },
-        { label: "Висота (габарит)", value: orderObject.height_gab },
-        { label: "Висота (по штапику)", value: orderObject.height_shtapik, dashedBorder: true },
-
-        { label: "⚙ Тип управління", value: orderObject.controlType || "Не обрано" },
-        { label: "🔧 Тип фіксації", value: orderObject.fixation_type?.name || "Не обрано" },
-        { label: "🎨 Колір системи", value: orderObject.color_system },
-        { label: "🔢 Кількість", value: `${orderObject.count_number} шт.`, dashedBorder: true },
-
-        { label: "💰 Ціна за одиницю", value: `${price_per_unit} грн`, dashedBorder: true },
-    ];
-
-    return (
-        <>
-            <View>
-                <AnimatedWrapper useOpacity offsetY={20}>
-                    <Image
-                        source={require("../../../assets/orders-screen/success.webp")}
-                        style={{
-                            width: 70,
-                            height: 70,
-                            alignSelf: "center",
-                            resizeMode: "contain",
-                            alignItems: "center",
-                        }}
-                    />
-                    <Text style={styles.title}>Нове замовлення</Text>
-                    <Text style={styles.subtitle}>{orderObject.group.name}</Text>
-                </AnimatedWrapper>
-
-                {rows.map(({ label, value, dashedBorder }, index) => (
-                    <RowItem key={index} label={label} value={value} dashedBorder={dashedBorder} index={index} />
-                ))}
-
-                <AnimatedWrapper useOpacity offsetY={20} delay={400} style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                    <Text style={styles.totalAmount}>💰 Загальна сума</Text>
-                    <Text style={styles.totalAmountText}>{total_price} грн</Text>
-                </AnimatedWrapper>
-            </View>
-        </>
-    );
-}
-
-const RowItem: React.FC<{
-    label: string;
-    value: React.ReactNode;
-    dashedBorder?: boolean;
-    index: number
-}> = ({ label, value, dashedBorder, index }) => (
-    <AnimatedWrapper
-        useOpacity
-        offsetY={20}
-        delay={index * 20}
-        style={[{
-            flexDirection: 'row',
-            justifyContent: 'space-between'
-        },
-        dashedBorder && {
-            marginBottom: 10,
-            paddingBottom: 10,
-            borderBottomWidth: 1,
-            borderStyle: 'dashed',
-            borderColor: '#A2A2A870'
-        }]}>
-        <Text style={styles.section}>{label}</Text>
-        <Text style={styles.detail}>{value}</Text>
-    </AnimatedWrapper>
-);
-
+// Report 
 function Report() {
     return (
         <AnimatedWrapper
@@ -228,6 +103,23 @@ function Report() {
 }
 
 const styles = StyleSheet.create({
+    orderHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        paddingBottom: 8,
+        marginBottom: 8,
+        borderBottomWidth: 1,
+        borderColor: "#A2A2A870",
+    },
+    cartIcon: {
+        width: 70,
+        height: 70,
+        alignSelf: "center",
+        resizeMode: "contain",
+        alignItems: "center",
+        borderRadius: 50
+    },
     title: {
         fontSize: 16,
         fontFamily: Fonts.comfortaa600,
@@ -241,29 +133,41 @@ const styles = StyleSheet.create({
         color: Colors.blue,
         textAlign: "center",
         textTransform: "uppercase",
-        paddingBottom: 15,
-        marginBottom: 15,
-        borderBottomWidth: 1,
-        borderColor: "#A2A2A870",
     },
-    section: {
-        fontSize: 15,
-        fontFamily: Fonts.comfortaa600,
-        color: "#707070",
+    addButton: {
+        marginTop: 5,
+        marginBottom: 10,
+        backgroundColor: Colors.blue,
+        width: 35,
+        height: 35,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 50,
+        alignSelf: 'center'
     },
-    detail: {
-        fontSize: 15,
-        fontFamily: Fonts.comfortaa600,
-        maxWidth: '60%'
+    addButtonText: {
+        color: 'white',
+        fontFamily: Fonts.comfortaa700,
+        fontSize: 24,
+        top: -4,
+    },
+    totalRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        padding: 5,
+        backgroundColor: 'white',
+        borderRadius: 12
     },
     totalAmount: {
         fontFamily: Fonts.comfortaa700,
-        fontSize: 20,
-        color: "#707070",
+        fontSize: 18,
+        lineHeight: 26,
+        color: Colors.gray,
     },
     totalAmountText: {
         fontFamily: Fonts.comfortaa700,
-        fontSize: 20,
+        fontSize: 18,
+        lineHeight: 26,
     },
     submitButton: {
         height: 59,

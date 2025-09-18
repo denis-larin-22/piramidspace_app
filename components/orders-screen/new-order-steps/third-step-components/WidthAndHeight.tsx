@@ -1,18 +1,159 @@
 import { Text, TextInput, View } from "react-native"
-import { INewOrderObject } from "../../AddNewOrder"
 import { thirdStepStyles } from "../ThirdStep"
 import { Fragment, useState } from "react";
 import { Colors } from "../../../../theme/colors";
 import AnimatedWrapper from "../../../animation/AnimatedWrapper";
 import { Fonts } from "../../../../theme/fonts";
+import { ICreateOrderParams, INewOrderObject, useCreateOrder } from "../../NewOrderProvider";
 
-function WidthAndHeight({ orderObject, setOrderObject, errorFieldNumber }: {
-    orderObject: INewOrderObject,
-    setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>>,
+const WIDTH_DIFFERENCE = 3;
+const HEIGHT_DIFFERENCE = 5;
+
+function WidthAndHeight({ errorFieldNumber }: { errorFieldNumber: number | null }) {
+    const { orderParams, setOrderParams } = useCreateOrder();
+
+    if (orderParams.activeGroup === 'day') {
+        return <DayNightWH
+            orderParams={orderParams}
+            setOrderParams={setOrderParams}
+            errorFieldNumber={errorFieldNumber}
+        />;
+    } else {
+        return <AnotherGroupsWH
+            orderParams={orderParams}
+            setOrderParams={setOrderParams}
+            errorFieldNumber={errorFieldNumber}
+        />
+    };
+}
+
+////////////////////////// WIDTH AND HEIGHT BY GROUPPS ///////////////////////////
+
+// Day_Night
+function DayNightWH({ orderParams, setOrderParams, errorFieldNumber }: {
+    orderParams: ICreateOrderParams,
+    setOrderParams: (params: ICreateOrderParams) => void,
     errorFieldNumber: number | null
 }) {
-    const WIDTH_DIFFERENCE = 3;
-    const HEIGHT_DIFFERENCE = 5;
+    const orderObject = orderParams.newOrderObject;
+
+    const [focusedInput, setFocusedInput] = useState<number | null>(null);
+    const [warningInput, setWarningInput] = useState<number | null>(null);
+
+    const w_max = orderObject.product?.w_max;
+    const h_max = orderObject.product?.h_max;
+
+    const showWarning = (id: number) => {
+        setWarningInput(id);
+        setTimeout(() => setWarningInput(null), 3000);
+    };
+
+    return (
+        <>
+            {/* ====== ШИРИНА ====== */}
+            <View style={thirdStepStyles.row}>
+                {/* Ширина (габарит) */}
+                <View style={thirdStepStyles.inputContainer}>
+                    <View style={thirdStepStyles.rowLabel}>
+                        <Text style={thirdStepStyles.detailsText}>Ширина </Text>
+                    </View>
+
+                    <Warning isVissible={warningInput === 1} text={w_max} />
+                    <TextInput
+                        keyboardType="number-pad"
+                        style={[
+                            thirdStepStyles.input,
+                            { borderColor: focusedInput === 1 ? Colors.blue : Colors.blueLight },
+                            (errorFieldNumber === 2 || warningInput === 1) && thirdStepStyles.borderRed
+                        ]}
+                        placeholder="0"
+                        value={orderObject.width_gab || ""}
+                        onChangeText={(value) => {
+                            if (w_max === undefined || w_max >= +value) {
+                                setOrderParams({
+                                    ...orderParams,
+                                    newOrderObject: {
+                                        ...orderParams.newOrderObject,
+                                        width_gab: value
+                                    }
+                                })
+                            };
+
+                            if (w_max !== undefined && w_max < +value) {
+                                setOrderParams({
+                                    ...orderParams,
+                                    newOrderObject: {
+                                        ...orderParams.newOrderObject,
+                                        width_gab: null
+                                    }
+                                })
+
+                                showWarning(1);
+                            }
+                        }}
+                        onFocus={() => setFocusedInput(1)}
+                        onBlur={() => setFocusedInput(null)}
+                        maxLength={3}
+                    />
+                    <Text style={thirdStepStyles.unitLabel}>см</Text>
+                </View>
+
+                {/* Высота (габарит) */}
+                <View style={thirdStepStyles.inputContainer}>
+                    <View style={thirdStepStyles.rowLabel}>
+                        <Text style={thirdStepStyles.detailsText}>Висота </Text>
+                    </View>
+
+                    <Warning isVissible={warningInput === 2} text={h_max} />
+                    <TextInput
+                        keyboardType="number-pad"
+                        style={[
+                            thirdStepStyles.input,
+                            { borderColor: focusedInput === 2 ? Colors.blue : Colors.blueLight },
+                            (errorFieldNumber === 2 || warningInput === 2) && thirdStepStyles.borderRed
+                        ]}
+                        placeholder="0"
+                        value={orderObject.height_gab || ""}
+                        onChangeText={(value) => {
+                            if (h_max === undefined || h_max >= +value) {
+                                setOrderParams({
+                                    ...orderParams,
+                                    newOrderObject: {
+                                        ...orderParams.newOrderObject,
+                                        height_gab: value
+                                    }
+                                })
+                            };
+
+                            if (h_max !== undefined && h_max < +value) {
+                                setOrderParams({
+                                    ...orderParams,
+                                    newOrderObject: {
+                                        ...orderParams.newOrderObject,
+                                        height_gab: null
+                                    }
+                                })
+
+                                showWarning(2);
+                            }
+                        }}
+                        onFocus={() => setFocusedInput(2)}
+                        onBlur={() => setFocusedInput(null)}
+                        maxLength={3}
+                    />
+                    <Text style={thirdStepStyles.unitLabel}>см</Text>
+                </View>
+            </View>
+        </>
+    )
+}
+
+function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber }: {
+    orderParams: ICreateOrderParams,
+    setOrderParams: (params: ICreateOrderParams) => void,
+    errorFieldNumber: number | null
+}) {
+    const orderObject = orderParams.newOrderObject;
 
     const [focusedInput, setFocusedInput] = useState<number | null>(null);
     const [warningInput, setWarningInput] = useState<number | null>(null);
@@ -35,12 +176,17 @@ function WidthAndHeight({ orderObject, setOrderObject, errorFieldNumber }: {
         mode: "subtract" | "add" = "subtract"
     ) => {
         if (!max) {
-            setOrderObject({
+            const updates = {
                 ...orderObject,
                 [field]: value,
                 [pairField]: value
                     ? String(mode === "subtract" ? Math.max(0, +value - diff) : +value + diff)
                     : ""
+            };
+
+            setOrderParams({
+                ...orderParams,
+                newOrderObject: updates
             });
             return;
         }
@@ -51,12 +197,16 @@ function WidthAndHeight({ orderObject, setOrderObject, errorFieldNumber }: {
             return;
         }
 
-        setOrderObject({
+        const updates = {
             ...orderObject,
             [field]: value,
             [pairField]: value
                 ? String(mode === "subtract" ? Math.max(0, +value - diff) : +value + diff)
                 : ""
+        };
+        setOrderParams({
+            ...orderParams,
+            newOrderObject: updates
         });
     };
 

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { INewOrderObject } from "../AddNewOrder";
-import { ColorPrice, Fixation, getProductsByGroupCodes, IFixationType, IProductByCodes, ISubgroup, MainGroupsCode } from "../../../lib/api/orders-screen/groups-and-products";
-import { Image, ImageBackground, ImageStyle, Pressable, ScrollView, Text, TextInput, View, StyleSheet, } from "react-native";
+import { ColorPrice, Fixation, getProductsByGroupCodes, IProductByCodes, ISubgroup, OptionPrice } from "../../../lib/api/orders-screen/groups-and-products";
+import { Image, ImageBackground, ImageStyle, Pressable, Text, View, StyleSheet, ViewStyle, } from "react-native";
 import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
@@ -14,6 +13,8 @@ import Color from "./third-step-components/Color";
 import FixationType from "./third-step-components/FixationType";
 import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
 import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
+import { useCreateOrder } from "../NewOrderProvider";
+import Options from "./third-step-components/Options";
 
 export interface IErrorStateMessage {
     state: boolean,
@@ -21,8 +22,11 @@ export interface IErrorStateMessage {
     errorFieldNumber: 2 | 3 | 4 | 5 | 6 | null
 }
 
-function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: INewOrderObject, setOrderObject: React.Dispatch<React.SetStateAction<INewOrderObject>>, stepHandler: () => void }) {
-    const { group, subgroup, product, height_shtapik, width_shtapik, height_gab, width_gab, controlType, count_number, color_system, fixation_type } = orderObject;
+function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
+    const { orderParams, setOrderParams } = useCreateOrder();
+
+    const orderObject = orderParams.newOrderObject;
+    const { group, subgroup, product, height_shtapik, width_shtapik, height_gab, width_gab, controlType, count_number, color_system, fixation_type, options } = orderObject;
 
     if (subgroup === null) return null;
 
@@ -32,11 +36,11 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
     const [activeProduct, setActiveProduct] = useState<IProductByCodes | null>(product);
 
     // Color choice
-    const subgroupColors =
-        (group.code === 'day' || group.code === 'roller')
-            ? Object.keys(subgroup.colors as Record<string, ColorPrice[]>)
-            : (subgroup.colors as string[]);
-
+    const subgroupColors = Array.isArray(subgroup.colors) ?
+        // (group.code === 'day' || group.code === 'roller') 
+        (subgroup.colors as string[])
+        :
+        Object.keys(subgroup.colors as Record<string, ColorPrice[]>);
     const [colorsList] = useState<string[]>(subgroupColors);
     const [activeColor, setActiveColor] = useState(color_system);
     const [isColorListOpen, setIsColorListOpen] = useState(false);
@@ -46,10 +50,20 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
     const [activeControlType, setActiveControlType] = useState(controlType);
     const [isControlTypeListOpen, setIsControlTypeListOpen] = useState(false);
 
-    // Fixation choise
+    // Fixation type
     const [fixationTypeList] = useState<Fixation[]>(subgroup.fixations);
     const [activeFixationType, setActiveFixationType] = useState<Fixation | null>(fixation_type);
     const [isFixationTypeListOpen, setIsFixationTypeListOpen] = useState(false);
+
+    // Option value
+    const subgroupOptions = Array.isArray(subgroup.options) ?
+        // (group.code === 'day' || group.code === 'roller') 
+        (subgroup.options as string[])
+        :
+        Object.keys(subgroup.options as Record<string, OptionPrice[]>);
+    const [optionsList] = useState<string[]>(subgroupOptions);
+    const [activeOption, setActiveOption] = useState(options);
+    const [isOptionsListOpen, setIsOptionsListOpen] = useState(false);
 
     // Error state
     const initErrorObject: IErrorStateMessage = {
@@ -76,10 +90,12 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
     useEffect(() => {
         async function getProducts() {
             const login = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
+            // check needed values
             if (orderObject.group.code === null || orderObject.subgroup === null || login === undefined) {
                 setProducts([]);
                 return;
             }
+
             const data = await getProductsByGroupCodes(orderObject.group.code, orderObject.subgroup.code, login);
             if (data === null) {
                 return;
@@ -88,7 +104,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
             }
         }
         getProducts();
-    }, [orderObject]);
+    }, [orderParams.newOrderObject]);
 
     // Dropdown togglers
     function toggleProductsList() {
@@ -96,6 +112,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
         setIsControlTypeListOpen(false);
         setIsColorListOpen(false);
         setIsFixationTypeListOpen(false);
+        setIsOptionsListOpen(false);
         setIsProductsListOpen((prev) => !prev);
     }
     function toggleControlTypeList() {
@@ -103,6 +120,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
         setIsProductsListOpen(false);
         setIsColorListOpen(false);
         setIsFixationTypeListOpen(false);
+        setIsOptionsListOpen(false);
         setIsControlTypeListOpen((prev) => !prev);
     }
     function toggleColorList() {
@@ -110,6 +128,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
         setIsProductsListOpen(false);
         setIsControlTypeListOpen(false);
         setIsFixationTypeListOpen(false);
+        setIsOptionsListOpen(false);
         setIsColorListOpen((prev) => !prev);
     }
     function toggleFixationTypeList() {
@@ -117,7 +136,16 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
         setIsProductsListOpen(false);
         setIsControlTypeListOpen(false);
         setIsColorListOpen(false);
+        setIsOptionsListOpen(false);
         setIsFixationTypeListOpen((prev) => !prev);
+    }
+    function toggleOptionsList() {
+        Keyboard.dismiss();
+        setIsProductsListOpen(false);
+        setIsControlTypeListOpen(false);
+        setIsColorListOpen(false);
+        setIsFixationTypeListOpen(false);
+        setIsOptionsListOpen((prev) => !prev);
     }
 
     const productsListHandler = (product: IProductByCodes) => {
@@ -133,32 +161,68 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
 
             setIsError(initErrorObject);
             setActiveProduct(pressebleProduct);
-            setOrderObject({ ...orderObject, product: product });
+            setOrderParams({
+                ...orderParams,
+                newOrderObject: {
+                    ...orderParams.newOrderObject,
+                    product: product
+                }
+            });
             setIsProductsListOpen(false);
         }
     }
 
     const controlTypesListHandler = (type: string) => {
         setActiveControlType(type);
-        setOrderObject({ ...orderObject, controlType: type });
+        setOrderParams({
+            ...orderParams,
+            newOrderObject: {
+                ...orderParams.newOrderObject,
+                controlType: type
+            }
+        });
         setIsControlTypeListOpen(false);
     }
 
     const colorsListHandler = (color: string) => {
         setActiveColor(color);
-        setOrderObject({ ...orderObject, color_system: color });
+        setOrderParams({
+            ...orderParams,
+            newOrderObject: {
+                ...orderParams.newOrderObject,
+                color_system: color
+            }
+        });
         setIsColorListOpen(false);
     }
 
     const fixationTypesListHandler = (type: Fixation) => {
         setActiveFixationType(type);
-        setOrderObject({ ...orderObject, fixation_type: type });
+        setOrderParams({
+            ...orderParams,
+            newOrderObject: {
+                ...orderParams.newOrderObject,
+                fixation_type: type
+            }
+        });
         setIsFixationTypeListOpen(false);
+    }
+
+    const optionsListHandler = (option: string) => {
+        setActiveOption(option);
+        setOrderParams({
+            ...orderParams,
+            newOrderObject: {
+                ...orderParams.newOrderObject,
+                options: option
+            }
+        });
+        setIsOptionsListOpen(false);
     }
 
     // Final form order CHECK befor sending
     function foldOrder() {
-        if (!height_shtapik || !width_shtapik || !height_gab || !width_gab) {
+        if (!height_gab || !width_gab) {
             setIsError({
                 state: true,
                 text: "⚠️ Введіть усі значення ширини та висоти",
@@ -189,6 +253,22 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                 errorFieldNumber: 6
             });
         } else {
+            const { newOrderObject, ordersList } = orderParams;
+
+            const isThereInList = ordersList.some((order) => order.id === newOrderObject.id);
+
+            setOrderParams({
+                ...orderParams,
+                ordersList: isThereInList ?
+                    ordersList.map((order) => {
+                        if (order.id === newOrderObject.id) {
+                            return newOrderObject;
+                        } else { return order };
+                    })
+                    :
+                    [...ordersList, newOrderObject]
+
+            });
             stepHandler();
         }
 
@@ -211,9 +291,17 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
             <AnimatedWrapper
                 useOpacity
                 offsetY={20}
-                delay={200}
+                delay={150}
             >
                 <Text style={thirdStepStyles.stepCategory}>{orderObject.group.name}</Text>
+            </AnimatedWrapper>
+
+            <AnimatedWrapper
+                useOpacity
+                offsetY={20}
+                delay={200}
+            >
+                <Text style={thirdStepStyles.stepSubCategory}>{subgroup.name}</Text>
             </AnimatedWrapper>
 
             {/* Error message */}
@@ -239,8 +327,6 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                 >
                     {/* Размеры: Ширина и Высота */}
                     <WidthAndHeight
-                        orderObject={orderObject}
-                        setOrderObject={setOrderObject}
                         errorFieldNumber={isError.errorFieldNumber}
                     />
 
@@ -255,11 +341,7 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                             isError={isError}
                         /> : null}
 
-                        <CountValue
-                            orderObject={orderObject}
-                            setOrderObject={setOrderObject}
-                            errorFieldNumber={isError.errorFieldNumber}
-                        />
+                        <CountValue errorFieldNumber={isError.errorFieldNumber} />
                     </View>
 
                     {/* Цвет системы */}
@@ -280,6 +362,15 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
                         isError={isError}
                         isFixationTypeListOpen={isFixationTypeListOpen}
                         toggleFixationTypeList={toggleFixationTypeList}
+                    /> : null}
+
+                    {optionsList.length !== 0 ? <Options
+                        activeOption={activeOption}
+                        optionsList={optionsList}
+                        optionsListHandler={optionsListHandler}
+                        isError={isError}
+                        isOptionsListOpen={isOptionsListOpen}
+                        toggleOptionList={toggleOptionsList}
                     /> : null}
                     {/* Цена / Разом */}
                     {/* <View style={thirdStepStyles.row}>
@@ -314,7 +405,6 @@ function ThirdStep({ orderObject, setOrderObject, stepHandler }: { orderObject: 
     );
 }
 
-
 export function ArrowDown({ style, isRotate = false }: { style?: ImageStyle, isRotate?: boolean }) {
     return (
         <>
@@ -348,36 +438,47 @@ export function ArrowDown({ style, isRotate = false }: { style?: ImageStyle, isR
     );
 }
 
-function ErrorMessage({ errorText }: { errorText: string }) {
+export function ErrorMessage({ errorText, styles }: { errorText: string, styles?: ViewStyle }) {
     return (
-        <AnimatedWrapper style={thirdStepStyles.errorMessage} useOpacity offsetY={20}>
+        <AnimatedWrapper style={[thirdStepStyles.errorMessage, styles]} useOpacity offsetY={20}>
             <View style={thirdStepStyles.errorMarker}></View>
             <Text style={thirdStepStyles.errorMessageText}>{errorText}</Text>
         </AnimatedWrapper>
     );
 }
 
+
 export const thirdStepStyles = StyleSheet.create({
     stepSubtitle: {
         fontFamily: Fonts.comfortaa400,
         fontSize: 16,
         textTransform: "uppercase",
-        marginBottom: 0,
         textAlign: "center",
         color: Colors.gray,
+        top: -10
     },
     stepCategory: {
         fontFamily: Fonts.comfortaa700,
         fontSize: 30,
         textTransform: "uppercase",
         marginBottom: 10,
-        textAlign: "center",
+        textAlign: "left",
         color: Colors.blue,
+        top: -10
+    },
+    stepSubCategory: {
+        fontFamily: Fonts.comfortaa700,
+        fontSize: 16,
+        textAlign: 'right',
+        color: '#3372F965',
         borderBottomWidth: 2,
         paddingBottom: 5,
-        borderColor: Colors.blueLight
+        borderColor: Colors.blueLight,
+        top: -25,
+        marginBottom: -25
     },
     detailsText: {
+        marginTop: 5,
         fontFamily: Fonts.comfortaa600,
         fontSize: 16,
         color: Colors.gray,
