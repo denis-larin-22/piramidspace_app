@@ -1,18 +1,24 @@
 import AnimatedWrapper from "../animation/AnimatedWrapper";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { tableStyles } from "./TableOrders";
-import { IOrder } from "../../lib/api/orders-screen/ordersList";
+import { fetchDeleteOrder, IOrder } from "../../lib/api/orders-screen/ordersList";
+import { useEffect, useState } from "react";
+import { getDataFromAcyncStorage } from "../../lib/async-storage/acyncStorage";
+import { ASYNC_STORAGE_USER_LOGIN } from "../../lib/async-storage/asyncStorageKeys";
+import { useCreateOrder } from "./NewOrderProvider";
 
 function OrderItem({
     order,
     activeOrderId,
-    setActiveOrderId
+    setActiveOrderId,
+    triggerRefetch
 }: {
     order: IOrder,
     activeOrderId: number | null,
-    setActiveOrderId: (id: number | null) => void
+    setActiveOrderId: (id: number | null) => void,
+    triggerRefetch: () => void
 }) {
     const {
         ['N_заказа']: id,
@@ -26,7 +32,19 @@ function OrderItem({
         ["комментарий менеджера"]: managerComment
     } = order;
 
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+    const [loginValue, setLoginValue] = useState<string | undefined>(undefined);
 
+    useEffect(() => {
+        async function getLoginValue() {
+            const login = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
+            if (!login) return;
+
+            setLoginValue(login);
+        }
+
+        getLoginValue();
+    });
 
     return (
         <AnimatedWrapper
@@ -72,6 +90,99 @@ function OrderItem({
                     duration={200}
                     style={styles.detailsWrapper}
                 >
+                    <Pressable
+                        style={styles.deleteBtn}
+                        onPress={() => setIsDeleteModalOpen(true)}
+                    >
+                        <Image
+                            source={require("../../assets/orders-screen/delete.webp")}
+                            style={styles.deleteIcon}
+                            resizeMode="contain"
+                        />
+                    </Pressable>
+
+                    <Modal visible={isDeleteModalOpen} transparent>
+                        <AnimatedWrapper
+                            style={styles.modalOverlay}
+                            useOpacity
+                            duration={200}
+                        >
+                            <AnimatedWrapper
+                                useOpacity
+                                useScale
+                                offsetY={100}
+                                delay={100}
+                                duration={200}
+                                style={styles.modalContent}
+                            >
+                                <Image
+                                    source={require("../../assets/orders-screen/warning.png")}
+                                    style={{
+                                        width: 50,
+                                        height: 50,
+                                        marginBottom: 20
+                                    }}
+                                    resizeMode="contain"
+                                />
+                                <Text style={{
+                                    fontFamily: Fonts.comfortaa700,
+                                    fontSize: 18,
+                                    marginBottom: 5
+                                }}>Видалити замовлення?</Text>
+                                <Text style={{
+                                    fontFamily: Fonts.openSans400,
+                                    fontSize: 14,
+                                    marginBottom: 30,
+                                    color: Colors.gray
+                                }}>Видалення замовлення №{id}</Text>
+
+                                <View style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    gap: 20
+                                }}>
+                                    <Pressable style={{
+                                        padding: 10,
+                                        borderWidth: 1,
+                                        borderColor: '#A2A2A870',
+                                        borderRadius: 14,
+                                    }}
+                                        onPress={() => setIsDeleteModalOpen(false)}
+                                    >
+                                        <Text style={{
+                                            fontFamily: Fonts.openSans400,
+                                            color: Colors.gray
+                                        }}>Відмінити</Text>
+                                    </Pressable>
+                                    <Pressable style={{
+                                        padding: 10,
+                                        borderRadius: 14,
+                                        backgroundColor: Colors.blue
+                                    }}
+                                        onPress={async () => {
+                                            if (!loginValue) return;
+
+                                            const result = await fetchDeleteOrder({
+                                                login: loginValue,
+                                                order_N: id.toString(),
+                                                userType: 'менеджер'
+                                            });
+
+                                            triggerRefetch();
+                                            setIsDeleteModalOpen(false);
+                                        }}
+                                    >
+                                        <Text style={{
+                                            fontFamily: Fonts.openSans400,
+                                            color: 'white'
+                                        }}>Видалити</Text>
+                                    </Pressable>
+                                </View>
+                            </AnimatedWrapper>
+                        </AnimatedWrapper>
+                    </Modal>
+
+
                     <View style={styles.detailsContainer}>
                         <Detail label="🗓️ Дата замовлення:" value={formatDateAndTime(createDate)} />
                         <Detail label="📦 Дата готовності:" value={finishDate ? formatDateAndTime(finishDate as string) : '—'} />
@@ -223,5 +334,41 @@ const styles = StyleSheet.create({
         borderColor: Colors.grayLight,
         paddingBottom: 5,
         marginBottom: 5
-    }
+    },
+    deleteBtn: {
+        width: 30,
+        height: 30,
+        backgroundColor: Colors.grayLight,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 50,
+        position: 'absolute',
+        right: 10,
+        top: 10,
+        zIndex: 1
+    },
+    deleteIcon: {
+        width: 20,
+        height: 20,
+        opacity: 0.3
+    },
+    modalOverlay: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20,
+        position: "relative",
+        height: "100%",
+        width: "100%",
+        backgroundColor: "#00000080",
+    },
+    modalContent: {
+        backgroundColor: Colors.pale,
+        paddingVertical: 20,
+        paddingHorizontal: 12,
+        borderRadius: 13,
+        width: '100%',
+        position: 'relative',
+        top: '-5%',
+        alignItems: 'center'
+    },
 });

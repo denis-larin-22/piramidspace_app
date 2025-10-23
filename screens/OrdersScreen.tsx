@@ -93,6 +93,7 @@ function OrdersScreen({ navigation }: { navigation: OrdersScreenNavigationProp }
                     activePage={activePage}
                     totalPages={totalPages}
                     setActivePage={setActivePage}
+                    triggerRefetch={triggerRefetch}
                 />
 
                 <AddNewOrder triggerRefetch={triggerRefetch} />

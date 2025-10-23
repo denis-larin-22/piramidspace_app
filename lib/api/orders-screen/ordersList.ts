@@ -114,3 +114,31 @@ export async function fetchOrderByStatus(dealerLogin: string, status: string, pa
         return null;
     }
 };
+
+interface IDeleteOrderBody {
+    order_N: string;
+    userType: string;
+    login: string;
+}
+
+export async function fetchDeleteOrder(body: IDeleteOrderBody) {
+    try {
+        const response = await fetch(`${BASE_URL}/api/cms/deleteOrder`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("An error occurred while fetching delete order:", error);
+        return null;
+    }
+}

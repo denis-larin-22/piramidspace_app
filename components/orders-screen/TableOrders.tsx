@@ -14,12 +14,14 @@ export default function TableOrders({
     activePage,
     setActivePage,
     totalPages,
+    triggerRefetch
 }: {
     isLoading: boolean,
     ordersList: Array<IOrder>,
     activePage: number,
     setActivePage: (page: number) => void,
     totalPages: number | undefined,
+    triggerRefetch: () => void
 }) {
     const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
 
@@ -60,6 +62,7 @@ export default function TableOrders({
                             order={order}
                             activeOrderId={activeOrderId}
                             setActiveOrderId={setActiveOrderId}
+                            triggerRefetch={triggerRefetch}
                         />
                     ))
                 }
