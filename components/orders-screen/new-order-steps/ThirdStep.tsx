@@ -441,8 +441,18 @@ export function ArrowDown({ style, isRotate = false }: { style?: ImageStyle, isR
 export function ErrorMessage({ errorText, styles }: { errorText: string, styles?: ViewStyle }) {
     return (
         <AnimatedWrapper style={[thirdStepStyles.errorMessage, styles]} useOpacity offsetY={20}>
-            <View style={thirdStepStyles.errorMarker}></View>
-            <Text style={thirdStepStyles.errorMessageText}>{errorText}</Text>
+            <Image
+                source={require('../../../assets/orders-screen/error-icon.webp')}
+                style={{
+                    width: 25,
+                    height: 25,
+                    resizeMode: 'contain',
+                }}
+            />
+            <View>
+                <Text style={[thirdStepStyles.errorMessageText, { fontFamily: Fonts.comfortaa700, fontSize: 16, marginBottom: 10 }]}>Помилка!</Text>
+                <Text style={thirdStepStyles.errorMessageText}>{errorText}</Text>
+            </View>
         </AnimatedWrapper>
     );
 }
@@ -553,11 +563,13 @@ export const thirdStepStyles = StyleSheet.create({
         position: "absolute",
         top: 20,
         alignSelf: "center",
-        backgroundColor: Colors.pale,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        paddingLeft: 30,
-        borderRadius: 31,
+        backgroundColor: "#fff8f6ff",
+        padding: 20,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: "#FF0A0A",
+        flexDirection: 'row',
+        gap: 10,
         // iOS shadow
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
@@ -568,10 +580,11 @@ export const thirdStepStyles = StyleSheet.create({
         elevation: 5,
     },
     errorMessageText: {
-        fontFamily: Fonts.comfortaa600,
-        fontSize: 16,
+        fontFamily: Fonts.openSans400,
+        fontSize: 14,
         lineHeight: 18,
-        textAlign: 'center',
+        maxWidth: "95%",
+        // backgroundColor: 'red'
     },
     errorMarker: {
         width: 22,

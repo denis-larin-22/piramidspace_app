@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react'
-import { getDataFromAcyncStorage } from '../async-storage/acyncStorage'
+import { useEffect, useState, useCallback } from 'react';
+import { getDataFromAcyncStorage } from '../async-storage/acyncStorage';
+import { ASYNC_STORAGE_USER_LOGIN } from '../async-storage/asyncStorageKeys';
 import {
-    ASYNC_STORAGE_USER_LOGIN
-} from '../async-storage/asyncStorageKeys'
-import { fetchOrderById, fetchOrderByStatus, fetchOrdersList, IOrderList } from '../api/orders-screen/ordersList';
+    fetchOrderById,
+    fetchOrderByStatus,
+    fetchOrdersList,
+    IOrderList
+} from '../api/orders-screen/ordersList';
 
 export const useOrdersList = (
     orderId: string,
@@ -14,35 +17,42 @@ export const useOrdersList = (
     const [ordersList, setOrdersList] = useState<IOrderList | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    useEffect(() => {
-        const getOrders = async () => {
-            setIsLoading(true)
+    // рычаг для ручного перезапуска
+    const [refetchTrigger, setRefetchTrigger] = useState(0);
 
-            const userLoginValue = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
+    // загрузка
+    const fetchOrders = useCallback(async () => {
+        setIsLoading(true);
 
-            if (userLoginValue !== undefined) {
+        const userLoginValue = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
 
-                if (orderId.length !== 0) {
-                    const orderById = await fetchOrderById(userLoginValue, orderId, ordersPerPage);
-                    setOrdersList(orderById);
-                } else if (status.length !== 0) {
-                    const ordersListByStatus = await fetchOrderByStatus(userLoginValue, status, page, ordersPerPage);
-
-                    setOrdersList(ordersListByStatus);
-                } else {
-                    const fullOrdersList = await fetchOrdersList(userLoginValue, page, ordersPerPage);
-                    setOrdersList(fullOrdersList);
-                }
-
+        if (userLoginValue !== undefined) {
+            if (orderId.length !== 0) {
+                const orderById = await fetchOrderById(userLoginValue, orderId, ordersPerPage);
+                setOrdersList(orderById);
+            } else if (status.length !== 0) {
+                const ordersListByStatus = await fetchOrderByStatus(userLoginValue, status, page, ordersPerPage);
+                setOrdersList(ordersListByStatus);
             } else {
-                setOrdersList(null);
+                const fullOrdersList = await fetchOrdersList(userLoginValue, page, ordersPerPage);
+                setOrdersList(fullOrdersList);
             }
-
-            setIsLoading(false);
+        } else {
+            setOrdersList(null);
         }
 
-        getOrders();
+        setIsLoading(false);
     }, [orderId, status, page, ordersPerPage]);
 
-    return { ordersList, isLoading };
+    // useEffect срабатывает и при обычных изменениях, и при ручном refetch
+    useEffect(() => {
+        fetchOrders();
+    }, [fetchOrders, refetchTrigger]);
+
+    //  функция которую можно вызывать извне
+    const triggerRefetch = useCallback(() => {
+        setRefetchTrigger(prev => prev + 1);
+    }, []);
+
+    return { ordersList, isLoading, triggerRefetch };
 };

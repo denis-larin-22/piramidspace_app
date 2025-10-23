@@ -4,77 +4,49 @@ import AnimatedWrapper from "../../../animation/AnimatedWrapper";
 import { Image, Pressable, Text, View, StyleSheet } from "react-native";
 import { Fonts } from "../../../../theme/fonts";
 import { Colors } from "../../../../theme/colors";
-import { calculateOrderPriceDayNight, ICalculateResponce, ICulculateOrderObject } from "../../../../lib/api/orders-screen/calculate-order";
-import { MainGroupsCode } from "../../../../lib/api/orders-screen/groups-and-products";
 import Loader from "../../../ui/Loader";
-import { getDataFromAcyncStorage } from "../../../../lib/async-storage/acyncStorage";
-import { ASYNC_STORAGE_USER_LOGIN } from "../../../../lib/async-storage/asyncStorageKeys";
-import { ArrowDown, ErrorMessage } from "../ThirdStep";
+import { ErrorMessage } from "../ThirdStep";
 
-function OrderItem({ index, orderObject, deleteHandler }: { index: number, orderObject: INewOrderObject, deleteHandler: (itemId: string) => void }) {
-    const itemRows = [
-        { label: "Група", value: orderObject.group.name },
-        { label: "Підгрупа", value: orderObject.subgroup?.name },
-        { label: "Назва товару", value: orderObject.product?.name, dashedBorder: true },
-
-        { label: "↔️ Ширина (по штапику)", value: orderObject.width_shtapik },
-        { label: "↔️ Ширина (габарит)", value: orderObject.width_gab },
-        { label: "↕️ Висота (по штапику)", value: orderObject.height_shtapik },
-        { label: "↕️ Висота (габарит)", value: orderObject.height_gab, dashedBorder: true },
-
-        { label: "⚙ Тип управління", value: orderObject.controlType },
-        { label: "🔧 Тип фіксації", value: orderObject.fixation_type?.name },
-        { label: "🎨 Колір системи", value: orderObject.color_system },
-        { label: "🔢 Кількість", value: `${orderObject.count_number} шт.`, dashedBorder: true },
-    ];
-
+function OrderItem({
+    index,
+    orderObject,
+    usdPrice,
+    isLoading,
+    isError = false,
+    deleteHandler,
+}: {
+    index: number,
+    orderObject: INewOrderObject,
+    usdPrice: number | undefined,
+    isLoading: boolean,
+    isError?: boolean
+    deleteHandler: (itemId: string) => void,
+}) {
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const [price, setPrice] = useState<ICalculateResponce | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [isError, setIsError] = useState(false);
 
-    useEffect(() => {
-        async function getPrice() {
-            setIsLoading(true);
-            const login = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
+    const itemRows = [
+        { label: "↔️ Ширина (габарит)", value: orderObject.width_gab },
+        { label: "↕️ Висота (габарит)", value: orderObject.height_gab },
+        { label: "↔️ Ширина (по штапику)", value: orderObject.width_shtapik },
+        { label: "↕️ Висота (по штапику)", value: orderObject.height_shtapik, dashedBorder: true },
 
-            const orderParams: ICulculateOrderObject = {
-                login: login || "",
-                add_to_cart: false,
-                group_code: orderObject.group.code as MainGroupsCode,
-                subgroup_code: orderObject.subgroup?.code as string,
-                product_code: orderObject.product?.name as string,
-                height: Number(orderObject.height_gab as string),
-                width: Number(orderObject.width_gab as string),
-                quantity: orderObject.count_number ? +orderObject.count_number : 0,
-                side: (orderObject.controlType as string) === 'L' ? "left" : "right",
-                system_color: orderObject.color_system as string,
-                units: "см",
-                // 
-                fixation_type: orderObject.fixation_type?.name || "",
-                options: orderObject.options || "",
-            }
+        { label: "⚙ Управління", value: orderObject.controlType === 'L' ? "ліворуч" : "праворуч" },
+        { label: "🔧 Фіксація", value: orderObject.fixation_type?.name },
+        { label: "🎨 Колір", value: orderObject.color_system },
+        { label: "🔢 Кількість", value: `${orderObject.count_number} шт.`, dashedBorder: true },
 
-            const calculates = await calculateOrderPriceDayNight(orderParams);
-
-            if (calculates === null) {
-                setIsError(true);
-
-                setTimeout(() => setIsError(false), 3000)
-            }
-            setPrice(calculates);
-            setIsLoading(false);
-        }
-        getPrice();
-    }, [orderObject]);
-
+        {
+            label: "Вартість", value: usdPrice ? usdPrice.toFixed(2) + "$" : "❌",
+            dashedBorder: true
+        },
+    ];
 
     return (
         <AnimatedWrapper>
-
             <Pressable
                 onPress={() => setIsOpen(!isOpen)}
-                style={styles.container}>
+                style={styles.container}
+            >
                 <View style={styles.header}>
                     <Text style={styles.indexCircle}>{++index}</Text>
                     <Text style={styles.productName}>{orderObject.product?.name}</Text>
@@ -90,7 +62,6 @@ function OrderItem({ index, orderObject, deleteHandler }: { index: number, order
                         />
                     </Pressable>
                 </View>
-
 
                 {!isOpen ? (
                     <View style={styles.previewRow}>
@@ -110,19 +81,8 @@ function OrderItem({ index, orderObject, deleteHandler }: { index: number, order
 
 
                         {!isLoading ? <View style={styles.previewColumn}>
-                            <Text style={[styles.previewBox, {
-                                borderWidth: 2,
-                                borderColor: price ? Colors.blue : Colors.red,
-                                backgroundColor: price ? Colors.blueLight : '#FF0A0A10'
-                            }]}>
-                                {price !== null ? price.total_price.toFixed(2) : ""} $
-                            </Text>
-                            <Text style={[styles.previewBox, {
-                                borderWidth: 2,
-                                borderColor: price ? Colors.blue : Colors.red,
-                                backgroundColor: price ? Colors.blueLight : '#FF0A0A10'
-                            }]}>
-                                {price !== null ? price.total_price_uah.toFixed(2) : ""} грн.
+                            <Text style={styles.previewBox}>
+                                {usdPrice ? usdPrice.toFixed(2) + "$" : "❌"}
                             </Text>
                         </View>
                             :
@@ -130,8 +90,12 @@ function OrderItem({ index, orderObject, deleteHandler }: { index: number, order
                         }
                     </View>
                 ) : null}
-            </Pressable>
 
+                {!isOpen && <DetailsSwitcher
+                    isOpen={isOpen}
+                    onSwitch={() => setIsOpen(!isOpen)}
+                />}
+            </Pressable>
 
             {isError && <ErrorMessage errorText="Помилка запиту розрахунку вартості!" />}
             {isOpen ? (
@@ -139,6 +103,11 @@ function OrderItem({ index, orderObject, deleteHandler }: { index: number, order
                     {itemRows.map(({ label, value, dashedBorder }, index) => (
                         <RowItem key={index} label={label} value={value} dashedBorder={dashedBorder} index={index} />
                     ))}
+
+                    {isOpen && <DetailsSwitcher
+                        isOpen={isOpen}
+                        onSwitch={() => setIsOpen(!isOpen)}
+                    />}
                 </View>
             ) : null}
         </AnimatedWrapper>
@@ -171,6 +140,22 @@ const RowItem: React.FC<{
     )
 };
 
+function DetailsSwitcher({ isOpen, onSwitch }: { isOpen: boolean, onSwitch: () => void }) {
+    return (
+        <Pressable
+            onPress={onSwitch}
+        >
+            <Text style={styles.detailSwitcherText}>{isOpen ? "Приховати деталі" : "Деталі замовлення"}</Text>
+            <Image
+                source={require('../../../../assets/orders-screen/arrow.webp')}
+                style={[styles.setailSwitcherArrow, {
+                    transform: [{ rotate: isOpen ? "-90deg" : "90deg" }]
+                }]}
+            />
+        </Pressable>
+    )
+};
+
 // Styles
 const styles = StyleSheet.create({
     container: {
@@ -185,7 +170,7 @@ const styles = StyleSheet.create({
         paddingBottom: 5,
         marginBottom: 8,
         borderBottomWidth: 1,
-        borderColor: Colors.blueLight
+        borderColor: Colors.grayLight
     },
     indexCircle: {
         fontFamily: Fonts.comfortaa700,
@@ -202,8 +187,8 @@ const styles = StyleSheet.create({
     },
     productName: {
         fontFamily: Fonts.comfortaa600,
-        fontSize: 14,
-        lineHeight: 16,
+        fontSize: 15,
+        lineHeight: 19,
         maxWidth: 240
     },
     deleteBtn: {
@@ -226,6 +211,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-around',
+        borderBottomWidth: 1,
+        borderColor: Colors.grayLight,
+        paddingBottom: 7,
+        marginBottom: 5
     },
     previewColumn: {
         gap: 5
@@ -234,16 +223,16 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.openSans400,
         fontSize: 14,
         textAlign: 'center',
-        padding: 5,
         borderRadius: 8,
-        backgroundColor: Colors.blueLight,
+        // backgroundColor: Colors.pale,
         color: 'black',
     },
     expandedContainer: {
         backgroundColor: 'white',
         padding: 5,
         top: -20,
-        borderRadius: 8
+        borderRadius: 8,
+        paddingBottom: 12
     },
     rowItem: {
         flexDirection: 'row',
@@ -257,13 +246,28 @@ const styles = StyleSheet.create({
         borderColor: '#A2A2A870'
     },
     rowLabel: {
-        fontSize: 14,
+        fontSize: 15,
         fontFamily: Fonts.comfortaa600,
         color: "#707070",
     },
     rowValue: {
-        fontSize: 14,
+        fontSize: 15,
         fontFamily: Fonts.comfortaa600,
         maxWidth: '70%'
+    },
+    detailSwitcherText: {
+        color: Colors.gray,
+        fontFamily: Fonts.openSans400,
+        fontSize: 16,
+        marginLeft: 15,
+        opacity: 0.6,
+    },
+    setailSwitcherArrow: {
+        width: 10,
+        height: 16,
+        resizeMode: 'stretch',
+        position: 'absolute',
+        right: 20,
+        top: 3
     }
 });

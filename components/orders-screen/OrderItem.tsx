@@ -26,6 +26,8 @@ function OrderItem({
         ["комментарий менеджера"]: managerComment
     } = order;
 
+
+
     return (
         <AnimatedWrapper
             key={id}
@@ -55,6 +57,7 @@ function OrderItem({
                 </Text>
                 <Text style={[styles.cell, tableStyles.column2]}>
                     {getFormatedOrderType(order['вид заказа'])}
+                    {/* {order['вид заказа']} */}
                 </Text>
                 <Status statusValue={order['статус']} />
                 <Text style={[styles.cell, tableStyles.column4]}>
@@ -77,7 +80,7 @@ function OrderItem({
                         <Detail label="💰 Сума роздріб:" value={retailPrice} />
                         <Detail label="🛍️ Замовник роздріб:" value={customerRetail} borderBottom />
                         <Detail label="👤 Коментар менеджера:" value={managerComment} />
-                        <Detail label="📝 Коментарій:" value={comment.length ? comment : '—'} />
+                        <Detail label="📝 Коментарій:" value={comment} />
                     </View>
                 </AnimatedWrapper>
             )}
@@ -119,6 +122,8 @@ function formatDateAndTime(dateString: string): string {
 }
 
 function getFormatedOrderType(type: string) {
+    if (type === null) return "-";
+
     switch (type.toLowerCase()) {
         case 'горизонтальные жалюзи':
             return 'горизонтальні жалюзі';

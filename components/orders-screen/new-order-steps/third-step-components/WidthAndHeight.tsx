@@ -12,141 +12,141 @@ const HEIGHT_DIFFERENCE = 5;
 function WidthAndHeight({ errorFieldNumber }: { errorFieldNumber: number | null }) {
     const { orderParams, setOrderParams } = useCreateOrder();
 
-    if (orderParams.activeGroup === 'day') {
-        return <DayNightWH
-            orderParams={orderParams}
-            setOrderParams={setOrderParams}
-            errorFieldNumber={errorFieldNumber}
-        />;
-    } else {
-        return <AnotherGroupsWH
-            orderParams={orderParams}
-            setOrderParams={setOrderParams}
-            errorFieldNumber={errorFieldNumber}
-        />
-    };
+    // if (orderParams.activeGroup === 'day') {
+    //     return <DayNightWH
+    //         orderParams={orderParams}
+    //         setOrderParams={setOrderParams}
+    //         errorFieldNumber={errorFieldNumber}
+    //     />;
+    // } else {
+    return <AnotherGroupsWH
+        orderParams={orderParams}
+        setOrderParams={setOrderParams}
+        errorFieldNumber={errorFieldNumber}
+    />
+    // };
 }
 
 ////////////////////////// WIDTH AND HEIGHT BY GROUPPS ///////////////////////////
 
 // Day_Night
-function DayNightWH({ orderParams, setOrderParams, errorFieldNumber }: {
-    orderParams: ICreateOrderParams,
-    setOrderParams: (params: ICreateOrderParams) => void,
-    errorFieldNumber: number | null
-}) {
-    const orderObject = orderParams.newOrderObject;
+// function DayNightWH({ orderParams, setOrderParams, errorFieldNumber }: {
+//     orderParams: ICreateOrderParams,
+//     setOrderParams: (params: ICreateOrderParams) => void,
+//     errorFieldNumber: number | null
+// }) {
+//     const orderObject = orderParams.newOrderObject;
 
-    const [focusedInput, setFocusedInput] = useState<number | null>(null);
-    const [warningInput, setWarningInput] = useState<number | null>(null);
+//     const [focusedInput, setFocusedInput] = useState<number | null>(null);
+//     const [warningInput, setWarningInput] = useState<number | null>(null);
 
-    const w_max = orderObject.product?.w_max;
-    const h_max = orderObject.product?.h_max;
+//     const w_max = orderObject.product?.w_max;
+//     const h_max = orderObject.product?.h_max;
 
-    const showWarning = (id: number) => {
-        setWarningInput(id);
-        setTimeout(() => setWarningInput(null), 3000);
-    };
+//     const showWarning = (id: number) => {
+//         setWarningInput(id);
+//         setTimeout(() => setWarningInput(null), 3000);
+//     };
 
-    return (
-        <>
-            {/* ====== ШИРИНА ====== */}
-            <View style={thirdStepStyles.row}>
-                {/* Ширина (габарит) */}
-                <View style={thirdStepStyles.inputContainer}>
-                    <View style={thirdStepStyles.rowLabel}>
-                        <Text style={thirdStepStyles.detailsText}>Ширина </Text>
-                    </View>
+//     return (
+//         <>
+//             {/* ====== ШИРИНА ====== */}
+//             <View style={thirdStepStyles.row}>
+//                 {/* Ширина (габарит) */}
+//                 <View style={thirdStepStyles.inputContainer}>
+//                     <View style={thirdStepStyles.rowLabel}>
+//                         <Text style={thirdStepStyles.detailsText}>Ширина </Text>
+//                     </View>
 
-                    <Warning isVissible={warningInput === 1} text={w_max} />
-                    <TextInput
-                        keyboardType="number-pad"
-                        style={[
-                            thirdStepStyles.input,
-                            { borderColor: focusedInput === 1 ? Colors.blue : Colors.blueLight },
-                            (errorFieldNumber === 2 || warningInput === 1) && thirdStepStyles.borderRed
-                        ]}
-                        placeholder="0"
-                        value={orderObject.width_gab || ""}
-                        onChangeText={(value) => {
-                            if (w_max === undefined || w_max >= +value) {
-                                setOrderParams({
-                                    ...orderParams,
-                                    newOrderObject: {
-                                        ...orderParams.newOrderObject,
-                                        width_gab: value
-                                    }
-                                })
-                            };
+//                     <Warning isVissible={warningInput === 1} text={w_max} />
+//                     <TextInput
+//                         keyboardType="number-pad"
+//                         style={[
+//                             thirdStepStyles.input,
+//                             { borderColor: focusedInput === 1 ? Colors.blue : Colors.blueLight },
+//                             (errorFieldNumber === 2 || warningInput === 1) && thirdStepStyles.borderRed
+//                         ]}
+//                         placeholder="0"
+//                         value={orderObject.width_gab || ""}
+//                         onChangeText={(value) => {
+//                             if (w_max === undefined || w_max >= +value) {
+//                                 setOrderParams({
+//                                     ...orderParams,
+//                                     newOrderObject: {
+//                                         ...orderParams.newOrderObject,
+//                                         width_gab: value
+//                                     }
+//                                 })
+//                             };
 
-                            if (w_max !== undefined && w_max < +value) {
-                                setOrderParams({
-                                    ...orderParams,
-                                    newOrderObject: {
-                                        ...orderParams.newOrderObject,
-                                        width_gab: null
-                                    }
-                                })
+//                             if (w_max !== undefined && w_max < +value) {
+//                                 setOrderParams({
+//                                     ...orderParams,
+//                                     newOrderObject: {
+//                                         ...orderParams.newOrderObject,
+//                                         width_gab: null
+//                                     }
+//                                 })
 
-                                showWarning(1);
-                            }
-                        }}
-                        onFocus={() => setFocusedInput(1)}
-                        onBlur={() => setFocusedInput(null)}
-                        maxLength={3}
-                    />
-                    <Text style={thirdStepStyles.unitLabel}>см</Text>
-                </View>
+//                                 showWarning(1);
+//                             }
+//                         }}
+//                         onFocus={() => setFocusedInput(1)}
+//                         onBlur={() => setFocusedInput(null)}
+//                         maxLength={3}
+//                     />
+//                     <Text style={thirdStepStyles.unitLabel}>см</Text>
+//                 </View>
 
-                {/* Высота (габарит) */}
-                <View style={thirdStepStyles.inputContainer}>
-                    <View style={thirdStepStyles.rowLabel}>
-                        <Text style={thirdStepStyles.detailsText}>Висота </Text>
-                    </View>
+//                 {/* Высота (габарит) */}
+//                 <View style={thirdStepStyles.inputContainer}>
+//                     <View style={thirdStepStyles.rowLabel}>
+//                         <Text style={thirdStepStyles.detailsText}>Висота </Text>
+//                     </View>
 
-                    <Warning isVissible={warningInput === 2} text={h_max} />
-                    <TextInput
-                        keyboardType="number-pad"
-                        style={[
-                            thirdStepStyles.input,
-                            { borderColor: focusedInput === 2 ? Colors.blue : Colors.blueLight },
-                            (errorFieldNumber === 2 || warningInput === 2) && thirdStepStyles.borderRed
-                        ]}
-                        placeholder="0"
-                        value={orderObject.height_gab || ""}
-                        onChangeText={(value) => {
-                            if (h_max === undefined || h_max >= +value) {
-                                setOrderParams({
-                                    ...orderParams,
-                                    newOrderObject: {
-                                        ...orderParams.newOrderObject,
-                                        height_gab: value
-                                    }
-                                })
-                            };
+//                     <Warning isVissible={warningInput === 2} text={h_max} />
+//                     <TextInput
+//                         keyboardType="number-pad"
+//                         style={[
+//                             thirdStepStyles.input,
+//                             { borderColor: focusedInput === 2 ? Colors.blue : Colors.blueLight },
+//                             (errorFieldNumber === 2 || warningInput === 2) && thirdStepStyles.borderRed
+//                         ]}
+//                         placeholder="0"
+//                         value={orderObject.height_gab || ""}
+//                         onChangeText={(value) => {
+//                             if (h_max === undefined || h_max >= +value) {
+//                                 setOrderParams({
+//                                     ...orderParams,
+//                                     newOrderObject: {
+//                                         ...orderParams.newOrderObject,
+//                                         height_gab: value
+//                                     }
+//                                 })
+//                             };
 
-                            if (h_max !== undefined && h_max < +value) {
-                                setOrderParams({
-                                    ...orderParams,
-                                    newOrderObject: {
-                                        ...orderParams.newOrderObject,
-                                        height_gab: null
-                                    }
-                                })
+//                             if (h_max !== undefined && h_max < +value) {
+//                                 setOrderParams({
+//                                     ...orderParams,
+//                                     newOrderObject: {
+//                                         ...orderParams.newOrderObject,
+//                                         height_gab: null
+//                                     }
+//                                 })
 
-                                showWarning(2);
-                            }
-                        }}
-                        onFocus={() => setFocusedInput(2)}
-                        onBlur={() => setFocusedInput(null)}
-                        maxLength={3}
-                    />
-                    <Text style={thirdStepStyles.unitLabel}>см</Text>
-                </View>
-            </View>
-        </>
-    )
-}
+//                                 showWarning(2);
+//                             }
+//                         }}
+//                         onFocus={() => setFocusedInput(2)}
+//                         onBlur={() => setFocusedInput(null)}
+//                         maxLength={3}
+//                     />
+//                     <Text style={thirdStepStyles.unitLabel}>см</Text>
+//                 </View>
+//             </View>
+//         </>
+//     )
+// }
 
 function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber }: {
     orderParams: ICreateOrderParams,
@@ -191,7 +191,14 @@ function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber }: {
             return;
         }
 
-        const limit = mode === "subtract" ? max - diff : max;
+        let limit: number;
+
+        if (mode === "subtract") {
+            limit = max;
+        } else {
+            limit = max - diff;
+        }
+
         if (+value > limit) {
             if (warnId) showWarning(warnId);
             return;
@@ -204,6 +211,7 @@ function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber }: {
                 ? String(mode === "subtract" ? Math.max(0, +value - diff) : +value + diff)
                 : ""
         };
+
         setOrderParams({
             ...orderParams,
             newOrderObject: updates
@@ -212,9 +220,8 @@ function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber }: {
 
     return (
         <>
-            {/* ====== ШИРИНА ====== */}
             <View style={thirdStepStyles.row}>
-                {/* Ширина (габарит) */}
+                {/* ====== ШИРИНА ====== */}
                 <View style={thirdStepStyles.inputContainer}>
                     <View style={thirdStepStyles.rowLabel}>
                         <Text style={thirdStepStyles.detailsText}>Ширина </Text>
@@ -241,37 +248,7 @@ function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber }: {
                     <Text style={thirdStepStyles.unitLabel}>см</Text>
                 </View>
 
-                {/* Ширина (по штапику) */}
-                <View style={thirdStepStyles.inputContainer}>
-                    <View style={thirdStepStyles.rowLabel}>
-                        <Text style={thirdStepStyles.detailsText}>Ширина </Text>
-                        <Text style={thirdStepStyles.labelNoteSmall}>(по штапику)</Text>
-                    </View>
-
-                    <Warning isVissible={warningInput === 2} text={w_max ? w_max - WIDTH_DIFFERENCE : undefined} />
-                    <TextInput
-                        keyboardType="number-pad"
-                        style={[
-                            thirdStepStyles.input,
-                            { borderColor: focusedInput === 2 ? Colors.blue : Colors.blueLight },
-                            errorFieldNumber === 2 && thirdStepStyles.borderRed
-                        ]}
-                        placeholder="0"
-                        value={orderObject.width_shtapik || ""}
-                        onChangeText={(value) =>
-                            updateDimension("width_shtapik", "width_gab", value, w_max, WIDTH_DIFFERENCE, 2, "add")
-                        }
-                        onFocus={() => setFocusedInput(2)}
-                        onBlur={() => setFocusedInput(null)}
-                        maxLength={3}
-                    />
-                    <Text style={thirdStepStyles.unitLabel}>см</Text>
-                </View>
-            </View>
-
-            {/* ====== ВЫСОТА ====== */}
-            <View style={thirdStepStyles.row}>
-                {/* Высота (габарит) */}
+                {/* ====== ВИСОТА ====== */}
                 <View style={thirdStepStyles.inputContainer}>
                     <View style={thirdStepStyles.rowLabel}>
                         <Text style={thirdStepStyles.detailsText}>Висота </Text>
@@ -297,8 +274,37 @@ function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber }: {
                     />
                     <Text style={thirdStepStyles.unitLabel}>см</Text>
                 </View>
+            </View>
 
-                {/* Высота (по штапику) */}
+            <View style={thirdStepStyles.row}>
+                {/* ====== ШИРИНА ПО ШТАПИКУ ====== */}
+                <View style={thirdStepStyles.inputContainer}>
+                    <View style={thirdStepStyles.rowLabel}>
+                        <Text style={thirdStepStyles.detailsText}>Ширина </Text>
+                        <Text style={thirdStepStyles.labelNoteSmall}>(по штапику)</Text>
+                    </View>
+
+                    <Warning isVissible={warningInput === 2} text={w_max ? w_max - WIDTH_DIFFERENCE : undefined} />
+                    <TextInput
+                        keyboardType="number-pad"
+                        style={[
+                            thirdStepStyles.input,
+                            { borderColor: focusedInput === 2 ? Colors.blue : Colors.blueLight },
+                            errorFieldNumber === 2 && thirdStepStyles.borderRed
+                        ]}
+                        placeholder="0"
+                        value={orderObject.width_shtapik || ""}
+                        onChangeText={(value) =>
+                            updateDimension("width_shtapik", "width_gab", value, w_max, WIDTH_DIFFERENCE, 2, "add")
+                        }
+                        onFocus={() => setFocusedInput(2)}
+                        onBlur={() => setFocusedInput(null)}
+                        maxLength={3}
+                    />
+                    <Text style={thirdStepStyles.unitLabel}>см</Text>
+                </View>
+
+                {/* ====== ВИСОТА ПО ШТАПИКУ ====== */}
                 <View style={thirdStepStyles.inputContainer}>
                     <View style={thirdStepStyles.rowLabel}>
                         <Text style={thirdStepStyles.detailsText}>Висота </Text>

@@ -180,7 +180,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
     );
 };
 
-
 function LoadingView() {
     return (
         <AnimatedWrapper

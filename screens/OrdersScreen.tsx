@@ -6,7 +6,7 @@ import {
     View
 } from "react-native";
 import { Colors } from "../theme/colors";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { Fonts } from "../theme/fonts";
 import OrdersHeader from "../components/orders-screen/OrdersHeader";
 import NumberAndStatus from "../components/orders-screen/NumberAndStatus";
@@ -49,7 +49,7 @@ function OrdersScreen({ navigation }: { navigation: OrdersScreenNavigationProp }
     const [searchOrderId, setSearchOrderId] = useState("");
     const [searchOrderStatus, setSearchOrderStatus] = useState("");
 
-    const { ordersList, isLoading } = useOrdersList(
+    const { ordersList, isLoading, triggerRefetch } = useOrdersList(
         searchOrderId,
         searchOrderStatus,
         activePage,
@@ -95,7 +95,7 @@ function OrdersScreen({ navigation }: { navigation: OrdersScreenNavigationProp }
                     setActivePage={setActivePage}
                 />
 
-                <AddNewOrder />
+                <AddNewOrder triggerRefetch={triggerRefetch} />
 
                 <BackButton
                     styles={styles.backButton}

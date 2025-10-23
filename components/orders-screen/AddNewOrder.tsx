@@ -12,7 +12,7 @@ import SecondStep from "./new-order-steps/SecondStep";
 import FinalStep from "./new-order-steps/FinalStep";
 import { INewOrderObject, initCreateOrderParams, useCreateOrder } from "./NewOrderProvider";
 
-function AddNewOrder() {
+function AddNewOrder({ triggerRefetch }: { triggerRefetch: () => void }) {
     const { isConnected } = useNetworkStatus();
     const { rate } = useDollarRate(isConnected);
     const { balance } = useBalanceValue(isConnected);
@@ -93,10 +93,13 @@ function AddNewOrder() {
                                     :
                                     // #4
                                     <FinalStep
+                                        balanceValue={balance}
+                                        rateValue={rate}
                                         closeHandler={() => {
                                             setOrderParams(initCreateOrderParams);
                                             setIsModalVissible(false);
                                             setActiveStep(1);
+                                            triggerRefetch();
                                         }}
                                         stepHandler={() => {
                                             const oneMoreItem: INewOrderObject = {

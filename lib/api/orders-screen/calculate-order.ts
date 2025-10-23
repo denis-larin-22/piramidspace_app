@@ -1,8 +1,20 @@
 import { BASE_URL } from "../base-url"
 import { MainGroupsCode } from "./groups-and-products"
 
-// Calculate full order price
-export interface ICulculateOrderObject {
+// ORDER OBJECT WITH ITEMS | CALCULATE+CREATING ORDER
+export interface ICalculateOrderObject {
+    login: string,
+    place_order: boolean,
+    items: ICalculateOrderItem[],
+    comment: string,
+    delivery_adr: string,
+    adrType: string,
+    product_type: string,
+    retailData: string,
+    predopl: number
+}
+
+export interface ICalculateOrderItem {
     product_code: string,
     subgroup_code: string,
     group_code: MainGroupsCode,
@@ -10,34 +22,36 @@ export interface ICulculateOrderObject {
     height: number,
     side: string,
     units: string,
+    options?: string,
     quantity: number,
     system_color: string,
-    add_to_cart: boolean,
-    login: string,
-    fixation_type?: string,
-    options?: string,
+    fixation_type: string
 }
 
+// RESPONCE - RESULT
 export interface ICalculateResponce {
     success: boolean,
+    items: ICalculateResponceItem[],
+    order_number: string | null,
+    total_usd: number,
+    total_uah: number
+}
+
+export interface ICalculateResponceItem {
+    success: boolean,
+    product_code: string,
     price_per_unit: number,
     price_per_unit_uah: number,
     total_price: number,
     total_price_uah: number,
     details: {
-        base_price: number,
-        base_price_ua: number,
-        color_markup: number,
-        color_markup_ua: number,
+        color_markup: string,
         fixation_markup: number,
-        fixation_markup_ua: number,
-        option_markup: number,
-        option_markup_ua: number
-    },
-    added_to_cart: boolean
+        option_markup: number
+    }
 }
 
-export async function calculateOrderPriceDayNight(orderObject: ICulculateOrderObject): Promise<ICalculateResponce | null> {
+export async function calculateOrderPriceDayNight(orderObject: ICalculateOrderObject): Promise<ICalculateResponce | null> {
     try {
         const response = await fetch(`${BASE_URL}/api/piramid/calculate-product`, {
             method: "POST",

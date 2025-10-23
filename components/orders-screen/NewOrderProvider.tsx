@@ -30,7 +30,15 @@ export interface INewOrderObject {
     fixation_type: Fixation | null;
     price: number;
     options: string | null;
-    final_price: number;
+    final_price: {
+        usd: number,
+        uah: number
+    };
+    adrType: string,
+    comment: string,
+    delivery_adr: string,
+    product_type: string,
+    retailData: string,
 }
 
 export const initCreateOrderParams: ICreateOrderParams = {
@@ -50,7 +58,15 @@ export const initCreateOrderParams: ICreateOrderParams = {
         fixation_type: null,
         price: 0,
         options: null,
-        final_price: 0,
+        final_price: {
+            usd: 0,
+            uah: 0
+        },
+        adrType: "",
+        comment: "",
+        delivery_adr: "",
+        product_type: "",
+        retailData: "",
     },
     ordersList: [],
 };
