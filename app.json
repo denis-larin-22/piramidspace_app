@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/start-icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/start-icon.png",
       "resizeMode": "contain",
@@ -47,7 +47,8 @@
             "minSdkVersion": 24
           }
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "owner": "den4ik-dev"
   }
