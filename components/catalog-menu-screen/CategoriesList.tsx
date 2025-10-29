@@ -1,10 +1,11 @@
-import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { ICategory, IProductItem } from "../../lib/types";
 import { getCorrectWordDeclension } from "../../lib/utils";
 import { SYSTEM_SALE_CATEGORY_ID, SYSTEM_TOP_CATEGORY_ID } from "../../lib/hooks/useCatalogCategories";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
+import { JSX } from "react";
 
 interface IProps {
     categoriesList: ICategory[],

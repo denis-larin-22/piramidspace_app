@@ -7,8 +7,7 @@ import MainScreen from '../screens/MainScreen';
 import { getDataFromAcyncStorage } from '../lib/async-storage/acyncStorage';
 import { ASYNC_STORAGE_USER_INFO_OBJECT } from '../lib/async-storage/asyncStorageKeys';
 import { useEffect, useState } from 'react';
-import { Image, StatusBar, View } from 'react-native';
-import LottieView from 'lottie-react-native';
+import { StatusBar, View } from 'react-native';
 import { Colors } from '../theme/colors';
 import Loader from '../components/ui/Loader';
 import OrdersScreen from '../screens/OrdersScreen';
@@ -50,7 +49,10 @@ export default function AppStack() {
         return <Loading />
     } else {
         return (
-            <Stack.Navigator initialRouteName={isLoggedIn ? "MainScreen" : "LoginScreen"}>
+            <Stack.Navigator
+                id={undefined}
+                initialRouteName={isLoggedIn ? "MainScreen" : "LoginScreen"}
+            >
                 <Stack.Screen
                     name="LoginScreen"
                     component={LoginScreen}

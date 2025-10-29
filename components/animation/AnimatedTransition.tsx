@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { JSX, useEffect, useRef } from "react";
 import { Animated, ViewStyle } from "react-native";
 
 interface AnimatedTransitionProps {
