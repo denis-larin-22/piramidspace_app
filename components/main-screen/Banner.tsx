@@ -210,8 +210,9 @@ const styles = StyleSheet.create({
     },
     modalContainer: {
         position: 'relative',
-        height: '100%',
+        height: '95%',
         width: '100%',
+        marginTop: 10,
         backgroundColor: '#00000080',
         borderRadius: 25,
         alignItems: 'center',

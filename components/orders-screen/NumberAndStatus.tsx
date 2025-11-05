@@ -205,6 +205,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.comfortaa700,
         fontSize: 12,
         paddingVertical: 7,
+        color: 'black',
         paddingLeft: 12,
         paddingRight: 11,
         backgroundColor: "white",
@@ -226,6 +227,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.comfortaa700,
         fontSize: 12,
         lineHeight: 17,
+        color: 'black'
     },
     statusPressable: {
         flexDirection: "row",
@@ -256,7 +258,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 5,
         top: '20%',
-        backgroundColor: Colors.grayLight
+        backgroundColor: Colors.pale
     },
     modalCloseButton: {
         width: 50,
@@ -265,7 +267,7 @@ const styles = StyleSheet.create({
         bottom: 10,
         right: 20,
         zIndex: 52,
-        backgroundColor: Colors.pale,
+        backgroundColor: 'white',
         borderRadius: 50,
         borderWidth: 1,
         borderColor: Colors.grayLight
@@ -283,8 +285,8 @@ const styles = StyleSheet.create({
         marginBottom: 7,
         paddingHorizontal: 8,
         paddingVertical: 7,
-        borderRadius: 20,
-        backgroundColor: Colors.pale,
+        borderRadius: 10,
+        backgroundColor: 'white',
         overflow: 'hidden'
     },
     activeModalItem: {
@@ -293,7 +295,7 @@ const styles = StyleSheet.create({
     modalItemText: {
         fontFamily: Fonts.comfortaa700,
         fontSize: 12,
-        lineHeight: 12,
+        lineHeight: 14,
         color: "black",
         marginLeft: -10
     },
@@ -305,7 +307,7 @@ const styles = StyleSheet.create({
         marginLeft: 10
     },
     modalItemColor: {
-        width: 30,
+        width: 22,
         height: '230%',
         left: -10
     }

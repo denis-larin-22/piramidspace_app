@@ -416,6 +416,7 @@ const styles = StyleSheet.create({
         padding: 10,
         fontFamily: Fonts.openSans400,
         fontSize: 14,
+        color: 'black',
         marginTop: 10
     },
     commentArea: {

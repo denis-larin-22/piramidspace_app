@@ -188,6 +188,7 @@ const styles = StyleSheet.create({
     productName: {
         fontFamily: Fonts.comfortaa600,
         fontSize: 15,
+        color: 'black',
         lineHeight: 19,
         maxWidth: 240
     },
@@ -253,6 +254,7 @@ const styles = StyleSheet.create({
     rowValue: {
         fontSize: 15,
         fontFamily: Fonts.comfortaa600,
+        color: 'black',
         maxWidth: '70%'
     },
     detailSwitcherText: {

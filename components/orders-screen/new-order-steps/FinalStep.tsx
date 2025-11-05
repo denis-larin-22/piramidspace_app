@@ -30,15 +30,18 @@ function FinalStep({
     rateValue,
     balanceValue,
     stepHandler,
-    closeHandler
+    closeHandler,
+    buttonsHideHandler
 }: {
     rateValue: string | null,
     balanceValue: number | null,
     stepHandler: () => void,
-    closeHandler: () => void
+    closeHandler: () => void,
+    buttonsHideHandler: (isHide: boolean) => void
 }) {
     const { orderParams, setOrderParams } = useCreateOrder();
     const [isAddressOpen, setIsAddressOpen] = useState<boolean>(false);
+    const [isCreateButtonHidden, setIsCreateButtonHidden] = useState<boolean>(false);
 
     const initReport = {
         isVissible: false,
@@ -137,21 +140,16 @@ function FinalStep({
             <AnimatedWrapper
                 useOpacity
                 offsetY={20}
-                style={[styles.orderHeader, {
-                    flexWrap: "wrap",
-                    gap: 10,
-                    alignItems: "center",
-                    justifyContent: "center"
-                }]}
+                style={styles.rateBalanceContainer}
             >
-                <Text style={{ fontFamily: Fonts.comfortaa700, color: Colors.gray }}>Курс: {rateValue}</Text>
-                <Text style={{ fontFamily: Fonts.comfortaa700, color: Colors.gray }}>Баланс: {balanceValue}</Text>
-                <Text style={{ fontFamily: Fonts.comfortaa700, color: Colors.gray }}>Готовність на: -</Text>
+                <Text style={styles.rateBalanceText}>Курс: {rateValue}</Text>
+                <Text style={styles.rateBalanceText}>Баланс: {balanceValue}</Text>
+                <Text style={styles.rateBalanceText}>Готовність на: -</Text>
             </AnimatedWrapper>
 
             <ScrollView
-                style={{ maxHeight: isAddressOpen ? 0 : 370 }}
-                contentContainerStyle={{ paddingVertical: 8 }}
+                style={isAddressOpen ? styles.scrollViewHidden : styles.scrollViewVisible}
+                contentContainerStyle={styles.scrollViewContent}
                 showsVerticalScrollIndicator={true}
             >
                 {orderParams.ordersList.map((itemOrder, index) => {
@@ -171,15 +169,7 @@ function FinalStep({
                 })}
             </ScrollView>
 
-            <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginVertical: 10,
-                    width: "100%",
-                    gap: 30,
-                }}
-            >
+            <View style={styles.addressAndAddButtonContainer}>
                 {!isAddressOpen && (
                     <Pressable onPress={stepHandler} style={styles.addButton}>
                         <Text style={styles.addButtonText}>+</Text>
@@ -193,62 +183,72 @@ function FinalStep({
             </View>
 
             <AnimatedWrapper useOpacity offsetY={20} delay={400} style={styles.totalRow}>
-                <Text style={styles.totalAmount}>💰 Сума</Text>
-                {orderCalculates ?
-                    <Text style={styles.totalAmountText}>{orderCalculates.result?.total_usd.toFixed(2)}$</Text>
-                    :
+                <Text style={styles.totalAmount}>Сума</Text>
+                {orderCalculates.result ? (
+                    <Text style={styles.totalAmountText}>{orderCalculates.result.total_usd.toFixed(2)}$</Text>
+                ) : (
                     <Loader />
-                }
+                )}
             </AnimatedWrapper>
 
-            <AnimatedWrapper
-                style={[thirdStepStyles.submitButton, { bottom: -90 }]}
-                offsetY={-20}
-            >
-                <Pressable
-                    onPress={async () => {
-                        const placeOrder = await calculateCreateHandler(orderParams, true);
-
-                        if (placeOrder === null) {
-                            setReport({
-                                isVissible: true,
-                                isError: true,
-                                message: "Помилка створення/розрахунку замовлення"
-                            });
-                            setTimeout(() => { setReport(initReport) }, 3500);
-                        } else {
-                            setReport({
-                                isVissible: true,
-                                isError: false,
-                                message: `Замовлення №${placeOrder.order_number} створено`
-                            });
-                            setTimeout(() => {
-                                setReport(initReport);
-                                closeHandler();
-                            }, 3500);
-                        }
-                    }}
+            {!isCreateButtonHidden && (
+                <AnimatedWrapper
+                    style={[thirdStepStyles.submitButton, styles.createButtonWrapper]}
+                    offsetY={-20}
                 >
-                    <ImageBackground
-                        source={require("../../../assets/gradient-small.png")}
-                        style={thirdStepStyles.submitButtonBg}
+                    <Pressable
+                        onPress={async () => {
+                            buttonsHideHandler(true);
+                            setIsCreateButtonHidden(true);
+
+                            const placeOrder = await calculateCreateHandler(orderParams, true);
+
+                            if (placeOrder === null) {
+                                setReport({
+                                    isVissible: true,
+                                    isError: true,
+                                    message: "Помилка створення/розрахунку замовлення"
+                                });
+                                setTimeout(() => {
+                                    setReport(initReport);
+                                    buttonsHideHandler(false);
+                                    setIsCreateButtonHidden(false);
+                                }, 3500);
+                            } else {
+                                setReport({
+                                    isVissible: true,
+                                    isError: false,
+                                    message: `Замовлення №${placeOrder.order_number} створено`
+                                });
+                                setTimeout(() => {
+                                    setReport(initReport);
+                                    buttonsHideHandler(false);
+                                    setIsCreateButtonHidden(false);
+                                    closeHandler();
+                                }, 3500);
+                            }
+                        }}
                     >
-                        <Text style={thirdStepStyles.submitButtonText}>Створити</Text>
-                    </ImageBackground>
-                </Pressable>
-            </AnimatedWrapper>
+                        <ImageBackground
+                            source={require("../../../assets/gradient-small.png")}
+                            style={thirdStepStyles.submitButtonBg}
+                        >
+                            <Text style={thirdStepStyles.submitButtonText}>Створити</Text>
+                        </ImageBackground>
+                    </Pressable>
+                </AnimatedWrapper>
+            )}
 
             <Report
                 isVissible={report.isVissible}
                 isError={report.isError}
                 message={report.message}
             />
-        </View >
+        </View>
     );
 }
 
 export default FinalStep;
-
 
 export async function calculateCreateHandler(orderParams: ICreateOrderParams, createOrder: boolean = false): Promise<ICalculateResponce | null> {
     const login = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
@@ -285,80 +285,41 @@ export async function calculateCreateHandler(orderParams: ICreateOrderParams, cr
     return calculatesResult;
 }
 
-// Report 
+// Report Component
 function Report({ isVissible, message, isError = false }: { isVissible: boolean, message: string, isError?: boolean }) {
     if (isVissible) {
         return (
-            <View
-                style={{
-                    width: '100%',
-                    height: '100%',
-                    position: 'absolute',
-                    zIndex: 100,
-                    backgroundColor: Colors.pale,
-                    justifyContent: 'center',
-                }}
-            >
-                <AnimatedWrapper
-                    useOpacity
-                    useScale
-                    style={{
-                    }}
-                >
-                    {isError ?
+            <View style={styles.reportOverlay}>
+                <AnimatedWrapper useOpacity useScale>
+                    {isError ? (
                         <Image
                             source={require("../../../assets/orders-screen/error.webp")}
-                            style={{
-                                width: 70,
-                                height: 70,
-                                alignSelf: "center",
-                                resizeMode: "contain",
-                                alignItems: "center",
-                            }}
+                            style={styles.reportIcon}
                         />
-                        :
+                    ) : (
                         <Image
                             source={require("../../../assets/orders-screen/success.webp")}
-                            style={{
-                                width: 70,
-                                height: 70,
-                                alignSelf: "center",
-                                resizeMode: "contain",
-                                alignItems: "center",
-                            }}
+                            style={styles.reportIcon}
                         />
-                    }
+                    )}
 
-                    <View style={{
-                        marginVertical: 30,
-                        width: '70%',
-                        alignSelf: 'center',
-                        height: 16,
-                        backgroundColor: isError ? Colors.red : Colors.green,
-                        borderRadius: 20,
-                        borderWidth: 7,
-                        borderColor: isError ? "#FF0A0A50" : "#1EBF9150",
-                    }}></View>
+                    <View style={[
+                        styles.reportProgressBar,
+                        isError ? styles.reportProgressBarError : styles.reportProgressBarSuccess
+                    ]}></View>
 
-                    <Text style={{
-                        fontFamily: Fonts.comfortaa600,
-                        fontSize: 16,
-                        textAlign: 'center',
-                        marginTop: 20,
-                        color: Colors.gray
-                    }}>{message}</Text>
-                    {!isError && <Text style={{
-                        fontFamily: Fonts.comfortaa600,
-                        fontSize: 18,
-                        textAlign: 'center',
-                        opacity: 0.9
-                    }}>Дякуємо за Ваше замовлення!</Text>}
+                    <Text style={styles.reportMessage}>{message}</Text>
+                    {!isError && (
+                        <Text style={styles.reportThanks}>Дякуємо за Ваше замовлення!</Text>
+                    )}
                 </AnimatedWrapper>
             </View>
         )
-    } else return null;
+    }
+    return null;
 }
 
+// === Все стили вынесены сюда ===
 const styles = StyleSheet.create({
     orderHeader: {
         flexDirection: 'row',
@@ -391,8 +352,38 @@ const styles = StyleSheet.create({
         textAlign: "center",
         textTransform: "uppercase",
     },
+    rateBalanceContainer: {
+        flexDirection: 'row',
+        flexWrap: "wrap",
+        gap: 10,
+        alignItems: "center",
+        justifyContent: "center",
+        paddingBottom: 8,
+        marginBottom: 8,
+        borderBottomWidth: 1,
+        borderColor: "#A2A2A870",
+    },
+    rateBalanceText: {
+        fontFamily: Fonts.comfortaa700,
+        color: Colors.gray
+    },
+    scrollViewVisible: {
+        maxHeight: 370
+    },
+    scrollViewHidden: {
+        maxHeight: 0
+    },
+    scrollViewContent: {
+        paddingVertical: 8
+    },
+    addressAndAddButtonContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginVertical: 10,
+        width: "100%",
+        gap: 30,
+    },
     addButton: {
-        // marginLeft: 20,
         backgroundColor: Colors.blue,
         width: 35,
         height: 35,
@@ -425,53 +416,57 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.comfortaa700,
         fontSize: 18,
         lineHeight: 26,
+        color: 'black'
     },
-    submitButton: {
-        height: 59,
-        maxWidth: 180,
-        width: "100%",
-        borderRadius: 31,
-        overflow: "hidden",
-        position: "absolute",
-        bottom: -70,
+    createButtonWrapper: {
+        bottom: -90,
         alignSelf: "center",
     },
-    submitButtonBg: {
-        width: "100%",
-        height: "100%",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    submitButtonText: {
-        fontFamily: Fonts.comfortaa600,
-        fontSize: 17,
-        lineHeight: 22,
-        color: "white",
-    },
-    mt20: {
-        marginTop: 20,
-    },
-    button: {
-        height: 59,
-        borderRadius: 50,
-        overflow: 'hidden',
-    },
-    createButton: {
-        position: 'absolute',
-        bottom: -90,
-        alignSelf: 'center'
-    },
-    buttonBg: {
+
+    // Report styles
+    reportOverlay: {
         width: '100%',
         height: '100%',
-        alignItems: 'center',
+        position: 'absolute',
+        zIndex: 100,
+        backgroundColor: Colors.pale,
         justifyContent: 'center',
     },
-    createButtonText: {
-        fontFamily: Fonts.comfortaa400,
+    reportIcon: {
+        width: 70,
+        height: 70,
+        alignSelf: "center",
+        resizeMode: "contain",
+        alignItems: "center",
+    },
+    reportProgressBar: {
+        marginVertical: 30,
+        width: '70%',
+        alignSelf: 'center',
+        height: 16,
+        borderRadius: 20,
+        borderWidth: 7,
+    },
+    reportProgressBarError: {
+        backgroundColor: Colors.red,
+        borderColor: "#FF0A0A10",
+    },
+    reportProgressBarSuccess: {
+        backgroundColor: Colors.green,
+        borderColor: "#1EBF9150",
+    },
+    reportMessage: {
+        fontFamily: Fonts.comfortaa600,
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 20,
+        color: Colors.gray
+    },
+    reportThanks: {
+        fontFamily: Fonts.comfortaa600,
         fontSize: 18,
-        lineHeight: 50,
-        color: 'white',
-        paddingHorizontal: 20,
+        color: 'black',
+        textAlign: 'center',
+        opacity: 0.9
     },
 });

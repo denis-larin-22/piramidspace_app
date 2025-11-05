@@ -1,8 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { ScrollView, View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Fonts } from '../../theme/fonts';
 import AnimatedWrapper from '../animation/AnimatedWrapper';
-import OrderItem from './OrderItem';
+import Order from './table-order-item/Order';
 import { Colors } from '../../theme/colors';
 import Loader from '../ui/Loader';
 import { IOrder } from '../../lib/api/orders-screen/ordersList';
@@ -23,12 +23,9 @@ export default function TableOrders({
     totalPages: number | undefined,
     triggerRefetch: () => void
 }) {
-    const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
-
     const scrollRef = useRef<ScrollView>(null);
 
     const paginationHandler = (page: number) => {
-        setActiveOrderId(null);
         setActivePage(page);
     }
 
@@ -57,11 +54,9 @@ export default function TableOrders({
                     <LoadingView />
                     :
                     ordersList.map((order) => (
-                        <OrderItem
+                        <Order
                             key={order['N_заказа']}
                             order={order}
-                            activeOrderId={activeOrderId}
-                            setActiveOrderId={setActiveOrderId}
                             triggerRefetch={triggerRefetch}
                         />
                     ))
@@ -77,7 +72,6 @@ export default function TableOrders({
         </AnimatedWrapper >
     );
 }
-
 
 type PaginationProps = {
     currentPage: number;
@@ -248,7 +242,8 @@ const paginationStyles = StyleSheet.create({
     },
     dots: {
         opacity: 0.2,
-        fontWeight: 600
+        fontWeight: 600,
+        color: Colors.grayLight
     },
     activeText: {
         color: 'white',

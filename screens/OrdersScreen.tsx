@@ -33,7 +33,7 @@ export const STATUS_COLORS_OBJECTS: IStatusColors[] = [
     { color: '#f0e68c', status: 'в обробці', origin: 'в обработке' },
     { color: '#b4ddb4', status: 'у виробництві', origin: 'в производстве' },
     { color: '#FFA500', status: 'виготовлені', origin: 'изготовлен' },
-    { color: '#E47B78', status: 'видалений', origin: 'удален' },
+    { color: '#A2A2A8', status: 'видалений', origin: 'удален' },
     { color: '#f37474', status: 'відкладені', origin: 'отложен' },
     { color: '#FFFFFF', status: 'інші', origin: '' },
 ];
@@ -67,12 +67,7 @@ function OrdersScreen({ navigation }: { navigation: OrdersScreenNavigationProp }
 
     return (
         <CreateOrderProvider>
-            <StatusBar
-                hidden={false}
-                translucent={false}
-                barStyle="dark-content"
-                backgroundColor={Colors.pale}
-            />
+            <StatusBar hidden={true} />
 
             <View style={styles.container}>
                 <OrdersHeader />

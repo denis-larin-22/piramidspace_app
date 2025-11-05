@@ -21,6 +21,8 @@ function AddNewOrder({ triggerRefetch }: { triggerRefetch: () => void }) {
     // 
     const [isModalVissible, setIsModalVissible] = useState<boolean>(false);
     const [activeStep, setActiveStep] = useState<number>(1);
+    // 
+    const [isControlButtonsHidden, setIsControlButtonsHidden] = useState(false);
 
     // buttons handlers
     const backButtonHandler = () => {
@@ -114,16 +116,18 @@ function AddNewOrder({ triggerRefetch }: { triggerRefetch: () => void }) {
                                                 newOrderObject: oneMoreItem
                                             });
                                             setActiveStep(3);
-                                        }} />
+                                        }}
+                                        buttonsHideHandler={setIsControlButtonsHidden}
+                                    />
                         }
 
                         {/* Back and close */}
-                        <View style={{ zIndex: -1 }}>
+                        {!isControlButtonsHidden && <View style={{ zIndex: -1 }}>
                             {!(activeStep === 1 || (activeStep === 3 && orderParams.ordersList.length !== 0)) && (
                                 <BackButton backHandler={backButtonHandler} />
                             )}
                             <CloseButton closeHandler={closeButtonHandler} />
-                        </View>
+                        </View>}
                     </AnimatedWrapper>
                 </AnimatedWrapper>
             </Modal>

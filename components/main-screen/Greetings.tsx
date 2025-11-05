@@ -32,7 +32,8 @@ const styles = StyleSheet.create({
     greetingText: {
         fontSize: 18,
         fontFamily: Fonts.comfortaa400,
-        maxWidth: '75%'
+        maxWidth: '75%',
+        color: 'black'
     },
     userName: {
         fontFamily: Fonts.comfortaa700,

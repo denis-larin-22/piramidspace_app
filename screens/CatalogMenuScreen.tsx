@@ -16,12 +16,7 @@ function CatalogMenuScreen({ navigation }: { navigation: CatalogMenuScreenNaviga
 
     return (
         <View style={styles.wrap}>
-            <StatusBar
-                hidden={false}
-                translucent={false}
-                barStyle="dark-content"
-                backgroundColor={Colors.pale}
-            />
+            <StatusBar hidden={true} />
 
             <CatalogMenuHeader />
 

@@ -39,5 +39,6 @@ const styles = StyleSheet.create({
     title: {
         fontFamily: Fonts.comfortaa700,
         fontSize: 20,
+        color: 'black'
     },
 });

@@ -10,7 +10,10 @@ function CatalogMenuHeader() {
             delay={200}
             duration={300}
         >
-            <Logo />
+            <Logo style={{
+                width: 120,
+                height: 25
+            }} />
 
             <Image
                 source={require("../../assets/catalog-screen/menu-decorate-text.png")}

@@ -564,7 +564,7 @@ export const thirdStepStyles = StyleSheet.create({
         top: 20,
         alignSelf: "center",
         backgroundColor: "#fff8f6ff",
-        padding: 20,
+        padding: 12,
         borderRadius: 14,
         borderWidth: 1,
         borderColor: "#FF0A0A",
@@ -583,8 +583,8 @@ export const thirdStepStyles = StyleSheet.create({
         fontFamily: Fonts.openSans400,
         fontSize: 14,
         lineHeight: 18,
+        color: 'black',
         maxWidth: "95%",
-        // backgroundColor: 'red'
     },
     errorMarker: {
         width: 22,

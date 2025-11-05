@@ -52,12 +52,7 @@ function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigat
 
     return (
         <View style={styles.screenWrap}>
-            <StatusBar
-                hidden={false}
-                translucent={false}
-                barStyle="dark-content"
-                backgroundColor={Colors.pale}
-            />
+            <StatusBar hidden={true} />
 
             <AnimatedWrapper
                 style={styles.logoWrap}
@@ -66,7 +61,10 @@ function CatalogScreen({ navigation, route }: { navigation: CatalogScreenNavigat
                 duration={300}
                 delay={100}
             >
-                <Logo />
+                <Logo style={{
+                    width: 120,
+                    height: 25
+                }} />
                 {categoryName && <Text style={styles.screenTitle}>{categoryName}</Text>}
             </AnimatedWrapper>
 

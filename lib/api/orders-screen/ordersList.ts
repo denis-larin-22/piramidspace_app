@@ -44,7 +44,21 @@ export interface IOrder {
     sale_diler: number;
     seller: ISeller;
     bot_status: string | null;
+    items: IOrderItem[];
 };
+
+export interface IOrderItem {
+    "N_заказа": number,
+    "наименование": string,
+    "характерстика": string,
+    "кол_во": string,
+    "ед изм": string,
+    "стоим": string,
+    "площадь, м.кв.": string,
+    "розничная_стоим": string,
+    "комплектация": string,
+    "sale_tk": number
+}
 
 export interface IOrderList {
     current_page: number,

@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.comfortaa700,
         fontSize: 26,
         textAlign: "center",
-        marginBottom: 15
+        marginBottom: 15,
     },
     loginText: {
         color: "#2B2548",
@@ -258,7 +258,8 @@ const styles = StyleSheet.create({
         marginLeft: 16,
         marginBottom: 6,
         fontSize: 16,
-        fontFamily: Fonts.comfortaa700
+        fontFamily: Fonts.comfortaa700,
+        color: 'black'
     },
     input: {
         backgroundColor: "white",
@@ -269,7 +270,8 @@ const styles = StyleSheet.create({
         marginBottom: 21,
         borderWidth: 1,
         fontFamily: Fonts.openSans400,
-        fontSize: 14
+        fontSize: 14,
+        color: 'black'
     },
     openEyeImage: {
         height: 15,
@@ -336,6 +338,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         borderBottomWidth: 1,
         borderColor: "#A2A2A840",
-        paddingBottom: 5
+        paddingBottom: 5,
+        color: 'black'
     }
 });
