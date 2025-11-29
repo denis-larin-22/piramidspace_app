@@ -94,11 +94,12 @@ const styles = StyleSheet.create({
     },
     linkText: {
         fontSize: 36,
+        lineHeight: 36,
         fontFamily: Fonts.comfortaa700,
         textTransform: 'uppercase',
         color: Colors.blue,
         position: 'relative',
-        bottom: -5,
+        bottom: -15,
         left: -3,
     },
 });

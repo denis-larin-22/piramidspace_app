@@ -50,6 +50,7 @@ function FirstStep({ stepHandler }: { stepHandler: () => void }) {
             >
                 <Text style={{
                     fontFamily: Fonts.comfortaa700,
+                    color: 'black',
                     fontSize: 20,
                     textTransform: 'uppercase',
                     marginBottom: 15,

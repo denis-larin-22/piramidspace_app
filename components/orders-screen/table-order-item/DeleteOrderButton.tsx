@@ -88,16 +88,12 @@ export default DeleteOrderButton;
 
 const styles = StyleSheet.create({
     deleteBtn: {
-        width: 30,
-        height: 30,
-        backgroundColor: Colors.grayLight,
+        width: 40,
+        height: 40,
+        backgroundColor: Colors.pale,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 50,
-        position: 'absolute',
-        right: 50,
-        top: 10,
-        zIndex: 1
     },
     deleteIcon: {
         width: 20,
@@ -131,6 +127,7 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontFamily: Fonts.comfortaa700,
         fontSize: 18,
+        color: 'black',
         marginBottom: 5
     },
     modalSubtitle: {

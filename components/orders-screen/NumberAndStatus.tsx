@@ -32,7 +32,6 @@ function NumberAndStatus({
     const [isStatusModalOpen, setIsStatusModalOpen] = useState<boolean>(false);
     const [activeStatus, setActiveStatus] = useState<string>(statusValue || "");
 
-
     function resetId() {
         setidValueInput("");
         idValueHandler("");
@@ -48,6 +47,7 @@ function NumberAndStatus({
             <AnimatedWrapper useOpacity offsetX={50} duration={300} delay={100}>
                 <TextInput
                     placeholder="    №"
+                    placeholderTextColor={"#A2A2A8"}
                     style={styles.numberBox}
                     inputMode="numeric"
                     keyboardType="number-pad"

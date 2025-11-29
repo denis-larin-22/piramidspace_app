@@ -8,30 +8,9 @@ import { getDataFromAcyncStorage } from "../../../../lib/async-storage/acyncStor
 import { ASYNC_STORAGE_USER_LOGIN } from "../../../../lib/async-storage/asyncStorageKeys";
 import { ArrowDown, thirdStepStyles } from "../ThirdStep";
 import { ICreateOrderParams, useCreateOrder } from "../../NewOrderProvider";
+import { formatAddressNP, formatAddressPrivat } from "../../../../lib/utils";
 
-function formatAddressNP(addressObj: IAddressValuesNP): string {
-    return (
-        addressObj["доставка способ"] +
-        ", " +
-        addressObj["город"] +
-        ", " +
-        addressObj["отделение"]
-    );
-}
 
-function formatAddressPrivat(addressObj: IAddressValuesPrivat): string {
-    return (
-        addressObj["доставка способ"] +
-        ", " +
-        addressObj["город"] +
-        ", " +
-        addressObj["street_np"] +
-        ", " +
-        addressObj["houme_np"] +
-        ", " +
-        addressObj["appart_np"]
-    );
-}
 
 function AddressAndComment({
     isAddressOpen,

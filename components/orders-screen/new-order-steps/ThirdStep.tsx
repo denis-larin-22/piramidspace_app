@@ -15,6 +15,7 @@ import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorag
 import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
 import { useCreateOrder } from "../NewOrderProvider";
 import Options from "./third-step-components/Options";
+import { ErrorMessage } from "../../ui/ErrorMessage";
 
 export interface IErrorStateMessage {
     state: boolean,
@@ -26,7 +27,7 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
     const { orderParams, setOrderParams } = useCreateOrder();
 
     const orderObject = orderParams.newOrderObject;
-    const { group, subgroup, product, height_shtapik, width_shtapik, height_gab, width_gab, controlType, count_number, color_system, fixation_type, options } = orderObject;
+    const { subgroup, product, height_gab, width_gab, controlType, count_number, color_system, fixation_type, options } = orderObject;
 
     if (subgroup === null) return null;
 
@@ -438,26 +439,6 @@ export function ArrowDown({ style, isRotate = false }: { style?: ImageStyle, isR
     );
 }
 
-export function ErrorMessage({ errorText, styles }: { errorText: string, styles?: ViewStyle }) {
-    return (
-        <AnimatedWrapper style={[thirdStepStyles.errorMessage, styles]} useOpacity offsetY={20}>
-            <Image
-                source={require('../../../assets/orders-screen/error-icon.webp')}
-                style={{
-                    width: 25,
-                    height: 25,
-                    resizeMode: 'contain',
-                }}
-            />
-            <View>
-                <Text style={[thirdStepStyles.errorMessageText, { fontFamily: Fonts.comfortaa700, fontSize: 16, marginBottom: 10 }]}>Помилка!</Text>
-                <Text style={thirdStepStyles.errorMessageText}>{errorText}</Text>
-            </View>
-        </AnimatedWrapper>
-    );
-}
-
-
 export const thirdStepStyles = StyleSheet.create({
     stepSubtitle: {
         fontFamily: Fonts.comfortaa400,
@@ -557,42 +538,6 @@ export const thirdStepStyles = StyleSheet.create({
     },
     productItemTextWhite: {
         color: "white",
-    },
-    errorMessage: {
-        overflow: 'hidden',
-        position: "absolute",
-        top: 20,
-        alignSelf: "center",
-        backgroundColor: "#fff8f6ff",
-        padding: 12,
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: "#FF0A0A",
-        flexDirection: 'row',
-        gap: 10,
-        // iOS shadow
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-
-        // Android shadow
-        elevation: 5,
-    },
-    errorMessageText: {
-        fontFamily: Fonts.openSans400,
-        fontSize: 14,
-        lineHeight: 18,
-        color: 'black',
-        maxWidth: "95%",
-    },
-    errorMarker: {
-        width: 22,
-        height: '500%',
-        backgroundColor: Colors.red,
-        position: 'absolute',
-        top: 0,
-        left: 0
     },
     row: {
         flexDirection: "row",

@@ -5,6 +5,7 @@ import { IOrder, IOrderItem } from "../../../lib/api/orders-screen/ordersList";
 import { Status } from "./Order";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { useState } from "react";
+import { getFormatedOrderType } from "../../../lib/utils";
 
 function OrderDetails({ order }: { order: IOrder }) {
     const {
@@ -22,6 +23,12 @@ function OrderDetails({ order }: { order: IOrder }) {
         items: orderItems
     } = order;
 
+    const filteredItems = orderItems.map((item) => {
+        if (item['наименование'] === "Замер" || item['наименование'] === "Доставка" || item['наименование'] === "Установка") return null;
+
+        return item;
+    }).filter((item) => item !== null);
+
     const fullArea = orderItems.reduce((acc, item) => {
         const area = parseFloat(item["площадь, м.кв."]);
         return acc + (isNaN(area) ? 0 : area);
@@ -37,7 +44,7 @@ function OrderDetails({ order }: { order: IOrder }) {
                 <Text style={[styles.orderId, styles.shadow]}>#{id}</Text>
 
                 <View style={styles.headerRow}>
-                    <Text style={styles.orderGroup}>{group}</Text>
+                    <Text style={styles.orderGroup}>{getFormatedOrderType(group).toUpperCase()}</Text>
                     <Status statusValue={status} style={styles.statusStyle} />
                 </View>
             </AnimatedWrapper>
@@ -49,17 +56,18 @@ function OrderDetails({ order }: { order: IOrder }) {
             >
                 <Detail label="Дата замовлення:" value={formatDateAndTime(createDate)} />
                 <Detail label="Дата готовності:" value={completionDate ? formatDateAndTime(completionDate) : "—"} />
-                <Detail label="Загальна площа:" value={fullArea + " м²"} />
+                <Detail label="Загальна площа:" value={fullArea.toFixed(2) + " м²"} />
             </AnimatedWrapper>
 
             <AnimatedWrapper
                 useOpacity
                 offsetY={20}
                 delay={280}
+                style={styles.scrollWrap}
             >
                 <View style={styles.itemsHeader}>
                     <Text style={styles.itemsLabel}>Позицій в замовленні: </Text>
-                    <Text style={styles.itemsCount}>{orderItems.length}</Text>
+                    <Text style={styles.itemsCount}>{orderItems.length - 3}</Text>
                     <Arrows />
                 </View>
 
@@ -69,7 +77,7 @@ function OrderDetails({ order }: { order: IOrder }) {
                     contentContainerStyle={styles.itemsScrollContent}
                     style={styles.itemsScroll}
                 >
-                    {orderItems.map((item, index) => (
+                    {filteredItems.map((item, index) => (
                         <Item
                             key={item['N_заказа'] + index}
                             item={item}
@@ -166,7 +174,7 @@ function Item({ item, style }: { item: IOrderItem, style?: StyleProp<ViewStyle> 
 
             <Detail label="Кількість:" value={parseFloat(item['кол_во'])} />
             <Detail label="Площа:" value={item['площадь, м.кв.']} />
-            <Detail label="Ширина:" value={width} />
+            <Detail label="Ширина:" value={width ? width.trim() : width} />
             <Detail label="Висота:" value={height} />
             <Detail label="Керування:" value={controlSide} />
             <Detail label="Колір:" value={color} />
@@ -178,7 +186,7 @@ function Item({ item, style }: { item: IOrderItem, style?: StyleProp<ViewStyle> 
     )
 };
 
-function Arrows() {
+export function Arrows() {
     return (
         <>
             <Image source={require('../../../assets/orders-screen/arrow-right.png')} style={styles.arrowRight} />
@@ -190,6 +198,8 @@ function Arrows() {
 // UTILS
 
 function formatDateAndTime(dateString: string): string {
+    if (dateString === null) return '';
+
     const [datePart, timePart] = dateString.split(' ');
     const [year, month, day] = datePart.split('-');
 
@@ -201,16 +211,24 @@ function formatDateAndTime(dateString: string): string {
     return `${day}.${month}.${year}`;
 }
 
-function formatCharacteristicsString(value: string) {
+export function formatCharacteristicsString(value: string) {
+    if (value === null) return {
+        width: '—',
+        height: '—',
+        controlSide: '—',
+        color: '—',
+        fixation: '—'
+    };
+
     const separate = value.split(',');
     const dimensions = separate[0].split('*');
 
     return {
-        width: dimensions[0].trim() + "0",
-        height: dimensions[0].trim() + "0",
-        controlSide: separate[1].trim() === 'left' ? "ліворуч" : "праворуч",
-        color: separate[2].trim(),
-        fixation: separate[3].trim()
+        width: dimensions[0],
+        height: dimensions[1],
+        controlSide: separate[1] === 'left' ? "ліворуч" : "праворуч",
+        color: separate[2],
+        fixation: separate[3]
     };
 };
 
@@ -247,6 +265,7 @@ const styles = StyleSheet.create({
     },
     headerRow: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         alignItems: 'center',
         justifyContent: 'space-between',
         borderBottomWidth: 1,
@@ -257,7 +276,7 @@ const styles = StyleSheet.create({
     orderGroup: {
         fontFamily: Fonts.comfortaa700,
         fontSize: 20,
-        lineHeight: 20,
+        lineHeight: 24,
         color: Colors.blue,
     },
     statusStyle: {
@@ -269,6 +288,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
         marginTop: 10,
         paddingTop: 5,
+        paddingHorizontal: 15,
         borderTopWidth: 1,
         borderColor: Colors.grayLight,
     },
@@ -335,16 +355,17 @@ const styles = StyleSheet.create({
         paddingBottom: 5,
         marginBottom: 5,
     },
+    scrollWrap: {
+        marginHorizontal: -15,
+    },
     itemsScroll: {
         marginTop: 5,
         marginBottom: 10,
-        marginLeft: -15,
-        marginRight: -15,
-        paddingLeft: 15,
     },
     itemsScrollContent: {
         paddingVertical: 8,
         gap: 10,
+        paddingHorizontal: 12
     },
     itemCard: {
         backgroundColor: 'white',

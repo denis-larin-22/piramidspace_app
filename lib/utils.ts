@@ -1,5 +1,6 @@
 import { Colors } from "../theme/colors";
 import { BASE_URL } from "./api/base-url";
+import { IAddressValuesNP, IAddressValuesPrivat } from "./api/orders-screen/address";
 
 export function getAvailabilityTextColor(availabilityValue: string) {
     const value = availabilityValue.toLowerCase();
@@ -185,3 +186,66 @@ export function formatPhoneNumberToInternational(phone: string): string {
     return `+380${cleanedPhone.slice(1)}`;
 }
 
+// parse group code to cycilic
+export function getFormatedOrderType(type: string) {
+    if (type === null) return "-";
+
+    switch (type.toLowerCase()) {
+        case 'horizontal':
+            return 'горизонтальні жалюзі';
+        case 'vertical':
+            return 'вертикальні жалюзі';
+        case 'roler':
+            return 'рулонні жалюзі';
+        case 'components':
+            return 'комплектуючі';
+        case 'ads':
+            return 'рекламна продукція';
+        case 'day':
+            return 'день-ніч';
+        default:
+            return type.toLowerCase();
+    }
+}
+
+// getting order status\color
+export function getFormatedStatus(status: string) {
+    switch (status) {
+        case 'удален':
+            return { formatedStatus: 'видалений', color: '#A2A2A8' };
+        case 'у виробництві':
+            return { formatedStatus: 'у виробництві', color: '#b4ddb4' };
+        case 'изготовлен':
+            return { formatedStatus: 'виготовлені', color: '#FFA500' };
+        case 'предварительный':
+            return { formatedStatus: 'попередній', color: '#5ea1bc' };
+        default:
+            return { formatedStatus: status, color: '#FFFFFF' };
+    }
+}
+
+
+// Addresses
+export function formatAddressNP(addressObj: IAddressValuesNP): string {
+    return (
+        addressObj["доставка способ"] +
+        ", " +
+        addressObj["город"] +
+        ", " +
+        addressObj["отделение"]
+    );
+}
+
+export function formatAddressPrivat(addressObj: IAddressValuesPrivat): string {
+    return (
+        addressObj["доставка способ"] +
+        ", " +
+        addressObj["город"] +
+        ", " +
+        addressObj["street_np"] +
+        ", " +
+        addressObj["houme_np"] +
+        ", " +
+        addressObj["appart_np"]
+    );
+}

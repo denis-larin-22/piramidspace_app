@@ -5,7 +5,7 @@ import { Image, Pressable, Text, View, StyleSheet } from "react-native";
 import { Fonts } from "../../../../theme/fonts";
 import { Colors } from "../../../../theme/colors";
 import Loader from "../../../ui/Loader";
-import { ErrorMessage } from "../ThirdStep";
+import { ErrorMessage } from "../../../ui/ErrorMessage";
 
 function OrderItem({
     index,

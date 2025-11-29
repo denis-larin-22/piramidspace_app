@@ -11,6 +11,7 @@ import FirstStep, { generateId } from "./new-order-steps/FirstStep";
 import SecondStep from "./new-order-steps/SecondStep";
 import FinalStep from "./new-order-steps/FinalStep";
 import { INewOrderObject, initCreateOrderParams, useCreateOrder } from "./NewOrderProvider";
+import { CloseButton } from "../ui/CloseButton";
 
 function AddNewOrder({ triggerRefetch }: { triggerRefetch: () => void }) {
     const { isConnected } = useNetworkStatus();
@@ -126,7 +127,10 @@ function AddNewOrder({ triggerRefetch }: { triggerRefetch: () => void }) {
                             {!(activeStep === 1 || (activeStep === 3 && orderParams.ordersList.length !== 0)) && (
                                 <BackButton backHandler={backButtonHandler} />
                             )}
-                            <CloseButton closeHandler={closeButtonHandler} />
+                            <CloseButton
+                                style={styles.closeButton}
+                                closeHandler={closeButtonHandler}
+                            />
                         </View>}
                     </AnimatedWrapper>
                 </AnimatedWrapper>
@@ -138,21 +142,6 @@ function AddNewOrder({ triggerRefetch }: { triggerRefetch: () => void }) {
 export default AddNewOrder;
 
 // UI
-export function CloseButton({ closeHandler }: { closeHandler: () => void }) {
-    return (
-        <AnimatedWrapper delay={200} useOpacity offsetY={-30}>
-            <Pressable style={[styles.button, styles.closeButton]} onPress={closeHandler}>
-                <ImageBackground
-                    source={require('../../assets/gradient-small.png')}
-                    style={styles.buttonBg}
-                >
-                    <Text style={[styles.closeButtonText, styles.rotate]}>+</Text>
-                </ImageBackground>
-            </Pressable>
-        </AnimatedWrapper>
-    );
-}
-
 function BackButton({ backHandler }: { backHandler: () => void }) {
     return (
         <AnimatedWrapper delay={200} useOpacity offsetY={-30}>
@@ -227,20 +216,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    closeButtonText: {
-        fontFamily: Fonts.comfortaa400,
-        fontSize: 40,
-        lineHeight: 50,
-        color: 'white'
-    },
+
     backButtonText: {
         fontFamily: Fonts.comfortaa400,
         fontSize: 30,
         lineHeight: 38,
         color: 'white'
     },
-    rotate: {
-        transform: [{ rotate: '45deg' }],
-    },
+
 });
 

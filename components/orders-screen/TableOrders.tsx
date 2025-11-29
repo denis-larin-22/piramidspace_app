@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { ScrollView, View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Fonts } from '../../theme/fonts';
 import AnimatedWrapper from '../animation/AnimatedWrapper';
@@ -6,6 +6,7 @@ import Order from './table-order-item/Order';
 import { Colors } from '../../theme/colors';
 import Loader from '../ui/Loader';
 import { IOrder } from '../../lib/api/orders-screen/ordersList';
+import ModalOrder from './table-order-item/ModalOrder';
 
 
 export default function TableOrders({
@@ -28,6 +29,8 @@ export default function TableOrders({
     const paginationHandler = (page: number) => {
         setActivePage(page);
     }
+    // ///////////////////////////////
+    const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
 
     return (
         <AnimatedWrapper
@@ -54,11 +57,25 @@ export default function TableOrders({
                     <LoadingView />
                     :
                     ordersList.map((order) => (
-                        <Order
-                            key={order['N_заказа']}
-                            order={order}
-                            triggerRefetch={triggerRefetch}
-                        />
+                        <View key={order["N_заказа"]}>
+                            <Order
+                                key={order['N_заказа']}
+                                order={order}
+                                openHandler={() => setActiveOrderId(order["N_заказа"])}
+
+                            />
+
+                            {order["N_заказа"] === activeOrderId &&
+                                <ModalOrder
+                                    orderId={order["N_заказа"]}
+                                    isOpen={order["N_заказа"] === activeOrderId}
+                                    closeHandler={() => setActiveOrderId(null)}
+                                    triggerRefetch={() => {
+                                        setActiveOrderId(null);
+                                        triggerRefetch();
+                                    }}
+                                />}
+                        </View>
                     ))
                 }
             </ScrollView >
@@ -243,7 +260,7 @@ const paginationStyles = StyleSheet.create({
     dots: {
         opacity: 0.2,
         fontWeight: 600,
-        color: Colors.grayLight
+        color: 'black'
     },
     activeText: {
         color: 'white',
@@ -271,14 +288,15 @@ const paginationStyles = StyleSheet.create({
     }
 });
 
-
 export const tableStyles = StyleSheet.create({
     ordersTable: {
         marginVertical: 20,
         backgroundColor: 'white',
         borderRadius: 13,
         flexGrow: 1,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        borderWidth: 2,
+        borderColor: 'white'
     },
     scrollVertical: {
         height: '50%',

@@ -276,7 +276,7 @@ export async function calculateCreateHandler(orderParams: ICreateOrderParams, cr
         comment: orderParams.newOrderObject.comment,
         adrType: orderParams.newOrderObject.adrType,
         delivery_adr: orderParams.newOrderObject.delivery_adr,
-        product_type: "жалюзи",
+        product_type: orderParams.activeGroup,
         retailData: orderParams.newOrderObject.retailData,
         predopl: 0
     }
@@ -286,7 +286,7 @@ export async function calculateCreateHandler(orderParams: ICreateOrderParams, cr
 }
 
 // Report Component
-function Report({ isVissible, message, isError = false }: { isVissible: boolean, message: string, isError?: boolean }) {
+export function Report({ isVissible, message, isError = false }: { isVissible: boolean, message: string, isError?: boolean }) {
     if (isVissible) {
         return (
             <View style={styles.reportOverlay}>

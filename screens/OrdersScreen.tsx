@@ -60,6 +60,7 @@ function OrdersScreen({ navigation }: { navigation: OrdersScreenNavigationProp }
     const listToRender = ordersList?.data ?? [];
     const totalPages = ordersList?.last_page ?? 0;
 
+
     const statusHandler = (status: string) => {
         setSearchOrderStatus(status);
         setActivePage(0); // сброс страницы при смене фильтра
