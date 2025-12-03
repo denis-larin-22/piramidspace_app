@@ -61,7 +61,12 @@ function AddNewOrder({ triggerRefetch }: { triggerRefetch: () => void }) {
                 </TouchableOpacity>
             </AnimatedWrapper>
 
-            <Modal visible={isModalVissible} transparent>
+            <Modal
+                visible={isModalVissible}
+                transparent={true}
+                animationType="fade"
+                statusBarTranslucent={true}
+            >
                 <AnimatedWrapper
                     style={styles.modalOverlay}
                     useOpacity

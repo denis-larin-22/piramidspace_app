@@ -4,7 +4,7 @@ import { Colors } from "../../theme/colors";
 import { Text } from "react-native";
 import { Fonts } from "../../theme/fonts";
 
-function Warning({ isVissible, text }: { isVissible: boolean, text: number | undefined }) {
+function Warning({ isVissible, text }: { isVissible: boolean, text: number | string | undefined }) {
     if (text === undefined) return null;
 
     return (
@@ -20,7 +20,7 @@ function Warning({ isVissible, text }: { isVissible: boolean, text: number | und
                         borderRadius: 13,
                         paddingVertical: 3,
                         paddingHorizontal: 10,
-                        width: 110,
+                        width: 130,
                         borderLeftWidth: 15,
                         borderLeftColor: Colors.red,
                         shadowColor: "#000",

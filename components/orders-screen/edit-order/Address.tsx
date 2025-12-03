@@ -3,9 +3,9 @@ import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
 import { useState } from "react";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
-import { ArrowDown } from "../new-order-steps/ThirdStep";
 import { IAddress } from "../../../lib/api/orders-screen/address";
 import { formatAddressNP, formatAddressPrivat } from "../../../lib/utils";
+import { ArrowDown } from "../../ui/ArrowDown";
 
 function Address({
     address,

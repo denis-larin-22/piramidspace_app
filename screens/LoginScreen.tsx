@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppStack";
 import LoginForm from "../components/login-screen/LoginForm";
 import { StatusBar, View, Text, StyleSheet } from "react-native";
 import { Colors } from "../theme/colors";
-import NetInfo from '@react-native-community/netinfo';
 import { Fonts } from "../theme/fonts";
 import { useNetworkStatus } from "../lib/hooks/useNetworkStatus";
 

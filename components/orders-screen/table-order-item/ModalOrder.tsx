@@ -68,29 +68,35 @@ function ModalOrder({
                 >
                     {order ?
                         <>
+                            {/* =================== ORDER DETAILS =================== */}
                             <OrderDetails order={order} />
+                            {/* =================== ORDER DETAILS =================== */}
 
                             <View style={styles.buttonsWrap}>
-                                <AnimatedWrapper offsetY={20} delay={400}>
-                                    <EditOrder
-                                        currentOrder={order}
-                                        updateAfterEditHandler={() => {
-                                            updateAfterEditHandler();
-                                        }}
-                                    />
-                                </AnimatedWrapper>
+
                                 {order['статус'] === 'удален' ?
                                     null
                                     :
-                                    <AnimatedWrapper offsetY={20} delay={300}>
-                                        <DeleteOrderButton
-                                            isDeleteModalOpen={isDeleteModalOpen}
-                                            setIsDeleteModalOpen={setIsDeleteModalOpen}
-                                            loginValue={loginValue}
-                                            idOrder={order["N_заказа"]}
-                                            triggerRefetch={triggerRefetch}
-                                        />
-                                    </AnimatedWrapper>
+                                    <>
+                                        <AnimatedWrapper offsetY={20} delay={400}>
+                                            <EditOrder
+                                                currentOrder={order}
+                                                updateAfterEditHandler={() => {
+                                                    updateAfterEditHandler();
+                                                }}
+                                            />
+                                        </AnimatedWrapper>
+
+                                        <AnimatedWrapper offsetY={20} delay={300}>
+                                            <DeleteOrderButton
+                                                isDeleteModalOpen={isDeleteModalOpen}
+                                                setIsDeleteModalOpen={setIsDeleteModalOpen}
+                                                loginValue={loginValue}
+                                                idOrder={order["N_заказа"]}
+                                                triggerRefetch={triggerRefetch}
+                                            />
+                                        </AnimatedWrapper>
+                                    </>
                                 }
                                 <AnimatedWrapper offsetY={20} delay={200}>
                                     <CloseButton closeHandler={() => {

@@ -11,12 +11,13 @@ import { CloseButton } from "../../ui/CloseButton";
 import Loader from "../../ui/Loader";
 import Comment from "../edit-order/Comment";
 import Address from "../edit-order/Address";
-import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
+import { ASYNC_STORAGE_USER_INFO_OBJECT } from "../../../lib/async-storage/asyncStorageKeys";
 import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
 import { editOrder, IEditableOrder, IOrderItemToAdd, IOrderItemToDelete, IOrderItemToUpdate } from "../../../lib/api/orders-screen/edit-order";
 import { ErrorMessage } from "../../ui/ErrorMessage";
 import { fetchAddressList, IAddress } from "../../../lib/api/orders-screen/address";
 import { SuccessMessage } from "../../ui/SuccessMessage";
+import { IUserInfo } from "../../../lib/api/auth";
 
 const UNITS = "см";
 
@@ -52,7 +53,6 @@ function EditOrder({
     // Editable object(order) state
     const [editOrderParams, setEditOrderParams] = useState<IEditableOrder>(initEditOrderParams);
     const [editItemsList, setEditItemsList] = useState<(IOrderItemToAdd | IOrderItemToUpdate | IOrderItemToDelete)[]>([]);
-
     // /////////////////////
 
     useEffect(() => {
@@ -60,11 +60,11 @@ function EditOrder({
             // start
             setIsDataReady(false);
 
-
             const groupCode = parseGroupCode(currentOrder['вид заказа']);
             const subgroupCode = parseSubgroupCode(currentOrder.items[0]['наименование']);
 
-            const login = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
+            const userInfo = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT);
+            const { "логин": login, units } = JSON.parse(userInfo) as IUserInfo;
 
             // products list
             const dataByGroup = await getGroupsStructure(groupCode, login);
@@ -97,7 +97,7 @@ function EditOrder({
                     quantity: +item['кол_во'],
                     side: controlSide,
                     system_color: color,
-                    units: UNITS,
+                    units: units,
                     fixation_type: fixation,
                     options: ""  // ОПЦИИ НА ДРУГИЕ ВИДЫ - ОПЦИОНАЛЬНО
                 }
@@ -211,28 +211,36 @@ function EditOrder({
                                             styles={styles.notification}
                                         />}
 
-                                    <ScrollView
-                                        horizontal
-                                        showsHorizontalScrollIndicator={false}
-                                        contentContainerStyle={styles.itemsScrollContent}
-                                        style={styles.itemsScroll}
-                                    >
-                                        {editItemsList.map((item, index) => (
-                                            <EditableItem
-                                                key={index}
-                                                item={item as IOrderItemToUpdate}
-                                                subgroupData={subgroupData}
-                                                index={index}
-                                                onItemChange={(updatedItem) => {
-                                                    setIsSubmitBtnHidden(false);
-                                                    setEditItemsList(prev =>
-                                                        prev.map((it, i) => i === index ? updatedItem : it)
-                                                    );
-                                                }}
-                                            />
-                                        ))}
-                                    </ScrollView>
-
+                                    {editItemsList.filter(item => { return (item.action === 'add' || item.action === 'update') }).length ?
+                                        <ScrollView
+                                            horizontal
+                                            showsHorizontalScrollIndicator={false}
+                                            contentContainerStyle={styles.itemsScrollContent}
+                                            style={styles.itemsScroll}
+                                        >
+                                            {editItemsList.map((item, index) => (
+                                                <EditableItem
+                                                    key={index}
+                                                    item={item as IOrderItemToUpdate}
+                                                    subgroupData={subgroupData}
+                                                    index={index}
+                                                    onItemChange={(updatedItem) => {
+                                                        setIsSubmitBtnHidden(false);
+                                                        setEditItemsList(prev =>
+                                                            prev.map((it, i) => i === index ? updatedItem : it)
+                                                        );
+                                                    }}
+                                                />
+                                            ))}
+                                        </ScrollView>
+                                        :
+                                        <View style={styles.emptyItemsContainer}>
+                                            <Pressable style={styles.addButton}>
+                                                <Text style={styles.addButtonText}>+</Text>
+                                            </Pressable>
+                                            <Text style={styles.emptyItemsText}>Додати нову тканину</Text>
+                                        </View>
+                                    }
                                     {/* <Address
                                     address={currentOrder['адрес доставки']}
                                     addressList={addressList}
@@ -273,7 +281,10 @@ function EditOrder({
                                 </View>
                             }
 
-                            <CloseButton closeHandler={() => setIsOpen(false)} style={styles.closeButton} />
+                            <CloseButton
+                                style={styles.closeButton}
+                                closeHandler={() => { setIsOpen(false) }}
+                            />
                             {!isSubmitBtnHidden && <AnimatedWrapper
                                 offsetY={20}
                                 style={styles.submitButton}
@@ -384,7 +395,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         borderRadius: 13,
         width: '92%',
-        maxHeight: '92%',
+        maxHeight: '80%',
         minHeight: 300,
     },
     loaderWrap: {
@@ -451,5 +462,32 @@ const styles = StyleSheet.create({
     notification: {
         zIndex: 1000,
         marginTop: 250
+    },
+    emptyItemsContainer: {
+        marginVertical: 20,
+        padding: 20,
+        height: 100,
+        alignItems: 'center',
+        gap: 20
+    },
+    addButton: {
+        width: 40,
+        height: 40,
+        backgroundColor: Colors.blue,
+        borderRadius: 50,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    addButtonText: {
+        fontFamily: Fonts.comfortaa700,
+        fontSize: 20,
+        lineHeight: 22,
+        color: 'white'
+    },
+    emptyItemsText: {
+        fontFamily: Fonts.comfortaa400,
+        fontSize: 14,
+        lineHeight: 16,
+        color: Colors.gray
     }
 });

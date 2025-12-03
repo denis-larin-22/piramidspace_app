@@ -5,6 +5,8 @@ import Warning from "../../ui/Warning";
 import { useState } from "react";
 
 function WidthAndHeight({
+    unit,
+
     width,
     maxWidth,
     widthHandler,
@@ -13,6 +15,8 @@ function WidthAndHeight({
     maxHeight,
     heightHandler
 }: {
+    unit: string,
+
     width: number,
     maxWidth: number,
     widthHandler: (value: number) => void,
@@ -22,6 +26,7 @@ function WidthAndHeight({
     heightHandler: (value: number) => void,
 }) {
     const [warningInput, setWarningInput] = useState<number | null>(null);
+
 
     return (
         <View style={styles.wrap}>
@@ -45,9 +50,9 @@ function WidthAndHeight({
                             widthHandler(+value)
                         }
                     }}
-                    maxLength={3}
+                    maxLength={8}
                 />
-                <Text style={styles.unitLabel}>см</Text>
+                <Text style={styles.unitLabel}>{unit}</Text>
             </View>
             <View style={{ minWidth: '47%' }}>
                 <View style={styles.rowLabel}>
@@ -69,9 +74,9 @@ function WidthAndHeight({
                             heightHandler(+value)
                         }
                     }}
-                    maxLength={3}
+                    maxLength={8}
                 />
-                <Text style={styles.unitLabel}>см</Text>
+                <Text style={styles.unitLabel}>{unit}</Text>
             </View>
         </View>
     )

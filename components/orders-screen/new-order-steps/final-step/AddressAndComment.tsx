@@ -6,9 +6,10 @@ import { Colors } from "../../../../theme/colors";
 import { fetchAddressList, IAddress, IAddressValuesPrivat, IAddressValuesNP } from "../../../../lib/api/orders-screen/address";
 import { getDataFromAcyncStorage } from "../../../../lib/async-storage/acyncStorage";
 import { ASYNC_STORAGE_USER_LOGIN } from "../../../../lib/async-storage/asyncStorageKeys";
-import { ArrowDown, thirdStepStyles } from "../ThirdStep";
 import { ICreateOrderParams, useCreateOrder } from "../../NewOrderProvider";
 import { formatAddressNP, formatAddressPrivat } from "../../../../lib/utils";
+import { formStyles } from "../third-step-components/form-styles";
+import { ArrowDown } from "../../../ui/ArrowDown";
 
 
 
@@ -236,13 +237,13 @@ function Address({ addressList, orderParams, setOrderParams }: { addressList: IA
             >
                 <Pressable onPress={() => setListIsOpen(!listIsOpen)}>
                     <Text style={[
-                        thirdStepStyles.selectField,
+                        formStyles.selectField,
                         { borderColor: listIsOpen ? Colors.blue : Colors.blueLight },
                     ]}>
                         {deliveryOptions.find(opt => opt.key === selectedKey)?.label}
                     </Text>
                 </Pressable>
-                <ArrowDown isRotate={listIsOpen} style={thirdStepStyles.arrowIcon} />
+                <ArrowDown isRotate={listIsOpen} style={formStyles.arrowIcon} />
             </AnimatedWrapper>
 
             {listIsOpen && (
@@ -272,7 +273,7 @@ function Address({ addressList, orderParams, setOrderParams }: { addressList: IA
                         elevation: 5,
                     }}
                 >
-                    <ScrollView style={thirdStepStyles.scrollModal}>
+                    <ScrollView style={formStyles.scrollModal}>
                         {deliveryOptions.map((option, index) => (
                             <AnimatedWrapper
                                 key={option.key}
@@ -282,12 +283,12 @@ function Address({ addressList, orderParams, setOrderParams }: { addressList: IA
                             >
                                 <Pressable
                                     style={[
-                                        thirdStepStyles.productItem,
+                                        formStyles.productItem,
                                         selectedKey === option.key && { backgroundColor: Colors.pale },
                                     ]}
                                     onPress={() => handleSelect(option.key as keyof IAddress)}
                                 >
-                                    <Text style={thirdStepStyles.productItemText}>
+                                    <Text style={formStyles.productItemText}>
                                         {option.label}
                                     </Text>
                                 </Pressable>

@@ -1,9 +1,9 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { ArrowDown } from "../new-order-steps/ThirdStep";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { Colors } from "../../../theme/colors";
 import { Fonts } from "../../../theme/fonts";
 import { useState } from "react";
+import { ArrowDown } from "../../ui/ArrowDown";
 
 function ControlType({
     control,
@@ -21,7 +21,7 @@ function ControlType({
             <Text style={styles.detailsText}>Керування</Text>
 
             <Pressable onPress={() => setIsControlListOpen(!isControlListOpen)}>
-                <Text style={styles.selectField}>{ParseSideValue(control)}</Text>
+                <Text style={styles.selectField}>{ParseSideValue(control, false)}</Text>
             </Pressable>
             <ArrowDown isRotate={isControlListOpen} style={styles.arrowIcon} />
 
@@ -75,7 +75,7 @@ function ParseSideValue(value: string, isReverse: boolean = false) {
     if (isReverse) {
         return value === "ліворуч" ? "left" : "right"
     } else {
-        return value === "left" ? "ліворуч" : "праворуч"
+        return (value === "left" || value === "ліворуч") ? "ліворуч" : "праворуч"
     }
 }
 

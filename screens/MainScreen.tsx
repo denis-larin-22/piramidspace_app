@@ -10,9 +10,9 @@ import RateAndBalance from "../components/main-screen/RateAndBalance";
 import ConnectingBar from "../components/main-screen/ConnectingBar";
 import NetInfo from '@react-native-community/netinfo';
 import NavBar from "../components/main-screen/NavBar";
-import { getDataFromAcyncStorage } from "../lib/async-storage/acyncStorage";
-import { ASYNC_STORAGE_USER_INFO_OBJECT } from "../lib/async-storage/asyncStorageKeys";
-import { IUserInfo } from "../lib/api/auth";
+import { getDataFromAcyncStorage, saveDataToAcyncStorage } from "../lib/async-storage/acyncStorage";
+import { ASYNC_STORAGE_USER_INFO_OBJECT, ASYNC_STORAGE_USER_LOGIN, ASYNC_STORAGE_USER_PHONE_NUMBER } from "../lib/async-storage/asyncStorageKeys";
+import { getAuth, IUserInfo } from "../lib/api/auth";
 
 export type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "MainScreen">;
 
@@ -22,21 +22,38 @@ function MainScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
     const [isConnected, setIsConnected] = useState<boolean>(false);
     const [isConnectionBarVissible, setIsConnectionBarVissible] = useState(false);
 
+    // getting main data
     useEffect(() => {
-        getDataFromAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT)
-            .then(result => {
-                if (result === undefined) {
-                    setUserInfo(null);
-                } else {
-                    setUserInfo(JSON.parse(result));
-                }
-            })
-            .catch(() => setUserInfo(null));
+        async function updateUserObjectInfo() {
+            const login = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
+            const telNumber = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_PHONE_NUMBER);
+            const actualUserInfo = await getAuth(login, telNumber); // get actual user info object
+
+            if (actualUserInfo !== undefined) {
+                saveDataToAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT, JSON.stringify(actualUserInfo));
+                setUserInfo(actualUserInfo);
+            } else {
+                setUserInfo(null);
+            }
+        }
+
+        updateUserObjectInfo();
+
+        // getDataFromAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT)
+        //     .then(result => {
+        //         if (result === undefined) {
+        //             setUserInfo(null);
+        //         } else {
+        //             setUserInfo(JSON.parse(result));
+        //         }
+        //     })
+        //     .catch(() => setUserInfo(null));
 
         getDataCatalogList();
         getDataCatalogCategories();
     }, []);
 
+    // chech internet conection
     useEffect(() => {
         const unsubscribe = NetInfo.addEventListener(state => {
             setIsConnected(Boolean(state.isConnected));

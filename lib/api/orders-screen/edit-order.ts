@@ -1,3 +1,4 @@
+import { UnitsTypes } from "../auth";
 import { BASE_URL } from "../base-url";
 import { MainGroupsCode } from "./groups-and-products"
 
@@ -24,7 +25,7 @@ export interface IOrderItemToAdd {
     quantity: number,
     side: string,
     system_color: string,
-    units: string,
+    units: UnitsTypes,
     options: string,
     fixation_type: string
 }
@@ -41,7 +42,7 @@ export interface IOrderItemToUpdate {
     quantity: number,
     side: string,
     system_color: string,
-    units: string,
+    units: UnitsTypes,
     fixation_type: string
     options: string
 }

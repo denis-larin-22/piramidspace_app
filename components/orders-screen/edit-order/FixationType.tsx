@@ -1,9 +1,9 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
-import { ArrowDown } from "../new-order-steps/ThirdStep";
 import { useState } from "react";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
+import { ArrowDown } from "../../ui/ArrowDown";
 
 function FixationType({
     fixation,

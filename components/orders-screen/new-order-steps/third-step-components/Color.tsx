@@ -1,7 +1,9 @@
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { ArrowDown, IErrorStateMessage, thirdStepStyles } from "../ThirdStep";
+import { IErrorStateMessage } from "../ThirdStep";
 import AnimatedWrapper from "../../../animation/AnimatedWrapper";
 import { Colors } from "../../../../theme/colors";
+import { formStyles } from "./form-styles";
+import { ArrowDown } from "../../../ui/ArrowDown";
 
 export default function Color({
     activeColor,
@@ -19,28 +21,28 @@ export default function Color({
     colorsListHandler: (color: string) => void
 }) {
     return (
-        <View style={thirdStepStyles.colorContainer}>
-            <Text style={thirdStepStyles.detailsText}>Колір системи</Text>
+        <View style={formStyles.colorContainer}>
+            <Text style={formStyles.detailsText}>Колір системи</Text>
 
             <Pressable onPress={toggleColorList}>
                 <Text style={[
-                    thirdStepStyles.selectField,
+                    formStyles.selectField,
                     { borderColor: isColorListOpen ? Colors.blue : Colors.blueLight },
-                    isError.errorFieldNumber === 5 && thirdStepStyles.borderRed
+                    isError.errorFieldNumber === 5 && formStyles.borderRed
                 ]}>{activeColor || "Оберіть колір"}</Text>
             </Pressable>
-            <ArrowDown isRotate={isColorListOpen} style={thirdStepStyles.arrowIcon} />
+            <ArrowDown isRotate={isColorListOpen} style={formStyles.arrowIcon} />
 
             {isColorListOpen && (
                 <AnimatedWrapper
                     useOpacity
                     useScale
                     offsetY={-20}
-                    style={[thirdStepStyles.dropdownMenu, {
+                    style={[formStyles.dropdownMenu, {
                         minHeight: 50,
                     }]}
                 >
-                    <ScrollView style={thirdStepStyles.scrollModal}>
+                    <ScrollView style={formStyles.scrollModal}>
                         {colorsList.length ?
                             colorsList.map((color, index) => (
                                 <AnimatedWrapper
@@ -51,17 +53,17 @@ export default function Color({
                                 >
                                     <Pressable
                                         style={[
-                                            thirdStepStyles.productItem,
+                                            formStyles.productItem,
                                             activeColor === color && { backgroundColor: Colors.pale },
                                         ]}
                                         onPress={() => colorsListHandler(color)}
                                     >
-                                        <Text style={thirdStepStyles.productItemText}>{color}</Text>
+                                        <Text style={formStyles.productItemText}>{color}</Text>
                                     </Pressable>
                                 </AnimatedWrapper>
                             ))
                             :
-                            <Text style={thirdStepStyles.absentValueText}>значення відсутні</Text>
+                            <Text style={formStyles.absentValueText}>значення відсутні</Text>
                         }
                     </ScrollView>
                 </AnimatedWrapper>

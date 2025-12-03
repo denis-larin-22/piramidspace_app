@@ -1,8 +1,10 @@
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { ArrowDown, IErrorStateMessage, thirdStepStyles } from "../ThirdStep";
+import { IErrorStateMessage } from "../ThirdStep";
 import AnimatedWrapper from "../../../animation/AnimatedWrapper";
 import { Colors } from "../../../../theme/colors";
 import { Fixation } from "../../../../lib/api/orders-screen/groups-and-products";
+import { formStyles } from "./form-styles";
+import { ArrowDown } from "../../../ui/ArrowDown";
 
 export default function FixationType({
     activeFixationType,
@@ -20,28 +22,28 @@ export default function FixationType({
     fixationTypesListHandler: (type: Fixation) => void
 }) {
     return (
-        <View style={thirdStepStyles.colorContainer}>
-            <Text style={thirdStepStyles.detailsText}>Фіксація</Text>
+        <View style={formStyles.colorContainer}>
+            <Text style={formStyles.detailsText}>Фіксація</Text>
 
             <Pressable onPress={toggleFixationTypeList}>
                 <Text style={[
-                    thirdStepStyles.selectField,
+                    formStyles.selectField,
                     { borderColor: isFixationTypeListOpen ? Colors.blue : Colors.blueLight },
-                    isError.errorFieldNumber === 6 && thirdStepStyles.borderRed
+                    isError.errorFieldNumber === 6 && formStyles.borderRed
                 ]}>{activeFixationType === null ? "Оберіть тип" : activeFixationType.name}</Text>
             </Pressable>
-            <ArrowDown isRotate={isFixationTypeListOpen} style={thirdStepStyles.arrowIcon} />
+            <ArrowDown isRotate={isFixationTypeListOpen} style={formStyles.arrowIcon} />
 
             {isFixationTypeListOpen && (
                 <AnimatedWrapper
                     useOpacity
                     useScale
                     offsetY={-20}
-                    style={[thirdStepStyles.dropdownMenu, {
+                    style={[formStyles.dropdownMenu, {
                         minHeight: 80,
                     }]}
                 >
-                    <ScrollView style={thirdStepStyles.scrollModal}>
+                    <ScrollView style={formStyles.scrollModal}>
                         {fixationTypeList.length ?
                             fixationTypeList.map((fixationType, index) => (
                                 <AnimatedWrapper
@@ -52,17 +54,17 @@ export default function FixationType({
                                 >
                                     <Pressable
                                         style={[
-                                            thirdStepStyles.productItem,
+                                            formStyles.productItem,
                                             (activeFixationType !== null && activeFixationType === fixationType) && { backgroundColor: Colors.pale },
                                         ]}
                                         onPress={() => fixationTypesListHandler(fixationType)}
                                     >
-                                        <Text style={thirdStepStyles.productItemText}>{fixationType.name}</Text>
+                                        <Text style={formStyles.productItemText}>{fixationType.name}</Text>
                                     </Pressable>
                                 </AnimatedWrapper>
                             ))
                             :
-                            <Text style={thirdStepStyles.absentValueText}>значення відсутні</Text>
+                            <Text style={formStyles.absentValueText}>значення відсутні</Text>
                         }
                     </ScrollView>
                 </AnimatedWrapper>

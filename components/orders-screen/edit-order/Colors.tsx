@@ -1,9 +1,9 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { ArrowDown } from "../new-order-steps/ThirdStep";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { Colors } from "../../../theme/colors";
 import { Fonts } from "../../../theme/fonts";
 import { useState } from "react";
+import { ArrowDown } from "../../ui/ArrowDown";
 
 function Color({
     сolor,

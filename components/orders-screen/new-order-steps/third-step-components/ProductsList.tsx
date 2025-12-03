@@ -1,9 +1,10 @@
 import { Pressable, ScrollView, Text, View } from "react-native";
 import AnimatedWrapper from "../../../animation/AnimatedWrapper";
-import { ArrowDown, thirdStepStyles } from "../ThirdStep";
 import Loader from "../../../ui/Loader";
 import { IProductByCodes } from "../../../../lib/api/orders-screen/groups-and-products";
 import { Colors } from "../../../../theme/colors";
+import { formStyles } from "./form-styles";
+import { ArrowDown } from "../../../ui/ArrowDown";
 
 export default function ProductsList({
     productsList,
@@ -23,31 +24,31 @@ export default function ProductsList({
         <View style={{ position: "relative" }}>
             <Pressable onPress={toggleProductsList}>
                 <Text
-                    style={[thirdStepStyles.selectField, {
+                    style={[formStyles.selectField, {
                         borderColor: isProductsListOpen ? Colors.blue : Colors.blueLight
                     }]}
                 >
                     {activeProduct === null ? "Оберіть зі списку" : activeProduct.name}
                 </Text>
             </Pressable>
-            <ArrowDown isRotate={isProductsListOpen} style={thirdStepStyles.arrowIcon} />
+            <ArrowDown isRotate={isProductsListOpen} style={formStyles.arrowIcon} />
 
             {isProductsListOpen && <AnimatedWrapper
                 useOpacity
                 useScale
                 offsetY={-30}
-                style={[thirdStepStyles.dropdownMenu, {
+                style={[formStyles.dropdownMenu, {
                     minHeight: 321,
                 }]}
             >
                 {productsList == null ? (
-                    <View style={thirdStepStyles.loaderContainer}>
+                    <View style={formStyles.loaderContainer}>
                         <Loader radius={100} />
                     </View>
                 ) : productsList.length === 0 ? (
                     <Text>Товари за обраними параметрами відсутні</Text>
                 ) : (
-                    <ScrollView style={thirdStepStyles.scrollModal}>
+                    <ScrollView style={formStyles.scrollModal}>
                         {productsList.map((product, index) => (
                             <AnimatedWrapper
                                 key={index}
@@ -57,7 +58,7 @@ export default function ProductsList({
                             >
                                 <Pressable
                                     style={[
-                                        thirdStepStyles.productItem,
+                                        formStyles.productItem,
                                         {
                                             backgroundColor: getProductBackgroundColor(
                                                 product,
@@ -70,8 +71,8 @@ export default function ProductsList({
                                 >
                                     <Text
                                         style={[
-                                            thirdStepStyles.productItemText,
-                                            product.sale_tk && thirdStepStyles.productItemTextWhite,
+                                            formStyles.productItemText,
+                                            product.sale_tk && formStyles.productItemTextWhite,
                                         ]}
                                     >
                                         {getProductLabel(product)}

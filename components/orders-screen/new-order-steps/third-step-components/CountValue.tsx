@@ -1,8 +1,8 @@
 import { Text, TextInput, View } from "react-native";
-import { thirdStepStyles } from "../ThirdStep";
 import { useState } from "react";
 import { Colors } from "../../../../theme/colors";
 import { useCreateOrder } from "../../NewOrderProvider";
+import { formStyles } from "./form-styles";
 
 export default function CountValue({ errorFieldNumber }: { errorFieldNumber: number | null }) {
     const { orderParams, setOrderParams } = useCreateOrder();
@@ -10,14 +10,14 @@ export default function CountValue({ errorFieldNumber }: { errorFieldNumber: num
     const [isFocused, setIsFocused] = useState<boolean>(false);
 
     return (
-        <View style={thirdStepStyles.inputContainer}>
-            <Text style={thirdStepStyles.detailsText}>Кількість</Text>
+        <View style={formStyles.inputContainer}>
+            <Text style={formStyles.detailsText}>Кількість</Text>
             <TextInput
                 keyboardType="number-pad"
                 style={[
-                    thirdStepStyles.input,
+                    formStyles.input,
                     { borderColor: isFocused ? Colors.blue : Colors.blueLight },
-                    errorFieldNumber === 4 && thirdStepStyles.borderRed
+                    errorFieldNumber === 4 && formStyles.borderRed
                 ]}
                 placeholder="0"
                 value={orderParams.newOrderObject.count_number || ""}
@@ -34,7 +34,7 @@ export default function CountValue({ errorFieldNumber }: { errorFieldNumber: num
                 onBlur={() => setIsFocused(false)}
                 maxLength={3}
             />
-            <Text style={thirdStepStyles.unitLabel}>шт</Text>
+            <Text style={formStyles.unitLabel}>шт</Text>
         </View>
     )
 };

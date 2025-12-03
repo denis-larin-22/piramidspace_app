@@ -67,7 +67,7 @@ function OrderDetails({ order }: { order: IOrder }) {
             >
                 <View style={styles.itemsHeader}>
                     <Text style={styles.itemsLabel}>Позицій в замовленні: </Text>
-                    <Text style={styles.itemsCount}>{orderItems.length - 3}</Text>
+                    <Text style={styles.itemsCount}>{filteredItems.length}</Text>
                     <Arrows />
                 </View>
 
@@ -77,13 +77,16 @@ function OrderDetails({ order }: { order: IOrder }) {
                     contentContainerStyle={styles.itemsScrollContent}
                     style={styles.itemsScroll}
                 >
-                    {filteredItems.map((item, index) => (
-                        <Item
-                            key={item['N_заказа'] + index}
-                            item={item}
-                            style={{ marginRight: ++index === orderItems.length ? 30 : 0 }}
-                        />
-                    ))}
+                    {filteredItems.length ?
+                        filteredItems.map((item, index) => (
+                            <Item
+                                key={item['N_заказа'] + index}
+                                item={item}
+                                style={{ marginRight: ++index === orderItems.length ? 30 : 0 }}
+                            />
+                        ))
+                        :
+                        null}
                 </ScrollView>
             </AnimatedWrapper>
 
@@ -226,7 +229,7 @@ export function formatCharacteristicsString(value: string) {
     return {
         width: dimensions[0],
         height: dimensions[1],
-        controlSide: separate[1] === 'left' ? "ліворуч" : "праворуч",
+        controlSide: separate[1].trim() === 'left' ? "ліворуч" : "праворуч",
         color: separate[2],
         fixation: separate[3]
     };

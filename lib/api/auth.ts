@@ -1,5 +1,7 @@
 import { BASE_URL } from "./base-url";
 
+export type UnitsTypes = "см" | "мм"; // единицы измерения только в см и мм
+
 // !!!!!!!!  THERE IS CYRILLIC IN THE BACKEND ANSWER - result object !!!!!!!
 export interface IUserInfo {
     логин: string;
@@ -15,6 +17,7 @@ export interface IUserInfo {
     okpo_dill: number;
     location_dill: string;
     cellphone_dill: string | null;
+    units: UnitsTypes;
 }
 
 export async function getAuth(login: string, phoneNumber: string): Promise<IUserInfo | undefined> {

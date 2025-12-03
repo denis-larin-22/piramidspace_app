@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { ColorPrice, Fixation, getProductsByGroupCodes, IProductByCodes, ISubgroup, OptionPrice } from "../../../lib/api/orders-screen/groups-and-products";
-import { Image, ImageBackground, ImageStyle, Pressable, Text, View, StyleSheet, ViewStyle, } from "react-native";
-import { Fonts } from "../../../theme/fonts";
-import { Colors } from "../../../theme/colors";
+import { ColorPrice, Fixation, getProductsByGroupCodes, IProductByCodes, OptionPrice } from "../../../lib/api/orders-screen/groups-and-products";
+import { Image, ImageBackground, ImageStyle, Pressable, Text, View } from "react-native";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { Keyboard } from 'react-native';
 import WidthAndHeight from "./third-step-components/WidthAndHeight";
@@ -11,11 +9,13 @@ import CountValue from "./third-step-components/CountValue";
 import ControlType from "./third-step-components/ControlType";
 import Color from "./third-step-components/Color";
 import FixationType from "./third-step-components/FixationType";
-import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
+import { ASYNC_STORAGE_USER_INFO_OBJECT } from "../../../lib/async-storage/asyncStorageKeys";
 import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
 import { useCreateOrder } from "../NewOrderProvider";
 import Options from "./third-step-components/Options";
 import { ErrorMessage } from "../../ui/ErrorMessage";
+import { IUserInfo, UnitsTypes } from "../../../lib/api/auth";
+import { formStyles } from "./third-step-components/form-styles";
 
 export interface IErrorStateMessage {
     state: boolean,
@@ -25,6 +25,7 @@ export interface IErrorStateMessage {
 
 function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
     const { orderParams, setOrderParams } = useCreateOrder();
+    const [unit, setUnit] = useState<UnitsTypes | null>(null);
 
     const orderObject = orderParams.newOrderObject;
     const { subgroup, product, height_gab, width_gab, controlType, count_number, color_system, fixation_type, options } = orderObject;
@@ -90,7 +91,10 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
     // Getting products list and params
     useEffect(() => {
         async function getProducts() {
-            const login = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
+            const userInfo = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT);
+            const { "логин": login, units } = JSON.parse(userInfo) as IUserInfo;
+            setUnit(units); // save main unit
+
             // check needed values
             if (orderObject.group.code === null || orderObject.subgroup === null || login === undefined) {
                 setProducts([]);
@@ -286,7 +290,7 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
                 offsetY={20}
                 delay={100}
             >
-                <Text style={thirdStepStyles.stepSubtitle}>Оформлення Замовлення</Text>
+                <Text style={formStyles.stepSubtitle}>Оформлення Замовлення</Text>
             </AnimatedWrapper>
 
             <AnimatedWrapper
@@ -294,7 +298,7 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
                 offsetY={20}
                 delay={150}
             >
-                <Text style={thirdStepStyles.stepCategory}>{orderObject.group.name}</Text>
+                <Text style={formStyles.stepCategory}>{orderObject.group.name}</Text>
             </AnimatedWrapper>
 
             <AnimatedWrapper
@@ -302,7 +306,7 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
                 offsetY={20}
                 delay={200}
             >
-                <Text style={thirdStepStyles.stepSubCategory}>{subgroup.name}</Text>
+                <Text style={formStyles.stepSubCategory}>{subgroup.name}</Text>
             </AnimatedWrapper>
 
             {/* Error message */}
@@ -311,7 +315,7 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
             {/* Product selection */}
             <AnimatedWrapper useOpacity offsetY={30} delay={300}>
                 {/* Product list */}
-                <Text style={thirdStepStyles.detailsText}>Оберіть тканину</Text>
+                <Text style={formStyles.detailsText}>Оберіть тканину</Text>
                 <ProductsList
                     activeProduct={activeProduct}
                     productsList={products}
@@ -328,11 +332,12 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
                 >
                     {/* Размеры: Ширина и Высота */}
                     <WidthAndHeight
+                        unit={unit}
                         errorFieldNumber={isError.errorFieldNumber}
                     />
 
                     {/* Управление и Количество */}
-                    <View style={thirdStepStyles.row}>
+                    <View style={formStyles.row}>
                         {cotrolTypesList.length !== 0 ? <ControlType
                             isControlTypeListOpen={isControlTypeListOpen}
                             toggleControlTypeList={toggleControlTypeList}
@@ -374,14 +379,14 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
                         toggleOptionList={toggleOptionsList}
                     /> : null}
                     {/* Цена / Разом */}
-                    {/* <View style={thirdStepStyles.row}>
-                        <View style={thirdStepStyles.inputContainer}>
-                            <Text style={thirdStepStyles.detailsText}>Ціна</Text>
-                            <Text style={thirdStepStyles.input} >0</Text>
+                    {/* <View style={formStyles.row}>
+                        <View style={formStyles.inputContainer}>
+                            <Text style={formStyles.detailsText}>Ціна</Text>
+                            <Text style={formStyles.input} >0</Text>
                         </View>
-                        <View style={thirdStepStyles.inputContainer}>
-                            <Text style={thirdStepStyles.detailsText}>Разом</Text>
-                            <Text style={thirdStepStyles.input} >0</Text>
+                        <View style={formStyles.inputContainer}>
+                            <Text style={formStyles.detailsText}>Разом</Text>
+                            <Text style={formStyles.input} >0</Text>
                         </View>
                     </View> */}
                 </View>
@@ -389,15 +394,15 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
 
             {/* Кнопка отправки */}
             {activeProduct && <AnimatedWrapper
-                style={thirdStepStyles.submitButton}
+                style={formStyles.submitButton}
                 offsetY={-20}
             >
                 <Pressable onPress={foldOrder}>
                     <ImageBackground
                         source={require("../../../assets/gradient-small.png")}
-                        style={thirdStepStyles.submitButtonBg}
+                        style={formStyles.submitButtonBg}
                     >
-                        <Text style={thirdStepStyles.submitButtonText}>Покласти</Text>
+                        <Text style={formStyles.submitButtonText}>Покласти</Text>
                     </ImageBackground>
                 </Pressable>
             </AnimatedWrapper>
@@ -405,224 +410,5 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
         </>
     );
 }
-
-export function ArrowDown({ style, isRotate = false }: { style?: ImageStyle, isRotate?: boolean }) {
-    return (
-        <>
-            {isRotate ?
-                <AnimatedWrapper
-                    key="rotated"
-                    useOpacity
-                    offsetY={10}
-                >
-                    <Image
-                        source={require("../../../assets/catalog-screen/arrow.png")}
-                        style={[
-                            { width: 18, height: 11, resizeMode: "contain", top: -27, transform: [{ rotate: "180deg" }] },
-                            style
-                        ]}
-                    />
-                </AnimatedWrapper>
-                :
-                <AnimatedWrapper
-                    key="notrotated"
-                    useOpacity
-                    offsetY={-10}
-                >
-                    <Image
-                        source={require("../../../assets/catalog-screen/arrow.png")}
-                        style={[{ width: 18, height: 11, resizeMode: "contain", top: -25 }, style]}
-                    />
-                </AnimatedWrapper>
-            }
-        </>
-    );
-}
-
-export const thirdStepStyles = StyleSheet.create({
-    stepSubtitle: {
-        fontFamily: Fonts.comfortaa400,
-        fontSize: 16,
-        textTransform: "uppercase",
-        textAlign: "center",
-        color: Colors.gray,
-        top: -10
-    },
-    stepCategory: {
-        fontFamily: Fonts.comfortaa700,
-        fontSize: 30,
-        textTransform: "uppercase",
-        marginBottom: 10,
-        textAlign: "left",
-        color: Colors.blue,
-        top: -10
-    },
-    stepSubCategory: {
-        fontFamily: Fonts.comfortaa700,
-        fontSize: 16,
-        textAlign: 'right',
-        color: '#3372F965',
-        borderBottomWidth: 2,
-        paddingBottom: 5,
-        borderColor: Colors.blueLight,
-        top: -25,
-        marginBottom: -25
-    },
-    detailsText: {
-        marginTop: 5,
-        fontFamily: Fonts.comfortaa600,
-        fontSize: 16,
-        color: Colors.gray,
-    },
-    selectField: {
-        marginTop: 4,
-        fontFamily: Fonts.openSans400,
-        fontSize: 16,
-        color: "black",
-        backgroundColor: "white",
-        paddingVertical: 9,
-        paddingHorizontal: 13,
-        borderRadius: 31,
-        borderWidth: 2,
-    },
-    selectFieldInactive: {
-        opacity: 0.5,
-    },
-    arrowIcon: {
-        position: "absolute",
-        zIndex: 10,
-        right: 10,
-        bottom: 13,
-    },
-    dropdownMenu: {
-        maxHeight: 321,
-        width: "100%",
-        backgroundColor: "white",
-        borderRadius: 17,
-        position: "absolute",
-        top: "105%",
-        zIndex: 50,
-        padding: 8,
-        paddingBottom: 4,
-
-        // iOS shadow
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-
-        // Android shadow
-        elevation: 5,
-    },
-    loaderContainer: {
-        height: '100%',
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    scrollModal: {
-        maxHeight: 321,
-    },
-    productItem: {
-        paddingTop: 3,
-        paddingBottom: 5,
-        marginBottom: 5,
-        borderRadius: 70,
-        paddingHorizontal: 10,
-        borderBottomWidth: 1,
-        borderColor: Colors.pale,
-    },
-    productItemText: {
-        fontFamily: Fonts.openSans400,
-        fontSize: 15,
-        color: "black",
-    },
-    productItemTextWhite: {
-        color: "white",
-    },
-    row: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginTop: 12,
-    },
-    inputContainer: {
-        width: "47%",
-        position: "relative",
-    },
-    rowLabel: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    labelNote: {
-        fontFamily: Fonts.comfortaa700,
-        fontSize: 12,
-        color: Colors.blue,
-    },
-    labelNoteSmall: {
-        fontFamily: Fonts.comfortaa700,
-        fontSize: 10,
-        color: Colors.blue,
-    },
-    input: {
-        marginTop: 4,
-        fontFamily: Fonts.openSans400,
-        fontSize: 16,
-        color: "black",
-        backgroundColor: "white",
-        paddingVertical: 9,
-        paddingHorizontal: 13,
-        borderRadius: 31,
-        borderWidth: 2,
-        position: 'relative',
-        zIndex: 10
-    },
-    borderRed: {
-        borderColor: Colors.red,
-    },
-    unitLabel: {
-        fontFamily: Fonts.openSans400,
-        fontSize: 16,
-        color: Colors.gray,
-        position: "absolute",
-        bottom: 12,
-        right: 10,
-    },
-    colorContainer: {
-        position: "relative",
-        marginTop: 12,
-    },
-    marginTop12: {
-        marginTop: 10,
-    },
-    submitButton: {
-        height: 59,
-        maxWidth: 180,
-        width: "100%",
-        borderRadius: 31,
-        overflow: "hidden",
-        position: "absolute",
-        zIndex: -1,
-        bottom: -70,
-        alignSelf: "center",
-    },
-    submitButtonBg: {
-        width: "100%",
-        height: "100%",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    submitButtonText: {
-        fontFamily: Fonts.comfortaa600,
-        fontSize: 17,
-        lineHeight: 22,
-        color: "white",
-    },
-    absentValueText: {
-        fontFamily: Fonts.openSans400,
-        fontSize: 12,
-        lineHeight: 14,
-        color: Colors.gray,
-        marginLeft: 5
-    }
-});
 
 export default ThirdStep;
