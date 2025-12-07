@@ -9,12 +9,14 @@ import { ArrowDown } from "../../ui/ArrowDown";
 
 function Address({
     address,
+    currentAddressType,
     addressList,
     addressHandler
 }: {
     address: string,
+    currentAddressType: string,
     addressList: IAddress,
-    addressHandler: (address: string) => void;
+    addressHandler: (type: string, address: string) => void;
 
 }) {
     const [listIsOpen, setListIsOpen] = useState<boolean>(false);
@@ -34,7 +36,7 @@ function Address({
             >
                 <Pressable onPress={() => setListIsOpen(!listIsOpen)}>
                     <Text style={styles.selectField}>
-                        {Object.keys(addressList).find(opt => opt === address)}
+                        {currentAddressType}
                     </Text>
                 </Pressable>
                 <ArrowDown isRotate={listIsOpen} style={styles.arrowIcon} />
@@ -61,31 +63,36 @@ function Address({
                                 <Pressable
                                     style={[
                                         styles.addressItem,
-                                        address === addressType && { backgroundColor: Colors.pale },
+                                        currentAddressType === addressType && { backgroundColor: Colors.pale },
                                     ]}
                                     pointerEvents="box-only"
                                     onPress={() => {
                                         const activeAddress = addressList[addressType];
 
+
+
                                         if (activeAddress === false) {
-                                            addressHandler("");
+                                            addressHandler("основной", address);
                                             setListIsOpen(false);
                                         } else {
                                             if (addressType === "основний") {
-                                                const addressValue = formatAddressNP(activeAddress);
-                                                console.log(addressValue);
-                                            } else if (addressType === "за адресою") {
+                                                const addressValue = formatAddressNP(addressList[addressType]);
+                                                addressHandler(addressType, addressValue);
+                                            } else if (addressType === "За адресою") {
                                                 const addressValue = formatAddressPrivat(activeAddress);
-                                                console.log(addressValue);
+                                                addressHandler(addressType, addressValue);
+                                            } else {
+                                                addressHandler("основной", address);
                                             }
                                         }
+
 
                                         setListIsOpen(false);
                                         // addressHandler(activeAddress);
                                     }}
                                 >
                                     <Text style={styles.addressItemText}>
-                                        {addressType.toLowerCase()}
+                                        {addressType}
                                     </Text>
                                 </Pressable>
                             </AnimatedWrapper>
@@ -101,9 +108,7 @@ export default Address;
 
 const styles = StyleSheet.create({
     wrap: {
-        marginTop: -110,
         position: 'relative',
-        zIndex: -1
     },
     detailsText: {
         marginTop: 5,

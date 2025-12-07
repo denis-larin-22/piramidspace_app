@@ -271,6 +271,9 @@ export async function calculateCreateHandler(orderParams: ICreateOrderParams, cr
         }
     });
 
+    console.log(orderItems);
+
+
     const requestParams: ICalculateOrderObject = {
         login: login || "",
         place_order: createOrder,

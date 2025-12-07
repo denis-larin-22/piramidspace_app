@@ -19,8 +19,6 @@ import { fetchAddressList, IAddress } from "../../../lib/api/orders-screen/addre
 import { SuccessMessage } from "../../ui/SuccessMessage";
 import { IUserInfo } from "../../../lib/api/auth";
 
-const UNITS = "см";
-
 function EditOrder({
     currentOrder,
     updateAfterEditHandler
@@ -92,8 +90,8 @@ function EditOrder({
                     product_code: item['наименование'],
                     group_code: groupCode,
                     subgroup_code: subgroupCode,
-                    width: Number(width),
-                    height: Number(height),
+                    width: units === "см" ? Number(width) : Number(width) * 10,
+                    height: units === "см" ? Number(height) : Number(height) * 10,
                     quantity: +item['кол_во'],
                     side: controlSide,
                     system_color: color,
@@ -218,20 +216,21 @@ function EditOrder({
                                             contentContainerStyle={styles.itemsScrollContent}
                                             style={styles.itemsScroll}
                                         >
-                                            {editItemsList.map((item, index) => (
-                                                <EditableItem
-                                                    key={index}
-                                                    item={item as IOrderItemToUpdate}
-                                                    subgroupData={subgroupData}
-                                                    index={index}
-                                                    onItemChange={(updatedItem) => {
-                                                        setIsSubmitBtnHidden(false);
-                                                        setEditItemsList(prev =>
-                                                            prev.map((it, i) => i === index ? updatedItem : it)
-                                                        );
-                                                    }}
-                                                />
-                                            ))}
+                                            {editItemsList.map((item, index) => {
+                                                return (
+                                                    <EditableItem
+                                                        key={index}
+                                                        item={item as IOrderItemToUpdate}
+                                                        subgroupData={subgroupData}
+                                                        onItemChange={(updatedItem) => {
+                                                            setIsSubmitBtnHidden(false);
+                                                            setEditItemsList(prev =>
+                                                                prev.map((it, i) => i === index ? updatedItem : it)
+                                                            );
+                                                        }}
+                                                    />
+                                                )
+                                            })}
                                         </ScrollView>
                                         :
                                         <View style={styles.emptyItemsContainer}>
@@ -241,19 +240,21 @@ function EditOrder({
                                             <Text style={styles.emptyItemsText}>Додати нову тканину</Text>
                                         </View>
                                     }
-                                    {/* <Address
-                                    address={currentOrder['адрес доставки']}
-                                    addressList={addressList}
-                                    addressHandler={(address: string) => {
-                                        setEditOrderParams({
-                                            ...editOrderParams,
-                                            order: {
-                                                ...editOrderParams.order,
-                                                "адрес доставки": address
-                                            }
-                                        })
-                                    }}
-                                /> */}
+                                    <Address
+                                        address={currentOrder['адрес доставки']}
+                                        currentAddressType={currentOrder['ВидАдресаВЗаказе']}
+                                        addressList={addressList}
+                                        addressHandler={(type: string, address: string) => {
+                                            setEditOrderParams({
+                                                ...editOrderParams,
+                                                order: {
+                                                    ...editOrderParams.order,
+                                                    "ВидАдресаВЗаказе": type,
+                                                    "адрес доставки": address
+                                                }
+                                            })
+                                        }}
+                                    />
 
                                     <AnimatedWrapper
                                         useOpacity
@@ -489,5 +490,78 @@ const styles = StyleSheet.create({
         fontSize: 14,
         lineHeight: 16,
         color: Colors.gray
-    }
+    },
+    deleteButton: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: 25,
+        height: 25,
+        backgroundColor: Colors.pale,
+        borderRadius: 50,
+        padding: 3
+    },
+    deleteIcon: {
+        width: '100%',
+        height: '100%',
+        opacity: 0.3,
+    },
+    deleteWrap: {
+        backgroundColor: Colors.pale,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        borderRadius: 13,
+        width: '100%',
+        position: 'absolute',
+        zIndex: 100,
+        top: 50,
+        alignItems: 'center',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    warningIcon: {
+        width: 30,
+        height: 30,
+        marginBottom: 10
+    },
+    modalTitle: {
+        fontFamily: Fonts.comfortaa600,
+        fontSize: 14,
+        color: 'black',
+        marginBottom: 10
+    },
+    confirmButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 10
+    },
+    cancelButton: {
+        padding: 5,
+        borderWidth: 1,
+        borderColor: Colors.blue,
+        borderRadius: 14,
+        width: 60,
+    },
+    cancelButtonText: {
+        fontFamily: Fonts.openSans400,
+        color: Colors.blue,
+        textAlign: 'center',
+        fontSize: 14,
+    },
+    deleteConfirmButton: {
+        padding: 5,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: '#A2A2A870',
+        width: 60,
+    },
+    deleteConfirmButtonText: {
+        fontFamily: Fonts.openSans400,
+        fontSize: 14,
+        color: Colors.gray,
+        textAlign: 'center',
+    },
 });

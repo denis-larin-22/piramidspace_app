@@ -4,6 +4,7 @@ import { Colors } from "../../../theme/colors";
 import { Fonts } from "../../../theme/fonts";
 import { useState } from "react";
 import { ArrowDown } from "../../ui/ArrowDown";
+import { formStyles } from "../new-order-steps/third-step-components/form-styles";
 
 function Color({
     сolor,
@@ -18,23 +19,24 @@ function Color({
 
     return (
         <View>
-            <Text style={styles.detailsText}>Колір</Text>
+            <Text style={formStyles.detailsText}>Колір</Text>
 
             <Pressable onPress={() => setIsColorListOpen(!isColorListOpen)}>
                 <Text style={[
-                    styles.selectField,
+                    formStyles.selectField,
+                    { borderColor: Colors.blueLight }
                 ]}>{сolor}</Text>
             </Pressable>
-            <ArrowDown isRotate={isColorListOpen} style={styles.arrowIcon} />
+            <ArrowDown isRotate={isColorListOpen} style={formStyles.arrowIcon} />
 
             {isColorListOpen && (
                 <AnimatedWrapper
                     useOpacity
                     useScale
                     offsetY={-20}
-                    style={styles.dropdownMenu}
+                    style={formStyles.dropdownMenu}
                 >
-                    <ScrollView style={styles.scrollModal}>
+                    <ScrollView style={formStyles.scrollModal}>
                         {colorList.length ?
                             colorList.map((colorName, index) => (
                                 <AnimatedWrapper
@@ -45,7 +47,7 @@ function Color({
                                 >
                                     <Pressable
                                         style={[
-                                            styles.listItem,
+                                            formStyles.productItem,
                                             (сolor !== null && сolor === colorName) && { backgroundColor: Colors.pale },
                                         ]}
                                         onPress={() => {
@@ -53,12 +55,12 @@ function Color({
                                             setIsColorListOpen(false);
                                         }}
                                     >
-                                        <Text style={styles.listItemText}>{colorName}</Text>
+                                        <Text style={formStyles.productItemText}>{colorName}</Text>
                                     </Pressable>
                                 </AnimatedWrapper>
                             ))
                             :
-                            <Text style={styles.absentValueText}>значення відсутні</Text>
+                            <Text style={[formStyles.absentValueText, { marginBottom: 5 }]}>значення відсутні</Text>
                         }
                     </ScrollView>
                 </AnimatedWrapper>
@@ -68,75 +70,3 @@ function Color({
 }
 
 export default Color;
-
-const styles = StyleSheet.create({
-    detailsText: {
-        marginTop: 5,
-        fontFamily: Fonts.comfortaa600,
-        fontSize: 14,
-        lineHeight: 16,
-        color: Colors.gray,
-    },
-    selectField: {
-        marginTop: 4,
-        fontFamily: Fonts.openSans400,
-        fontSize: 14,
-        lineHeight: 16,
-        color: "black",
-        backgroundColor: "white",
-        paddingVertical: 5,
-        paddingHorizontal: 12,
-        borderRadius: 31,
-        borderWidth: 2,
-        borderColor: Colors.blueLight
-    },
-    arrowIcon: {
-        position: "absolute",
-        zIndex: 10,
-        right: 10,
-        top: -20,
-    },
-    dropdownMenu: {
-        maxHeight: 321,
-        minHeight: 80,
-        width: "100%",
-        backgroundColor: "white",
-        borderRadius: 17,
-        position: "absolute",
-        top: "105%",
-        padding: 8,
-        paddingBottom: 4,
-        zIndex: 1000,
-        elevation: 10,
-
-        // iOS shadow
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-    },
-    scrollModal: {
-        maxHeight: 321,
-    },
-    absentValueText: {
-        fontFamily: Fonts.openSans400,
-        fontSize: 12,
-        lineHeight: 14,
-        color: Colors.gray,
-        marginLeft: 5
-    },
-    listItem: {
-        paddingTop: 3,
-        paddingBottom: 3,
-        marginBottom: 5,
-        borderRadius: 70,
-        paddingHorizontal: 10,
-        borderBottomWidth: 1,
-        borderColor: Colors.pale,
-    },
-    listItemText: {
-        fontFamily: Fonts.openSans400,
-        fontSize: 14,
-        color: "black",
-    },
-});

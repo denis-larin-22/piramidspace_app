@@ -1,40 +1,37 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { ISubgroup } from "../../../lib/api/orders-screen/groups-and-products";
-import WidthAndHeight from "./WidthAndHeight";
-import Color from "./Colors";
-import ControlType from "./ControlType";
-import Count from "./Count";
 import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
 import { useEffect, useState } from "react";
-import FixationType from "./FixationType";
 import { IOrderItemToDelete, IOrderItemToUpdate } from "../../../lib/api/orders-screen/edit-order";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { IUserInfo, UnitsTypes } from "../../../lib/api/auth";
 import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
 import { ASYNC_STORAGE_USER_INFO_OBJECT } from "../../../lib/async-storage/asyncStorageKeys";
+import EditItemForm from "./EditItemForm";
 
 function EditableItem({
     item,
     subgroupData,
-    index,
     onItemChange,
 }: {
     item: IOrderItemToUpdate | IOrderItemToDelete;
     subgroupData: ISubgroup;
-    index: number;
     onItemChange: (updatedItem: IOrderItemToUpdate | IOrderItemToDelete) => void;
 }) {
+    // item to edit
     const [editableItem, setEditableItem] = useState<IOrderItemToUpdate | IOrderItemToDelete>(item);
-    const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
+    //  см/мм
     const [unit, setUnit] = useState<UnitsTypes | null>(null);
+    // delete btn 
+    const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
 
     useEffect(() => {
         setEditableItem(item);
 
         async function getUnits() {
             const userInfo = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT);
-            const { "логин": login, units } = JSON.parse(userInfo) as IUserInfo;
+            const { units } = JSON.parse(userInfo) as IUserInfo;
             setUnit(units); // save main unit
         }
 
@@ -56,78 +53,40 @@ function EditableItem({
     // ВНИМАНИЕ: ТОЛЬКО ЗДЕСЬ мы уверены, что это IOrderItemToUpdate
     const currentItem = editableItem as IOrderItemToUpdate;
 
-    const targetProduct = subgroupData.tkani.find(
-        (tkan) => tkan.short_name === currentItem.product_code
-    );
-    const controlList = subgroupData.control.map((item) =>
-        item === "L" ? "ліворуч" : "праворуч"
-    );
-    const colorList = Object.keys(subgroupData.colors);
-    const fixationList = subgroupData.fixations.map((type) => type.name);
+    function editHandler(updatedItem: IOrderItemToUpdate) {
+        setEditableItem(updatedItem);
+        onItemChange(updatedItem)
+    }
 
-    const updateAndNotify = (updates: Partial<IOrderItemToUpdate>) => {
-        const updated = { ...currentItem, ...updates };
-        setEditableItem(updated);
-        onItemChange(updated);
-    };
+    function deleteHandler() {
+        const objToDelete: IOrderItemToDelete = {
+            action: 'delete',
+            old_characteristic: item.old_characteristic,
+            old_name: item.old_name
+        };
+        onItemChange(objToDelete);
+    }
 
     return (
         <View style={styles.wrap}>
-            {/* blackout bcg when delete is open */}
-            {isDeleteOpen && <View style={styles.overlay}></View>}
+            {/* info */}
+            <OrderItem
+                item={currentItem}
+                units={unit}
+            />
 
-            <View style={styles.header}>
-                <Text style={styles.indexBadge}>{index + 1}</Text>
-                <Text style={styles.productCode}>{currentItem.product_code}</Text>
+            <DeleteItemButton
+                isOpen={isDeleteOpen}
+                setIsOpen={setIsDeleteOpen}
+                deleteHandler={deleteHandler}
+            />
 
-                <DeleteItemButton
-                    isOpen={isDeleteOpen}
-                    setIsOpen={setIsDeleteOpen}
-                    deleteHandler={() => {
-                        const markedToDelete = {
-                            action: 'delete',
-                            old_characteristic: currentItem.old_characteristic,
-                            old_name: currentItem.old_name
-                        } as IOrderItemToDelete;
-                        setEditableItem(markedToDelete)
-                        onItemChange(markedToDelete);
-                    }}
-                />
-            </View>
-
-            <WidthAndHeight
+            {/* edit form */}
+            <EditItemForm
+                itemToEdit={currentItem}
+                editHandler={editHandler}
                 unit={unit}
-
-                width={currentItem.width}
-                maxWidth={targetProduct.max_width}
-                widthHandler={(value) => updateAndNotify({ width: value })}
-
-                height={currentItem.height}
-                maxHeight={targetProduct.max_height}
-                heightHandler={(value) => updateAndNotify({ height: value })}
-            />
-
-            <Count
-                count={Number(currentItem.quantity).toFixed(0)}
-                countHandler={(value) => updateAndNotify({ quantity: value })}
-            />
-
-            <Color
-                сolor={currentItem.system_color}
-                colorList={colorList}
-                colorHandler={(color) => updateAndNotify({ system_color: color })}
-            />
-
-            <ControlType
-                control={currentItem.side}
-                controlTypesList={controlList}
-                controlHandler={(side) => updateAndNotify({ side: side })}
-            />
-
-            <FixationType
-                fixation={currentItem.fixation_type}
-                fixationList={fixationList}
-                fixationHandler={(fixation) => updateAndNotify({ fixation_type: fixation })}
+                subgroupData={subgroupData}
             />
         </View>
     );
@@ -135,7 +94,34 @@ function EditableItem({
 
 export default EditableItem;
 
+
 // UI
+function OrderItem({ item, units }: { item: IOrderItemToUpdate, units: UnitsTypes }) {
+    return (
+        <View style={[styles.itemCard, styles.shadow]}>
+            <Text style={styles.itemTitle} numberOfLines={2}>
+                {item.old_name || 'Без названия'}
+            </Text>
+
+            <Detail label="Кількість:" value={item.quantity} borderBottom />
+            <Detail label="Ширина:" value={item.width + " " + units} />
+            <Detail label="Висота:" value={item.height + " " + units} borderBottom />
+            <Detail label="Керування:" value={item.side} />
+            <Detail label="Колір:" value={item.system_color} />
+            <Detail label="Фіксація:" value={item.fixation_type} />
+        </View>
+    )
+};
+
+function Detail({ label, value, borderBottom = false }: { label: string, value: string | number | null, borderBottom?: boolean }) {
+    return (
+        <View style={[styles.detailRow, borderBottom && styles.bordeBottom]}>
+            <Text style={styles.detailLabel}>{label}</Text>
+            <Text style={styles.detailValue}>{value ? value : '—'}</Text>
+        </View>
+    );
+}
+
 function DeleteItemButton({
     isOpen,
     setIsOpen,
@@ -191,19 +177,8 @@ function DeleteItemButton({
 
 const styles = StyleSheet.create({
     wrap: {
-        width: 250,
-        minHeight: 350,
-        backgroundColor: "white",
-        marginBottom: 110,
-        position: "relative",
-        zIndex: 50,
-        padding: 7,
-        borderRadius: 16,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 5,
+        position: 'relative',
+        marginBottom: 40
     },
     overlay: {
         backgroundColor: '#00000020',
@@ -243,13 +218,13 @@ const styles = StyleSheet.create({
     },
     deleteButton: {
         position: 'absolute',
-        top: 0,
-        right: 0,
-        width: 25,
-        height: 25,
-        backgroundColor: Colors.pale,
+        bottom: -40,
+        right: 5,
+        width: 30,
+        height: 30,
+        backgroundColor: "white",
         borderRadius: 50,
-        padding: 3
+        padding: 5,
     },
     deleteIcon: {
         width: '100%',
@@ -263,7 +238,6 @@ const styles = StyleSheet.create({
         borderRadius: 13,
         width: '100%',
         position: 'absolute',
-        zIndex: 100,
         top: 50,
         alignItems: 'center',
         shadowColor: "#000",
@@ -313,5 +287,60 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: Colors.gray,
         textAlign: 'center',
+    },
+
+    itemCard: {
+        backgroundColor: 'white',
+        padding: 12,
+        borderRadius: 12,
+        width: 250,
+        maxWidth: Dimensions.get('window').width - 60,
+        overflow: 'hidden',
+    },
+    itemTitle: {
+        fontFamily: Fonts.comfortaa600,
+        fontSize: 14,
+        lineHeight: 16,
+        color: 'white',
+        backgroundColor: Colors.blue,
+        paddingVertical: 7,
+        paddingHorizontal: 9,
+        marginBottom: 4,
+        top: -12,
+        left: -12,
+        width: '115%',
+    },
+    shadow: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 4,
+    },
+    detailRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 7,
+        marginBottom: 4,
+    },
+    detailLabel: {
+        fontFamily: Fonts.comfortaa400,
+        fontSize: 14,
+        lineHeight: 17,
+        color: Colors.gray,
+    },
+    detailValue: {
+        fontFamily: Fonts.comfortaa600,
+        fontSize: 14,
+        lineHeight: 16,
+        color: 'black',
+        maxWidth: '60%',
+    },
+    bordeBottom: {
+        borderBottomWidth: 2,
+        borderColor: Colors.grayLight,
+        paddingBottom: 5,
+        marginBottom: 5,
     },
 });

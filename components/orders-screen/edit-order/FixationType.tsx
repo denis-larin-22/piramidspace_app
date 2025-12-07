@@ -4,6 +4,7 @@ import { Colors } from "../../../theme/colors";
 import { useState } from "react";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { ArrowDown } from "../../ui/ArrowDown";
+import { formStyles } from "../new-order-steps/third-step-components/form-styles";
 
 function FixationType({
     fixation,
@@ -18,25 +19,24 @@ function FixationType({
 
     return (
         <View>
-            <Text style={styles.detailsText}>Фіксація</Text>
+            <Text style={formStyles.detailsText}>Фіксація</Text>
 
             <Pressable onPress={() => setIsFixationTypeListOpen(!isFixationTypeListOpen)}>
                 <Text style={[
-                    styles.selectField,
+                    formStyles.selectField,
+                    { borderColor: Colors.blueLight }
                 ]}>{fixation}</Text>
             </Pressable>
-            <ArrowDown isRotate={isFixationTypeListOpen} style={styles.arrowIcon} />
+            <ArrowDown isRotate={isFixationTypeListOpen} style={formStyles.arrowIcon} />
 
             {isFixationTypeListOpen && (
                 <AnimatedWrapper
                     useOpacity
                     useScale
                     offsetY={-20}
-                    style={[styles.dropdownMenu, {
-                        minHeight: 80,
-                    }]}
+                    style={formStyles.dropdownMenu}
                 >
-                    <ScrollView style={styles.scrollModal}>
+                    <ScrollView style={formStyles.scrollModal}>
                         {fixationList.length ?
                             fixationList.map((fixationType, index) => (
                                 <AnimatedWrapper
@@ -47,7 +47,7 @@ function FixationType({
                                 >
                                     <Pressable
                                         style={[
-                                            styles.listItem,
+                                            formStyles.productItem,
                                             (fixation !== null && fixation === fixationType) && { backgroundColor: Colors.pale },
                                         ]}
                                         onPress={() => {
@@ -56,12 +56,12 @@ function FixationType({
                                             setIsFixationTypeListOpen(false);
                                         }}
                                     >
-                                        <Text style={styles.listItemText}>{fixationType}</Text>
+                                        <Text style={formStyles.productItemText}>{fixationType}</Text>
                                     </Pressable>
                                 </AnimatedWrapper>
                             ))
                             :
-                            <Text style={styles.absentValueText}>значення відсутні</Text>
+                            <Text style={[formStyles.absentValueText, { marginBottom: 5 }]}>значення відсутні</Text>
                         }
                     </ScrollView>
                 </AnimatedWrapper>
@@ -71,76 +71,3 @@ function FixationType({
 }
 
 export default FixationType;
-
-const styles = StyleSheet.create({
-    detailsText: {
-        marginTop: 5,
-        fontFamily: Fonts.comfortaa600,
-        fontSize: 14,
-        lineHeight: 16,
-        color: Colors.gray,
-    },
-    selectField: {
-        marginTop: 4,
-        fontFamily: Fonts.openSans400,
-        fontSize: 14,
-        lineHeight: 16,
-        color: "black",
-        backgroundColor: "white",
-        borderRadius: 31,
-        borderWidth: 2,
-        paddingVertical: 5,
-        paddingHorizontal: 12,
-        borderColor: Colors.blueLight
-    },
-    arrowIcon: {
-        position: "absolute",
-        zIndex: 10,
-        right: 10,
-        top: -20,
-    },
-    dropdownMenu: {
-        maxHeight: 120,
-        width: "100%",
-        backgroundColor: "white",
-        borderRadius: 17,
-        position: "absolute",
-        top: "105%",
-        zIndex: 50,
-        padding: 8,
-        paddingBottom: 4,
-
-        // iOS shadow
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-
-        // Android shadow
-        elevation: 5,
-    },
-    scrollModal: {
-        maxHeight: 120,
-    },
-    absentValueText: {
-        fontFamily: Fonts.openSans400,
-        fontSize: 12,
-        lineHeight: 14,
-        color: Colors.gray,
-        marginLeft: 5
-    },
-    listItem: {
-        paddingTop: 3,
-        paddingBottom: 3,
-        marginBottom: 5,
-        borderRadius: 70,
-        paddingHorizontal: 10,
-        borderBottomWidth: 1,
-        borderColor: Colors.pale,
-    },
-    listItemText: {
-        fontFamily: Fonts.openSans400,
-        fontSize: 14,
-        color: "black",
-    },
-});

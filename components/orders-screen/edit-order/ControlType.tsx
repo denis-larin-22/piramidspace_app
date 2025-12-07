@@ -4,6 +4,7 @@ import { Colors } from "../../../theme/colors";
 import { Fonts } from "../../../theme/fonts";
 import { useState } from "react";
 import { ArrowDown } from "../../ui/ArrowDown";
+import { formStyles } from "../new-order-steps/third-step-components/form-styles";
 
 function ControlType({
     control,
@@ -18,23 +19,21 @@ function ControlType({
 
     return (
         <View>
-            <Text style={styles.detailsText}>Керування</Text>
+            <Text style={formStyles.detailsText}>Керування</Text>
 
             <Pressable onPress={() => setIsControlListOpen(!isControlListOpen)}>
-                <Text style={styles.selectField}>{ParseSideValue(control, false)}</Text>
+                <Text style={[formStyles.selectField, { borderColor: Colors.blueLight }]}>{ParseSideValue(control, false)}</Text>
             </Pressable>
-            <ArrowDown isRotate={isControlListOpen} style={styles.arrowIcon} />
+            <ArrowDown isRotate={isControlListOpen} style={formStyles.arrowIcon} />
 
             {isControlListOpen && (
                 <AnimatedWrapper
                     useOpacity
                     useScale
                     offsetY={-20}
-                    style={[styles.dropdownMenu, {
-                        minHeight: 80,
-                    }]}
+                    style={formStyles.dropdownMenu}
                 >
-                    <ScrollView style={styles.scrollModal}>
+                    <ScrollView style={formStyles.scrollModal}>
                         {controlTypesList.length ?
                             controlTypesList.map((type, index) => (
                                 <AnimatedWrapper
@@ -45,7 +44,7 @@ function ControlType({
                                 >
                                     <Pressable
                                         style={[
-                                            styles.listItem,
+                                            formStyles.productItem,
                                             (control !== null && control === type) && { backgroundColor: Colors.pale },
                                         ]}
                                         onPress={() => {
@@ -55,12 +54,12 @@ function ControlType({
                                             setIsControlListOpen(false);
                                         }}
                                     >
-                                        <Text style={styles.listItemText}>{type}</Text>
+                                        <Text style={formStyles.productItemText}>{type}</Text>
                                     </Pressable>
                                 </AnimatedWrapper>
                             ))
                             :
-                            <Text style={styles.absentValueText}>значення відсутні</Text>
+                            <Text style={[formStyles.absentValueText, { marginBottom: 5 }]}>значення відсутні</Text>
                         }
                     </ScrollView>
                 </AnimatedWrapper>
@@ -78,76 +77,3 @@ function ParseSideValue(value: string, isReverse: boolean = false) {
         return (value === "left" || value === "ліворуч") ? "ліворуч" : "праворуч"
     }
 }
-
-const styles = StyleSheet.create({
-    detailsText: {
-        marginTop: 5,
-        fontFamily: Fonts.comfortaa600,
-        fontSize: 14,
-        lineHeight: 16,
-        color: Colors.gray,
-    },
-    selectField: {
-        marginTop: 4,
-        fontFamily: Fonts.openSans400,
-        fontSize: 14,
-        lineHeight: 16,
-        color: "black",
-        backgroundColor: "white",
-        borderRadius: 31,
-        borderWidth: 2,
-        paddingVertical: 5,
-        paddingHorizontal: 12,
-        borderColor: Colors.blueLight
-    },
-    arrowIcon: {
-        position: "absolute",
-        zIndex: 10,
-        right: 10,
-        top: -20,
-    },
-    dropdownMenu: {
-        maxHeight: 321,
-        width: "100%",
-        backgroundColor: "white",
-        borderRadius: 17,
-        position: "absolute",
-        top: "105%",
-        zIndex: 50,
-        padding: 8,
-        paddingBottom: 4,
-
-        // iOS shadow
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-
-        // Android shadow
-        elevation: 5,
-    },
-    scrollModal: {
-        maxHeight: 321,
-    },
-    absentValueText: {
-        fontFamily: Fonts.openSans400,
-        fontSize: 12,
-        lineHeight: 14,
-        color: Colors.gray,
-        marginLeft: 5
-    },
-    listItem: {
-        paddingTop: 3,
-        paddingBottom: 3,
-        marginBottom: 5,
-        borderRadius: 70,
-        paddingHorizontal: 10,
-        borderBottomWidth: 1,
-        borderColor: Colors.pale,
-    },
-    listItemText: {
-        fontFamily: Fonts.openSans400,
-        fontSize: 14,
-        color: "black",
-    },
-});

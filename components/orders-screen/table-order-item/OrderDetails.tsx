@@ -6,6 +6,7 @@ import { Status } from "./Order";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { useState } from "react";
 import { getFormatedOrderType } from "../../../lib/utils";
+import { UnitsTypes } from "../../../lib/api/auth";
 
 function OrderDetails({ order }: { order: IOrder }) {
     const {
@@ -79,7 +80,7 @@ function OrderDetails({ order }: { order: IOrder }) {
                 >
                     {filteredItems.length ?
                         filteredItems.map((item, index) => (
-                            <Item
+                            <OrderItem
                                 key={item['N_заказа'] + index}
                                 item={item}
                                 style={{ marginRight: ++index === orderItems.length ? 30 : 0 }}
@@ -166,7 +167,7 @@ function Detail({ label, value, borderBottom = false }: { label: string, value: 
     );
 }
 
-function Item({ item, style }: { item: IOrderItem, style?: StyleProp<ViewStyle> }) {
+function OrderItem({ item, style }: { item: IOrderItem, style?: StyleProp<ViewStyle> }) {
     const { width, height, controlSide, color, fixation } = formatCharacteristicsString(item['характерстика']);
 
     return (
@@ -177,8 +178,8 @@ function Item({ item, style }: { item: IOrderItem, style?: StyleProp<ViewStyle> 
 
             <Detail label="Кількість:" value={parseFloat(item['кол_во'])} />
             <Detail label="Площа:" value={item['площадь, м.кв.']} />
-            <Detail label="Ширина:" value={width ? width.trim() : width} />
-            <Detail label="Висота:" value={height} />
+            <Detail label="Ширина:" value={(width ? width.trim() : width) + " " + 'см'} />
+            <Detail label="Висота:" value={height + " " + 'см'} />
             <Detail label="Керування:" value={controlSide} />
             <Detail label="Колір:" value={color} />
             <Detail label="Фіксація:" value={fixation} borderBottom />
