@@ -18,6 +18,7 @@ import { ErrorMessage } from "../../ui/ErrorMessage";
 import { fetchAddressList, IAddress } from "../../../lib/api/orders-screen/address";
 import { SuccessMessage } from "../../ui/SuccessMessage";
 import { IUserInfo } from "../../../lib/api/auth";
+import AddNewItemButton from "../edit-order/AddNewItemButton";
 
 function EditOrder({
     currentOrder,
@@ -62,7 +63,7 @@ function EditOrder({
             const subgroupCode = parseSubgroupCode(currentOrder.items[0]['наименование']);
 
             const userInfo = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT);
-            const { "логин": login, units } = JSON.parse(userInfo) as IUserInfo;
+            const { "логин": login } = JSON.parse(userInfo) as IUserInfo;
 
             // products list
             const dataByGroup = await getGroupsStructure(groupCode, login);
@@ -90,12 +91,12 @@ function EditOrder({
                     product_code: item['наименование'],
                     group_code: groupCode,
                     subgroup_code: subgroupCode,
-                    width: units === "см" ? Number(width) : Number(width) * 10,
-                    height: units === "см" ? Number(height) : Number(height) * 10,
+                    width: Number(width),
+                    height: Number(height),
                     quantity: +item['кол_во'],
                     side: controlSide,
                     system_color: color,
-                    units: units,
+                    units: "см",
                     fixation_type: fixation,
                     options: ""  // ОПЦИИ НА ДРУГИЕ ВИДЫ - ОПЦИОНАЛЬНО
                 }
@@ -216,20 +217,42 @@ function EditOrder({
                                             contentContainerStyle={styles.itemsScrollContent}
                                             style={styles.itemsScroll}
                                         >
+                                            {/* ADD BUTTON */}
+                                            <AddNewItemButton
+                                                groupCode={parseGroupCode(currentOrder['вид заказа'])}
+                                                subgroupData={subgroupData}
+                                                addItemHandler={(newItem: IOrderItemToAdd) => {
+                                                    const updatedList = [...editItemsList, newItem];
+                                                    if (updatedList.length === editItemsList.length) {
+                                                        return;
+                                                    } else {
+                                                        console.log('hi');
+
+                                                        setEditItemsList([...editItemsList, newItem]);
+                                                        setIsSubmitBtnHidden(false);
+                                                    }
+                                                }}
+                                            />
+                                            {/* ========== */}
+
                                             {editItemsList.map((item, index) => {
-                                                return (
-                                                    <EditableItem
-                                                        key={index}
-                                                        item={item as IOrderItemToUpdate}
-                                                        subgroupData={subgroupData}
-                                                        onItemChange={(updatedItem) => {
-                                                            setIsSubmitBtnHidden(false);
-                                                            setEditItemsList(prev =>
-                                                                prev.map((it, i) => i === index ? updatedItem : it)
-                                                            );
-                                                        }}
-                                                    />
-                                                )
+                                                if (item.action === "delete") {
+                                                    return null;
+                                                } else {
+                                                    return (
+                                                        <EditableItem
+                                                            key={index}
+                                                            item={item as IOrderItemToUpdate}
+                                                            subgroupData={subgroupData}
+                                                            onItemChange={(updatedItem) => {
+                                                                setIsSubmitBtnHidden(false);
+                                                                setEditItemsList(prev =>
+                                                                    prev.map((it, i) => i === index ? updatedItem : it)
+                                                                );
+                                                            }}
+                                                        />
+                                                    )
+                                                }
                                             })}
                                         </ScrollView>
                                         :

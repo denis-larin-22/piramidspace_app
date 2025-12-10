@@ -148,7 +148,7 @@ export const formStyles = StyleSheet.create({
         position: "absolute",
         bottom: 12,
         right: 10,
-        zIndex: 100
+        zIndex: 10
     },
     colorContainer: {
         position: "relative",

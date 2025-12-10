@@ -13,16 +13,18 @@ function ControlType({
 }: {
     control: string,
     controlTypesList: string[]
-    controlHandler: (side: "left" | "right" | string) => void
+    controlHandler: (string) => void
 }) {
     const [isControlListOpen, setIsControlListOpen] = useState<boolean>(false);
 
     return (
-        <View>
+        <View style={{ flexGrow: 1 }}>
             <Text style={formStyles.detailsText}>Керування</Text>
 
-            <Pressable onPress={() => setIsControlListOpen(!isControlListOpen)}>
-                <Text style={[formStyles.selectField, { borderColor: Colors.blueLight }]}>{ParseSideValue(control, false)}</Text>
+            <Pressable onPress={() => setIsControlListOpen(!isControlListOpen)} >
+                <Text style={[formStyles.selectField, { borderColor: Colors.blueLight }]}>{
+                    control.length !== 0 ? ParseSideValue(control, false) : ""
+                }</Text>
             </Pressable>
             <ArrowDown isRotate={isControlListOpen} style={formStyles.arrowIcon} />
 
@@ -45,7 +47,7 @@ function ControlType({
                                     <Pressable
                                         style={[
                                             formStyles.productItem,
-                                            (control !== null && control === type) && { backgroundColor: Colors.pale },
+                                            ((control.length !== 0) && ParseSideValue(control, false) === type) && { backgroundColor: Colors.pale },
                                         ]}
                                         onPress={() => {
                                             const sideType = ParseSideValue(type, true);
@@ -72,8 +74,8 @@ export default ControlType;
 
 function ParseSideValue(value: string, isReverse: boolean = false) {
     if (isReverse) {
-        return value === "ліворуч" ? "left" : "right"
+        return value === "L" ? "left" : "right"
     } else {
-        return (value === "left" || value === "ліворуч") ? "ліворуч" : "праворуч"
+        return (value === "left") ? "L" : "R"
     }
 }

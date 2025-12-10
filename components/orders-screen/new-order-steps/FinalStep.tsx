@@ -253,7 +253,7 @@ export default FinalStep;
 
 export async function calculateCreateHandler(orderParams: ICreateOrderParams, createOrder: boolean = false): Promise<ICalculateResponce | null> {
     const userInfo = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT);
-    const { "логин": login, units } = JSON.parse(userInfo) as IUserInfo;
+    const { "логин": login } = JSON.parse(userInfo) as IUserInfo;
 
     const orderItems: ICalculateOrderItem[] = orderParams.ordersList.map((item) => {
         return {
@@ -262,17 +262,14 @@ export async function calculateCreateHandler(orderParams: ICreateOrderParams, cr
             product_code: item.product ? item.product.name : "",
             width: item.width_gab ? +item.width_gab : 0,
             height: item.height_gab ? +item.height_gab : 0,
-            side: (item.controlType === "L") ? "left" : 'right',
-            units: units,
+            side: (item.controlType === "L" || item.controlType === "ліворуч") ? "left" : 'right',
+            units: "см",
             quantity: item.count_number ? +item.count_number : 0,
             system_color: item.color_system ? item.color_system : "",
             fixation_type: item.fixation_type ? item.fixation_type.name : "",
             options: item.options ? item.options : ""
         }
     });
-
-    console.log(orderItems);
-
 
     const requestParams: ICalculateOrderObject = {
         login: login || "",

@@ -6,34 +6,32 @@ import Warning from "../../../ui/Warning";
 import { UnitsTypes } from "../../../../lib/api/auth";
 import { formStyles } from "./form-styles";
 
-function WidthAndHeight({ unit, errorFieldNumber }: { unit: UnitsTypes, errorFieldNumber: number | null }) {
+function WidthAndHeight({ errorFieldNumber }: { errorFieldNumber: number | null }) {
     const { orderParams, setOrderParams } = useCreateOrder();
 
     return <AnotherGroupsWH
         orderParams={orderParams}
         setOrderParams={setOrderParams}
         errorFieldNumber={errorFieldNumber}
-        unit={unit}
     />
 }
 
 ////////////////////////// WIDTH AND HEIGHT BY GROUPPS ///////////////////////////
-function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber, unit }: {
+function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber }: {
     orderParams: ICreateOrderParams,
     setOrderParams: (params: ICreateOrderParams) => void,
     errorFieldNumber: number | null,
-    unit: UnitsTypes
 }) {
     const orderObject = orderParams.newOrderObject;
 
     const [focusedInput, setFocusedInput] = useState<number | null>(null);
     const [warningInput, setWarningInput] = useState<number | null>(null);
 
-    const w_max = unit === "см" ? orderObject.product?.w_max : orderObject.product?.w_max * 10;
-    const h_max = unit === "см" ? orderObject.product?.h_max : orderObject.product?.h_max * 10;
+    const w_max = orderObject.product?.w_max;
+    const h_max = orderObject.product?.h_max;
 
-    const WIDTH_DIFFERENCE = unit === "см" ? 3 : 30;
-    const HEIGHT_DIFFERENCE = unit === "см" ? 5 : 50;
+    const WIDTH_DIFFERENCE = 3;
+    const HEIGHT_DIFFERENCE = 5;
 
     const showWarning = (id: number) => {
         setWarningInput(id);
@@ -102,7 +100,7 @@ function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber, unit }
                         <Text style={formStyles.labelNote}>(габарит)</Text>
                     </View>
 
-                    <Warning isVissible={warningInput === 1} text={w_max + " " + unit} />
+                    <Warning isVissible={warningInput === 1} text={w_max + " см"} />
                     <TextInput
                         keyboardType="number-pad"
                         style={[
@@ -119,7 +117,7 @@ function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber, unit }
                         onBlur={() => setFocusedInput(null)}
                         maxLength={6}
                     />
-                    <Text style={formStyles.unitLabel}>{unit}</Text>
+                    <Text style={formStyles.unitLabel}>см</Text>
                 </View>
 
                 {/* ====== ВИСОТА ====== */}
@@ -129,7 +127,7 @@ function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber, unit }
                         <Text style={formStyles.labelNote}>(габарит)</Text>
                     </View>
 
-                    <Warning isVissible={warningInput === 3} text={h_max + " " + unit} />
+                    <Warning isVissible={warningInput === 3} text={h_max + " см"} />
                     <TextInput
                         keyboardType="number-pad"
                         style={[
@@ -146,7 +144,7 @@ function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber, unit }
                         onBlur={() => setFocusedInput(null)}
                         maxLength={6}
                     />
-                    <Text style={formStyles.unitLabel}>{unit}</Text>
+                    <Text style={formStyles.unitLabel}>см</Text>
                 </View>
             </View>
 
@@ -158,7 +156,7 @@ function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber, unit }
                         <Text style={formStyles.labelNoteSmall}>(по штапику)</Text>
                     </View>
 
-                    <Warning isVissible={warningInput === 2} text={w_max ? w_max - WIDTH_DIFFERENCE + " " + unit : undefined} />
+                    <Warning isVissible={warningInput === 2} text={w_max ? w_max - WIDTH_DIFFERENCE + " см" : undefined} />
                     <TextInput
                         keyboardType="number-pad"
                         style={[
@@ -175,7 +173,7 @@ function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber, unit }
                         onBlur={() => setFocusedInput(null)}
                         maxLength={6}
                     />
-                    <Text style={formStyles.unitLabel}>{unit}</Text>
+                    <Text style={formStyles.unitLabel}>см</Text>
                 </View>
 
                 {/* ====== ВИСОТА ПО ШТАПИКУ ====== */}
@@ -185,7 +183,7 @@ function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber, unit }
                         <Text style={formStyles.labelNoteSmall}>(по штапику)</Text>
                     </View>
 
-                    <Warning isVissible={warningInput === 4} text={h_max ? h_max - HEIGHT_DIFFERENCE + " " + unit : undefined} />
+                    <Warning isVissible={warningInput === 4} text={h_max ? h_max - HEIGHT_DIFFERENCE + " см" : undefined} />
                     <TextInput
                         keyboardType="number-pad"
                         style={[
@@ -202,7 +200,7 @@ function AnotherGroupsWH({ orderParams, setOrderParams, errorFieldNumber, unit }
                         onBlur={() => setFocusedInput(null)}
                         maxLength={6}
                     />
-                    <Text style={formStyles.unitLabel}>{unit}</Text>
+                    <Text style={formStyles.unitLabel}>см</Text>
                 </View>
             </View>
         </>

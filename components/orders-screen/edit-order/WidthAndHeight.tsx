@@ -6,8 +6,6 @@ import { formStyles } from "../new-order-steps/third-step-components/form-styles
 import { UnitsTypes } from "../../../lib/api/auth";
 
 interface IProps {
-    unit: UnitsTypes;
-
     width: number;
     maxWidth: number;
     widthHandler: (value: number) => void;
@@ -18,7 +16,6 @@ interface IProps {
 }
 
 function WidthAndHeight({
-    unit,
     width: widthGab,
     height: heightGab,
     maxWidth,
@@ -30,12 +27,8 @@ function WidthAndHeight({
     const [heightShtapik, setHeightShtapik] = useState<number>(0);
     const [warningInput, setWarningInput] = useState<number | null>(null);
 
-    const isCm = unit === "см";
-    const WIDTH_DIFF = isCm ? 3 : 30;
-    const HEIGHT_DIFF = isCm ? 5 : 50;
-
-    const widthLimit = isCm ? maxWidth : maxWidth * 10;
-    const heightLimit = isCm ? maxHeight : maxHeight * 10;
+    const WIDTH_DIFF = 3;
+    const HEIGHT_DIFF = 5;
 
     // Синхронизация значений «по штапику» при изменении габарита
     useEffect(() => {
@@ -62,7 +55,7 @@ function WidthAndHeight({
     // Обработчики габаритов
     const handleGabWidth = (v: string) => {
         const num = parseInput(v);
-        if (num > widthLimit) {
+        if (num > maxWidth) {
             showWarning(1);
             return;
         }
@@ -71,7 +64,7 @@ function WidthAndHeight({
 
     const handleGabHeight = (v: string) => {
         const num = parseInput(v);
-        if (num > heightLimit) {
+        if (num > maxHeight) {
             showWarning(3);
             return;
         }
@@ -81,7 +74,7 @@ function WidthAndHeight({
     // Обработчики «по штапику»
     const handleShtapikWidth = (v: string) => {
         const num = parseInput(v);
-        if (num > widthLimit - WIDTH_DIFF) {
+        if (num > maxWidth - WIDTH_DIFF) {
             showWarning(2);
             return;
         }
@@ -90,7 +83,7 @@ function WidthAndHeight({
 
     const handleShtapikHeight = (v: string) => {
         const num = parseInput(v);
-        if (num > heightLimit - HEIGHT_DIFF) {
+        if (num > maxHeight - HEIGHT_DIFF) {
             showWarning(4);
             return;
         }
@@ -110,7 +103,7 @@ function WidthAndHeight({
                         <Text style={formStyles.detailsText}>Ширина </Text>
                         <Text style={formStyles.labelNote}>(габарит)</Text>
                     </View>
-                    <Warning isVissible={warningInput === 1} text={`${widthLimit} ${unit}`} />
+                    <Warning isVissible={warningInput === 1} text={`${maxWidth} см`} />
                     <TextInput
                         keyboardType="number-pad"
                         inputMode="decimal"
@@ -120,7 +113,7 @@ function WidthAndHeight({
                         onChangeText={handleGabWidth}
                         maxLength={8}
                     />
-                    <Text style={formStyles.unitLabel}>{unit}</Text>
+                    <Text style={formStyles.unitLabel}>см</Text>
                 </View>
 
                 {/* Высота (габарит) */}
@@ -129,7 +122,7 @@ function WidthAndHeight({
                         <Text style={formStyles.detailsText}>Высота </Text>
                         <Text style={formStyles.labelNote}>(габарит)</Text>
                     </View>
-                    <Warning isVissible={warningInput === 3} text={`${heightLimit} ${unit}`} />
+                    <Warning isVissible={warningInput === 3} text={`${maxHeight} см`} />
                     <TextInput
                         keyboardType="number-pad"
                         inputMode="decimal"
@@ -139,7 +132,7 @@ function WidthAndHeight({
                         onChangeText={handleGabHeight}
                         maxLength={8}
                     />
-                    <Text style={formStyles.unitLabel}>{unit}</Text>
+                    <Text style={formStyles.unitLabel}>см</Text>
                 </View>
             </View>
 
@@ -153,7 +146,7 @@ function WidthAndHeight({
                     </View>
                     <Warning
                         isVissible={warningInput === 2}
-                        text={`${widthLimit - WIDTH_DIFF} ${unit}`}
+                        text={`${maxWidth - WIDTH_DIFF} см`}
                     />
                     <TextInput
                         keyboardType="number-pad"
@@ -164,7 +157,7 @@ function WidthAndHeight({
                         onChangeText={handleShtapikWidth}
                         maxLength={8}
                     />
-                    <Text style={formStyles.unitLabel}>{unit}</Text>
+                    <Text style={formStyles.unitLabel}>см</Text>
                 </View>
 
                 {/* Высота по штапику */}
@@ -175,7 +168,7 @@ function WidthAndHeight({
                     </View>
                     <Warning
                         isVissible={warningInput === 4}
-                        text={`${heightLimit - HEIGHT_DIFF} ${unit}`}
+                        text={`${maxHeight - HEIGHT_DIFF} см`}
                     />
                     <TextInput
                         keyboardType="number-pad"
@@ -186,7 +179,7 @@ function WidthAndHeight({
                         onChangeText={handleShtapikHeight}
                         maxLength={8}
                     />
-                    <Text style={formStyles.unitLabel}>{unit}</Text>
+                    <Text style={formStyles.unitLabel}>см</Text>
                 </View>
             </View>
         </View>

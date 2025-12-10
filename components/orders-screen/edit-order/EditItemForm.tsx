@@ -9,19 +9,17 @@ import ControlType from "./ControlType";
 import FixationType from "./FixationType";
 import { CloseButton } from "../../ui/CloseButton";
 import { ISubgroup } from "../../../lib/api/orders-screen/groups-and-products";
-import { IOrderItemToUpdate } from "../../../lib/api/orders-screen/edit-order";
+import { IOrderItemToAdd, IOrderItemToUpdate } from "../../../lib/api/orders-screen/edit-order";
 import { UnitsTypes } from "../../../lib/api/auth";
 import { Fonts } from "../../../theme/fonts";
 
 function EditItemForm({
     itemToEdit,
     editHandler,
-    unit,
     subgroupData
 }: {
     itemToEdit: IOrderItemToUpdate,
     editHandler: React.Dispatch<React.SetStateAction<IOrderItemToUpdate>>,
-    unit: UnitsTypes,
     subgroupData: ISubgroup
 }) {
     const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
@@ -44,7 +42,6 @@ function EditItemForm({
 
                 itemToEdit={itemToEdit}
                 editHandler={editHandler}
-                unit={unit}
                 subgroupData={subgroupData}
             />
         </>
@@ -58,35 +55,18 @@ function EditForm({
     setIsOpen,
     itemToEdit,
     editHandler,
-    unit,
     subgroupData,
 }: {
     isOpen: boolean,
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>,
-    itemToEdit: IOrderItemToUpdate,
-    editHandler: React.Dispatch<React.SetStateAction<IOrderItemToUpdate>>,
-    unit: UnitsTypes,
+    itemToEdit: IOrderItemToUpdate | IOrderItemToAdd,
+    editHandler: React.Dispatch<React.SetStateAction<IOrderItemToUpdate | IOrderItemToAdd>>,
     subgroupData: ISubgroup,
-
 }) {
     const [isSubmitHidden, setIsSubmitHidden] = useState<boolean>(true);
 
-    const targetProduct = subgroupData.tkani.find(
-        (tkan) => tkan.short_name === itemToEdit.product_code
-    );
-    const controlList = subgroupData.control.map((item) =>
-        item === "L" ? "ліворуч" : "праворуч"
-    );
     const colorList = Object.keys(subgroupData.colors);
     const fixationList = subgroupData.fixations.map((type) => type.name);
-
-    // const updateAndNotify = (updates: Partial<IOrderItemToUpdate>) => {
-    //     const updated = { ...itemToEdit, ...updates };
-    //     setEditableItem(updated);
-    //     onItemChange(updated);
-    // };
-
-    const title = itemToEdit.old_name.split("_").join(" ");
 
     return (
         <Modal
@@ -119,12 +99,10 @@ function EditForm({
                                     style={styles.editDetailLogo}
                                 />
                             </View>
-                            <Text style={styles.title}>{title}</Text>
+                            <Text style={styles.title}>{itemToEdit.product_code}</Text>
                         </View>
 
                         <WidthAndHeight
-                            unit={unit}
-
                             width={itemToEdit.width}
                             maxWidth={200}
                             widthHandler={(value) => {
@@ -140,13 +118,27 @@ function EditForm({
                             }}
                         />
 
-                        <Count
-                            count={itemToEdit.quantity}
-                            countHandler={(value) => {
-                                setIsSubmitHidden(false);
-                                editHandler({ ...itemToEdit, quantity: value });
-                            }}
-                        />
+                        <View style={{
+                            flexDirection: 'row',
+                            gap: 20
+                        }}>
+                            <ControlType
+                                control={itemToEdit.side}
+                                controlTypesList={subgroupData.control}
+                                controlHandler={(side) => {
+                                    setIsSubmitHidden(false);
+                                    editHandler({ ...itemToEdit, side: side });
+                                }}
+                            />
+
+                            <Count
+                                count={itemToEdit.quantity}
+                                countHandler={(value) => {
+                                    setIsSubmitHidden(false);
+                                    editHandler({ ...itemToEdit, quantity: value });
+                                }}
+                            />
+                        </View>
 
                         <Color
                             сolor={itemToEdit.system_color}
@@ -157,14 +149,6 @@ function EditForm({
                             }}
                         />
 
-                        <ControlType
-                            control={itemToEdit.side}
-                            controlTypesList={controlList}
-                            controlHandler={(side) => {
-                                setIsSubmitHidden(false);
-                                editHandler({ ...itemToEdit, side: side });
-                            }}
-                        />
 
                         <FixationType
                             fixation={itemToEdit.fixation_type}

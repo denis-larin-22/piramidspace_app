@@ -21,22 +21,8 @@ function EditableItem({
 }) {
     // item to edit
     const [editableItem, setEditableItem] = useState<IOrderItemToUpdate | IOrderItemToDelete>(item);
-    //  см/мм
-    const [unit, setUnit] = useState<UnitsTypes | null>(null);
     // delete btn 
     const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
-
-    useEffect(() => {
-        setEditableItem(item);
-
-        async function getUnits() {
-            const userInfo = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT);
-            const { units } = JSON.parse(userInfo) as IUserInfo;
-            setUnit(units); // save main unit
-        }
-
-        getUnits()
-    }, [item]);
 
     // Определяем удалена ли позиция
     const markedAsDelete = "action" in editableItem && editableItem.action === "delete";
@@ -72,7 +58,6 @@ function EditableItem({
             {/* info */}
             <OrderItem
                 item={currentItem}
-                units={unit}
             />
 
             <DeleteItemButton
@@ -85,7 +70,6 @@ function EditableItem({
             <EditItemForm
                 itemToEdit={currentItem}
                 editHandler={editHandler}
-                unit={unit}
                 subgroupData={subgroupData}
             />
         </View>
@@ -96,17 +80,17 @@ export default EditableItem;
 
 
 // UI
-function OrderItem({ item, units }: { item: IOrderItemToUpdate, units: UnitsTypes }) {
+function OrderItem({ item }: { item: IOrderItemToUpdate }) {
     return (
         <View style={[styles.itemCard, styles.shadow]}>
             <Text style={styles.itemTitle} numberOfLines={2}>
-                {item.old_name || 'Без названия'}
+                {item.product_code || 'Без назви'}
             </Text>
 
             <Detail label="Кількість:" value={item.quantity} borderBottom />
-            <Detail label="Ширина:" value={item.width + " " + units} />
-            <Detail label="Висота:" value={item.height + " " + units} borderBottom />
-            <Detail label="Керування:" value={item.side} />
+            <Detail label="Ширина:" value={item.width + " см"} />
+            <Detail label="Висота:" value={item.height + " см"} borderBottom />
+            <Detail label="Керування:" value={(item.side === "right" || item.side === "R") ? "праворуч" : "ліворуч"} />
             <Detail label="Колір:" value={item.system_color} />
             <Detail label="Фіксація:" value={item.fixation_type} />
         </View>
@@ -159,7 +143,10 @@ function DeleteItemButton({
                 <View style={styles.confirmButtons}>
                     <Pressable
                         style={styles.deleteConfirmButton}
-                        onPress={deleteHandler}
+                        onPress={() => {
+                            deleteHandler();
+                            setIsOpen(false);
+                        }}
                     >
                         <Text style={styles.deleteConfirmButtonText}>Так</Text>
                     </Pressable>
@@ -294,6 +281,7 @@ const styles = StyleSheet.create({
         padding: 12,
         borderRadius: 12,
         width: 250,
+        minHeight: 200,
         maxWidth: Dimensions.get('window').width - 60,
         overflow: 'hidden',
     },

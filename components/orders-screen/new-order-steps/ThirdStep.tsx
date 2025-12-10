@@ -25,7 +25,6 @@ export interface IErrorStateMessage {
 
 function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
     const { orderParams, setOrderParams } = useCreateOrder();
-    const [unit, setUnit] = useState<UnitsTypes | null>(null);
 
     const orderObject = orderParams.newOrderObject;
     const { subgroup, product, height_gab, width_gab, controlType, count_number, color_system, fixation_type, options } = orderObject;
@@ -92,8 +91,7 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
     useEffect(() => {
         async function getProducts() {
             const userInfo = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT);
-            const { "логин": login, units } = JSON.parse(userInfo) as IUserInfo;
-            setUnit(units); // save main unit
+            const { "логин": login } = JSON.parse(userInfo) as IUserInfo;
 
             // check needed values
             if (orderObject.group.code === null || orderObject.subgroup === null || login === undefined) {
@@ -332,7 +330,6 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
                 >
                     {/* Размеры: Ширина и Высота */}
                     <WidthAndHeight
-                        unit={unit}
                         errorFieldNumber={isError.errorFieldNumber}
                     />
 
