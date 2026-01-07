@@ -21,6 +21,15 @@ export default function FixationType({
     toggleFixationTypeList: () => void,
     fixationTypesListHandler: (type: Fixation) => void
 }) {
+    const fullList: Fixation[] = [
+        ...fixationTypeList,
+        {
+            name: "без фіксації",
+            price: 0,
+            unit: ""
+        }
+    ];
+
     return (
         <View style={formStyles.colorContainer}>
             <Text style={formStyles.detailsText}>Фіксація</Text>
@@ -44,28 +53,26 @@ export default function FixationType({
                     }]}
                 >
                     <ScrollView style={formStyles.scrollModal}>
-                        {fixationTypeList.length ?
-                            fixationTypeList.map((fixationType, index) => (
-                                <AnimatedWrapper
-                                    key={index}
-                                    useOpacity
-                                    offsetY={10}
-                                    delay={150 + (30 * index)}
+                        {fullList.map((fixationType, index) => (
+                            <AnimatedWrapper
+                                key={index}
+                                useOpacity
+                                offsetY={10}
+                                delay={150 + (30 * index)}
+                            >
+                                <Pressable
+                                    style={[
+                                        formStyles.productItem,
+                                        (activeFixationType !== null && activeFixationType === fixationType) && { backgroundColor: Colors.pale },
+                                        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }
+                                    ]}
+                                    onPress={() => fixationTypesListHandler(fixationType)}
                                 >
-                                    <Pressable
-                                        style={[
-                                            formStyles.productItem,
-                                            (activeFixationType !== null && activeFixationType === fixationType) && { backgroundColor: Colors.pale },
-                                        ]}
-                                        onPress={() => fixationTypesListHandler(fixationType)}
-                                    >
-                                        <Text style={formStyles.productItemText}>{fixationType.name}</Text>
-                                    </Pressable>
-                                </AnimatedWrapper>
-                            ))
-                            :
-                            <Text style={formStyles.absentValueText}>значення відсутні</Text>
-                        }
+                                    <Text style={formStyles.productItemText}>{fixationType.name}</Text>
+                                    <Text style={[formStyles.productItemText, { color: Colors.gray }]}>{fixationType.price}$</Text>
+                                </Pressable>
+                            </AnimatedWrapper>
+                        ))}
                     </ScrollView>
                 </AnimatedWrapper>
             )}

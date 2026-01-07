@@ -127,11 +127,12 @@ function AddForm({
                                 setNewItem(prev => ({ ...prev, product_code: tkan.short_name }));
                                 setActiveTkan(tkan);
                             }}
-                            closeHandler={() => setIsOpen(false)}
                         />
 
-                        <View style={[styles.fieldsContainer, { opacity: newItem.product_code ? 1 : 0.4, pointerEvents: newItem.product_code ? 'auto' : 'none' }]}>
+                        <View style={{ opacity: newItem.product_code ? 1 : 0.4, pointerEvents: newItem.product_code ? 'auto' : 'none' }}>
                             <WidthAndHeight
+                                subgroupCode={newItem.subgroup_code}
+
                                 height={newItem.height}
                                 maxHeight={activeTkan?.max_height ?? 0}
                                 heightHandler={(value) => setNewItem(prev => ({ ...prev, height: value }))}
@@ -162,7 +163,7 @@ function AddForm({
 
                             <FixationType
                                 fixation={newItem.fixation_type}
-                                fixationList={subgroupData.fixations.map((type) => type.name)}
+                                fixationList={subgroupData.fixations}
                                 fixationHandler={(fixation) => setNewItem(prev => ({ ...prev, fixation_type: fixation }))}
                             />
                         </View>
@@ -204,17 +205,15 @@ function TkanList({
     activeTkan,
     tkanHandler,
     tkanList,
-    closeHandler
 }: {
     activeTkan: string,
     tkanHandler: (tkan: Tkan) => void,
     tkanList: Tkan[],
-    closeHandler: () => void
 }) {
     const [isTkanListOpen, setIsTkanListOpen] = useState<boolean>(false);
 
     return (
-        <View>
+        <View style={{ marginBottom: 10 }}>
             <Text style={formStyles.detailsText}>Оберіть тканину</Text>
 
             <Pressable onPress={() => setIsTkanListOpen(!isTkanListOpen)}>
@@ -263,7 +262,6 @@ function TkanList({
 }
 
 const styles = StyleSheet.create({
-    // Кнопка «Додати тканину» на головному екрані
     wrap: {
         height: 200,
         width: 60,
@@ -300,8 +298,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 40
     },
-
-    // Модальне вікно
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -319,8 +315,6 @@ const styles = StyleSheet.create({
         maxHeight: '90%',
         minHeight: 300,
     },
-
-    // Заголовок модалки
     headerContainer: {
         paddingBottom: 5,
         marginBottom: 5,
@@ -341,38 +335,25 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end'
     },
 
-    // Контейнер полів (відключається, якщо тканина не вибрана)
-    fieldsContainer: {},
-
-    // Рядок з керуванням та кількістю
     rowWithGap: {
         flexDirection: 'row',
         gap: 20,
         marginVertical: 10
     },
-
-    // Селект тканини
     tkanSelectField: {
         borderColor: Colors.blueLight
     },
-
-    // Активний елемент у списку тканин
     activeProductItem: {
         backgroundColor: Colors.pale,
     },
-
     absentValueMargin: {
         marginBottom: 5
     },
-
-    // Кнопка закриття
     closeButton: {
         position: 'absolute',
         bottom: -90,
         right: 0,
     },
-
-    // Кнопка «Додати»
     submitButton: {
         height: 59,
         maxWidth: 180,

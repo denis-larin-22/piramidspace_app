@@ -19,6 +19,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppStack";
 import AddNewOrder from "../components/orders-screen/AddNewOrder";
 import { CreateOrderProvider } from "../components/orders-screen/NewOrderProvider";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export interface IStatusColors {
     color: string;
@@ -60,17 +61,18 @@ function OrdersScreen({ navigation }: { navigation: OrdersScreenNavigationProp }
     const listToRender = ordersList?.data ?? [];
     const totalPages = ordersList?.last_page ?? 0;
 
-
     const statusHandler = (status: string) => {
         setSearchOrderStatus(status);
         setActivePage(0); // сброс страницы при смене фильтра
     };
 
+    const insets = useSafeAreaInsets();
+
     return (
         <CreateOrderProvider>
             <StatusBar hidden={true} />
 
-            <View style={styles.container}>
+            <View style={[styles.container, { paddingBottom: insets.bottom }]}>
                 <OrdersHeader />
 
                 {!isConnected && <Warning />}
@@ -92,15 +94,16 @@ function OrdersScreen({ navigation }: { navigation: OrdersScreenNavigationProp }
                     triggerRefetch={triggerRefetch}
                 />
 
-                <AddNewOrder triggerRefetch={triggerRefetch} />
+                <View style={styles.buttonsWrap}>
+                    <AddNewOrder triggerRefetch={triggerRefetch} />
 
-                <BackButton
-                    styles={styles.backButton}
-                    useOpacity
-                    offsetX={-30}
-                    delay={100}
-                    onPressAction={() => navigation.goBack()}
-                />
+                    <BackButton
+                        useOpacity
+                        offsetX={-30}
+                        delay={100}
+                        onPressAction={() => navigation.goBack()}
+                    />
+                </View>
             </View>
         </CreateOrderProvider>
     );
@@ -176,9 +179,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: Colors.gray
     },
-    backButton: {
-        position: 'absolute',
-        bottom: 10,
-        left: 10
-    },
+    buttonsWrap: {
+        flexDirection: 'row-reverse',
+        justifyContent: 'space-between'
+    }
 });

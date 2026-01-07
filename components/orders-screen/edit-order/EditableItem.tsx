@@ -2,12 +2,9 @@ import { Dimensions, Image, Pressable, StyleSheet, Text, View } from "react-nati
 import { ISubgroup } from "../../../lib/api/orders-screen/groups-and-products";
 import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { IOrderItemToDelete, IOrderItemToUpdate } from "../../../lib/api/orders-screen/edit-order";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
-import { IUserInfo, UnitsTypes } from "../../../lib/api/auth";
-import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
-import { ASYNC_STORAGE_USER_INFO_OBJECT } from "../../../lib/async-storage/asyncStorageKeys";
 import EditItemForm from "./EditItemForm";
 
 function EditableItem({

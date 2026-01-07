@@ -3,7 +3,7 @@ import { Colors } from "../../../theme/colors";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { useEffect, useState } from "react";
 import { IOrder, IOrderItem } from "../../../lib/api/orders-screen/ordersList";
-import { getGroupsStructure, ISubgroup, MainGroupsCode } from "../../../lib/api/orders-screen/groups-and-products";
+import { getGroupsStructure, getProductsByGroupCodes, ISubgroup, MainGroupsCode } from "../../../lib/api/orders-screen/groups-and-products";
 import { formatCharacteristicsString } from "./OrderDetails";
 import { Fonts } from "../../../theme/fonts";
 import EditableItem from "../edit-order/EditableItem";
@@ -32,9 +32,11 @@ function EditOrder({
     const [isDataReady, setIsDataReady] = useState<boolean>(false); // флаг готовности
     const [subgroupData, setSubgroupData] = useState<ISubgroup | null>(null);
     const [addressList, setAddressList] = useState<IAddress | null>(null);
+    const [address, setAddress] = useState({ type: "", address: "" });
     const [responseResult, setResponseResult] = useState<boolean | null>(null);
 
     const [isSubmitBtnHidden, setIsSubmitBtnHidden] = useState<boolean>(true);
+
 
     // Init state of editable order
     const initEditOrderParams: IEditableOrder = {
@@ -68,6 +70,7 @@ function EditOrder({
             // products list
             const dataByGroup = await getGroupsStructure(groupCode, login);
             const dataBySubgroup = dataByGroup.groups[0].subgroups.find((subgroup) => subgroup.code === subgroupCode);
+
             setSubgroupData(dataBySubgroup);
             // addresses list
             const addressList = await fetchAddressList(login);
@@ -116,6 +119,12 @@ function EditOrder({
                 },
                 items: editableItemsList
             }
+
+            // current address by current order
+            setAddress({
+                type: currentOrder['ВидАдресаВЗаказе'],
+                address: currentOrder['адрес доставки'],
+            });
             // set editable object state
             setEditOrderParams(editOrderObject);
             // set editable items state
@@ -131,7 +140,12 @@ function EditOrder({
     async function editResponseHandler() {
         const requestObject: IEditableOrder = {
             ...editOrderParams,
-            items: editItemsList
+            items: editItemsList,
+            order: {
+                ...editOrderParams.order,
+                "ВидАдресаВЗаказе": address.type,
+                "адрес доставки": address.address
+            }
         };
 
         const response = await editOrder(currentOrder["N_заказа"], requestObject);
@@ -264,18 +278,15 @@ function EditOrder({
                                         </View>
                                     }
                                     <Address
-                                        address={currentOrder['адрес доставки']}
-                                        currentAddressType={currentOrder['ВидАдресаВЗаказе']}
+                                        address={address.address}
+                                        currentAddressType={address.type}
                                         addressList={addressList}
                                         addressHandler={(type: string, address: string) => {
-                                            setEditOrderParams({
-                                                ...editOrderParams,
-                                                order: {
-                                                    ...editOrderParams.order,
-                                                    "ВидАдресаВЗаказе": type,
-                                                    "адрес доставки": address
-                                                }
-                                            })
+                                            setIsSubmitBtnHidden(false);
+                                            setAddress({
+                                                type: type,
+                                                address: address
+                                            });
                                         }}
                                     />
 
@@ -340,7 +351,7 @@ function parseGroupCode(typeOrder: string): MainGroupsCode {
         return 'day';
     } else if (type === 'горизонтальныежалюзи') {
         return 'horizontal';
-    } else if (type === 'вертикальныежалюзи') {
+    } else if (type === 'вертикальныежалюзи' || type === 'вертикальніжалюзі') {
         return 'vertical';
     } else if (type === 'рулонка') {
         return 'roller';
@@ -355,33 +366,75 @@ type SubgroupRule = {
     keywords: string[];
 };
 
+// Old rules
+// const subgroupRules: SubgroupRule[] = [
+//     { code: "day_mini", keywords: ["дн", "mini"] },
+//     { code: "magic25", keywords: ["magic", "25"] },
+//     { code: "day_uni_plosk", keywords: ["дн", "uni", "плоск"] },
+//     { code: "day_uni_p", keywords: ["дн", "uni", "п-образ"] },
+
+//     { code: "127mm", keywords: ["127 мм"] },
+//     { code: "89mm", keywords: ["89 мм"] },
+//     { code: "25mm_string", keywords: ["25 мм", "стру"] },
+//     { code: "25mm", keywords: ["25 мм"] },
+//     { code: "16mm_string", keywords: ["16 мм", "стру"] },
+//     { code: "16mm", keywords: ["16 мм"] },
+//     { code: "prishit", keywords: ["прис"] },
+//     { code: "mini", keywords: ["mini"] },
+//     { code: "magic30", keywords: ["magic", "30"] },
+//     { code: "uni_flat", keywords: ["uni", "плоск"] },
+//     { code: "uni_p", keywords: ["uni", "п-образ"] },
+// ];
+
 const subgroupRules: SubgroupRule[] = [
     { code: "day_mini", keywords: ["дн", "mini"] },
-    { code: "magic25", keywords: ["magic", "25"] },
+
+    { code: "day_uni_p", keywords: ["дн", "uni", "п образ"] },
     { code: "day_uni_plosk", keywords: ["дн", "uni", "плоск"] },
-    { code: "day_uni_p", keywords: ["дн", "uni", "п-образ"] },
+
+    { code: "magic25", keywords: ["magic", "25"] },
+    { code: "magic30", keywords: ["magic", "30"] },
 
     { code: "127mm", keywords: ["127 мм"] },
     { code: "89mm", keywords: ["89 мм"] },
+
     { code: "25mm_string", keywords: ["25 мм", "стру"] },
     { code: "25mm", keywords: ["25 мм"] },
+
     { code: "16mm_string", keywords: ["16 мм", "стру"] },
     { code: "16mm", keywords: ["16 мм"] },
+
     { code: "prishit", keywords: ["прис"] },
-    { code: "mini", keywords: ["mini"] },
-    { code: "magic30", keywords: ["magic", "30"] },
+
+    { code: "uni_p", keywords: ["uni", "п образ"] },
     { code: "uni_flat", keywords: ["uni", "плоск"] },
-    { code: "uni_p", keywords: ["uni", "п-образ"] },
+
+    { code: "mini", keywords: ["mini"] },
 ];
 
-function parseSubgroupCode(productName: string): string {
-    const name = productName.toLowerCase().replace(/[_-]/g, " ");
+function normalize(value: string): string {
+    return value
+        .toLowerCase()
+        .replace(/[_-]/g, " ")
+        .replace(/[.,]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function parseSubgroupCode(productName: string): string | undefined {
+    const name = normalize(productName);
 
     for (const rule of subgroupRules) {
-        if (rule.keywords.every(kw => name.includes(kw))) {
+        const isMatch = rule.keywords.every(keyword =>
+            name.includes(normalize(keyword))
+        );
+
+        if (isMatch) {
             return rule.code;
         }
     }
+
+    return undefined;
 }
 
 const styles = StyleSheet.create({

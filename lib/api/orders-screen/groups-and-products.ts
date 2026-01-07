@@ -74,6 +74,7 @@ export interface OptionPrice {
 
 // get all subgroups (by group)
 export async function getGroupsStructure(groupCode: MainGroupsCode, login: string): Promise<IProductGroupsStructureResponse | null> {
+
     try {
         const response = await fetch(`${BASE_URL}/api/piramid/product-groups?login=${login}&group=${groupCode}`);
 

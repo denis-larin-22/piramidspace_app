@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ColorPrice, Fixation, getProductsByGroupCodes, IProductByCodes, OptionPrice } from "../../../lib/api/orders-screen/groups-and-products";
-import { Image, ImageBackground, ImageStyle, Pressable, Text, View } from "react-native";
+import { ImageBackground, Pressable, Text, View } from "react-native";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { Keyboard } from 'react-native';
 import WidthAndHeight from "./third-step-components/WidthAndHeight";

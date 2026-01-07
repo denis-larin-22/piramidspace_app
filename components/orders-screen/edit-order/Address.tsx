@@ -3,7 +3,7 @@ import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
 import { useState } from "react";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
-import { IAddress } from "../../../lib/api/orders-screen/address";
+import { IAddress, IAddressValuesPrivat } from "../../../lib/api/orders-screen/address";
 import { formatAddressNP, formatAddressPrivat } from "../../../lib/utils";
 import { ArrowDown } from "../../ui/ArrowDown";
 
@@ -20,6 +20,35 @@ function Address({
 
 }) {
     const [listIsOpen, setListIsOpen] = useState<boolean>(false);
+
+    function setActiveAddress(type: keyof IAddress) {
+        if (type === "довільний") {
+            return {
+                type: type,
+                address: formatAddressNP(addressList["основний"])
+            }
+        } else if (type === "основний") {
+            return {
+                type: "основний",
+                address: formatAddressNP(addressList["основний"])
+            }
+        } else if (type === "За адресою") {
+            return {
+                type: "За адресою",
+                address: formatAddressPrivat(addressList["За адресою"] as IAddressValuesPrivat)
+            }
+        } else if (type === "додатковий") {
+            return {
+                type: type,
+                address: formatAddressNP(addressList["основний"])
+            }
+        } else {
+            return {
+                type: type,
+                address: formatAddressNP(addressList["основний"])
+            }
+        }
+    }
 
     return (
         <View style={styles.wrap}>
@@ -67,28 +96,10 @@ function Address({
                                     ]}
                                     pointerEvents="box-only"
                                     onPress={() => {
-                                        const activeAddress = addressList[addressType];
-
-
-
-                                        if (activeAddress === false) {
-                                            addressHandler("основной", address);
-                                            setListIsOpen(false);
-                                        } else {
-                                            if (addressType === "основний") {
-                                                const addressValue = formatAddressNP(addressList[addressType]);
-                                                addressHandler(addressType, addressValue);
-                                            } else if (addressType === "За адресою") {
-                                                const addressValue = formatAddressPrivat(activeAddress);
-                                                addressHandler(addressType, addressValue);
-                                            } else {
-                                                addressHandler("основной", address);
-                                            }
-                                        }
-
+                                        const { type, address } = setActiveAddress(addressType as keyof IAddress);
+                                        addressHandler(type, address);
 
                                         setListIsOpen(false);
-                                        // addressHandler(activeAddress);
                                     }}
                                 >
                                     <Text style={styles.addressItemText}>
@@ -118,23 +129,22 @@ const styles = StyleSheet.create({
         color: Colors.gray,
     },
     selectField: {
-        marginTop: 4,
+        marginTop: 7,
         fontFamily: Fonts.openSans400,
-        fontSize: 14,
-        lineHeight: 16,
+        fontSize: 16,
         color: "black",
         backgroundColor: "white",
+        paddingVertical: 9,
+        paddingHorizontal: 13,
         borderRadius: 31,
         borderWidth: 2,
-        paddingVertical: 5,
-        paddingHorizontal: 12,
         borderColor: Colors.blueLight
     },
     arrowIcon: {
         position: "absolute",
         zIndex: 10,
-        right: 10,
-        top: -20,
+        right: 15,
+        top: -27,
     },
     list: {
         minHeight: 50,

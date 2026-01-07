@@ -290,7 +290,7 @@ const paginationStyles = StyleSheet.create({
 
 export const tableStyles = StyleSheet.create({
     ordersTable: {
-        marginVertical: 20,
+        marginVertical: 7,
         backgroundColor: 'white',
         borderRadius: 13,
         flexGrow: 1,

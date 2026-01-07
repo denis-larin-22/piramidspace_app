@@ -25,7 +25,7 @@ function OrderDetails({ order }: { order: IOrder }) {
     } = order;
 
     const filteredItems = orderItems.map((item) => {
-        if (item['наименование'] === "Замер" || item['наименование'] === "Доставка" || item['наименование'] === "Установка") return null;
+        if (item['наименование'].toLowerCase() === "замер" || item['наименование'].toLowerCase() === "доставка" || item['наименование'].toLowerCase() === "установка" || item['наименование'].toLowerCase() === "магніт") return null;
 
         return item;
     }).filter((item) => item !== null);

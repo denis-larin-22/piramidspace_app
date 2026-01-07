@@ -10,7 +10,6 @@ import FixationType from "./FixationType";
 import { CloseButton } from "../../ui/CloseButton";
 import { ISubgroup } from "../../../lib/api/orders-screen/groups-and-products";
 import { IOrderItemToAdd, IOrderItemToUpdate } from "../../../lib/api/orders-screen/edit-order";
-import { UnitsTypes } from "../../../lib/api/auth";
 import { Fonts } from "../../../theme/fonts";
 
 function EditItemForm({
@@ -66,7 +65,12 @@ function EditForm({
     const [isSubmitHidden, setIsSubmitHidden] = useState<boolean>(true);
 
     const colorList = Object.keys(subgroupData.colors);
-    const fixationList = subgroupData.fixations.map((type) => type.name);
+
+    // width\height limits
+    const targetTkan = subgroupData.tkani.find((tkan) => tkan.short_name === itemToEdit.product_code || tkan.name === itemToEdit.product_code);
+
+    const maxWidth = targetTkan.max_width;
+    const maxHeight = targetTkan.max_height;
 
     return (
         <Modal
@@ -103,15 +107,17 @@ function EditForm({
                         </View>
 
                         <WidthAndHeight
+                            subgroupCode={subgroupData.code}
+
                             width={itemToEdit.width}
-                            maxWidth={200}
+                            maxWidth={maxWidth}
                             widthHandler={(value) => {
                                 setIsSubmitHidden(false);
                                 editHandler({ ...itemToEdit, width: value });
                             }}
 
                             height={itemToEdit.height}
-                            maxHeight={250}
+                            maxHeight={maxHeight}
                             heightHandler={(value) => {
                                 setIsSubmitHidden(false);
                                 editHandler({ ...itemToEdit, height: value });
@@ -152,7 +158,7 @@ function EditForm({
 
                         <FixationType
                             fixation={itemToEdit.fixation_type}
-                            fixationList={fixationList}
+                            fixationList={subgroupData.fixations}
                             fixationHandler={(fixation) => {
                                 setIsSubmitHidden(false);
                                 editHandler({ ...itemToEdit, fixation_type: fixation });

@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end',
         borderRadius: 50,
         overflow: "hidden",
-        marginBottom: 10,
+        // marginBottom: 10,
         backgroundColor: Colors.blue
     },
     addButtonText: {
