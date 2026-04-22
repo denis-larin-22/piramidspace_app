@@ -149,29 +149,35 @@ function CatalogItem({ product, navigation }: IProps) {
                         <View style={styles.separator}></View>
 
                         <View style={styles.infoList}>
-                            {technicalInformation.map((item, index) => (
-                                <View
-                                    key={index}
-                                    style={{
-                                        width: "48%",
-                                        marginBottom: 10,
-                                    }}
-                                >
-                                    <Text style={{
-                                        ...styles.infoTitle,
-                                        marginBottom: 5,
-                                    }}>
-                                        {item.item}
-                                    </Text>
-                                    <Text style={styles.infoText}>
-                                        {item.info === null ?
-                                            "відсутнє"
-                                            :
-                                            item.info
-                                        }
-                                    </Text>
-                                </View>
-                            ))}
+                            {technicalInformation.map((item, index) => {
+                                if (item.info === null) {
+                                    return null;
+                                } else {
+                                    return (
+                                        <View
+                                            key={index}
+                                            style={{
+                                                width: "48%",
+                                                marginBottom: 10,
+                                            }}
+                                        >
+                                            <Text style={{
+                                                ...styles.infoTitle,
+                                                marginBottom: 5,
+                                            }}>
+                                                {item.item}
+                                            </Text>
+                                            <Text style={styles.infoText}>
+                                                {item.info === null ?
+                                                    "відсутнє"
+                                                    :
+                                                    item.info
+                                                }
+                                            </Text>
+                                        </View>
+                                    )
+                                }
+                            })}
                         </View>
                     </AnimatedWrapper>
 
@@ -287,7 +293,7 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         justifyContent: "space-between",
         rowGap: 24,
-        marginBottom: 50
+        marginBottom: 100
     },
     // sale icon
     saleWrap: {

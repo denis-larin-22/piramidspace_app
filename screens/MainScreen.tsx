@@ -1,5 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Dimensions, StatusBar, StyleSheet, View } from "react-native";
+import { Dimensions, StatusBar, StyleSheet, Text, View } from "react-native";
 import { RootStackParamList } from "../navigation/AppStack";
 import { Colors } from "../theme/colors";
 import { useEffect, useState } from "react";
@@ -69,7 +69,7 @@ function MainScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
         };
     }, []);
 
-    if (userInfo === null) return null;
+    if (userInfo === null) return <Text>Користувача не знайдено</Text>;
 
     return (
         <View style={styles.container}>

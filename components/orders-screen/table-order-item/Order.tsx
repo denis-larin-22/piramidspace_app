@@ -1,5 +1,5 @@
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
-import { Pressable, StyleSheet, Text, TextStyle } from "react-native";
+import { Pressable, StyleSheet, Text, TextStyle, View } from "react-native";
 import { Colors } from "../../../theme/colors";
 import { Fonts } from "../../../theme/fonts";
 import { tableStyles } from "../TableOrders";
@@ -27,16 +27,23 @@ function Order({
                 }]}
                 onPress={openHandler}
             >
-                <Text style={[styles.cell, tableStyles.column1, styles.link]}>
-                    #{order['N_заказа']}
-                </Text>
-                <Text style={[styles.cell, tableStyles.column2]}>
-                    {getFormatedOrderType(order['вид заказа'])}
-                </Text>
+                <View style={{ justifyContent: 'center' }}>
+                    <Text style={[styles.cell, tableStyles.column1, styles.link]}>
+                        #{order['N_заказа']}
+                    </Text>
+                </View>
+                <View style={{ justifyContent: 'center' }}>
+                    <Text style={[styles.cell, tableStyles.column2]}>
+                        {getFormatedOrderType(order['вид заказа'])}
+                    </Text>
+                </View>
                 <Status statusValue={order['статус']} />
-                <Text style={[styles.cell, tableStyles.column4]}>
-                    {order['сумма']}
-                </Text>
+                <View style={{ justifyContent: 'center' }}>
+                    <Text style={[styles.cell, tableStyles.column4]}>
+                        {order['сумма']}
+                    </Text>
+                </View>
+
             </Pressable>
         </AnimatedWrapper>
     );
@@ -71,7 +78,7 @@ const styles = StyleSheet.create({
     cell: {
         fontFamily: Fonts.comfortaa700,
         fontSize: 12,
-        lineHeight: 13,
+        lineHeight: 14,
         color: 'black',
         textAlignVertical: 'center',
     },

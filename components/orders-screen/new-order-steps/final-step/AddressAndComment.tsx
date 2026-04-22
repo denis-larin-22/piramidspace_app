@@ -11,8 +11,6 @@ import { formatAddressNP, formatAddressPrivat } from "../../../../lib/utils";
 import { formStyles } from "../third-step-components/form-styles";
 import { ArrowDown } from "../../../ui/ArrowDown";
 
-
-
 function AddressAndComment({
     isAddressOpen,
     setIsAddressOpen
@@ -62,13 +60,17 @@ function AddressAndComment({
     }, []);
 
     return (
-        <View >
+        <AnimatedWrapper
+            useOpacity
+            offsetY={20}
+            delay={500}
+        >
             <View
                 style={[
                     styles.addressContainer,
                     {
-                        height: isAddressOpen ? 'auto' : 75,
-                        minWidth: isAddressOpen ? "100%" : "80%",
+                        height: isAddressOpen ? 'auto' : 58,
+                        minWidth: "100%",
                     }
                 ]}
             >
@@ -124,7 +126,7 @@ function AddressAndComment({
                     )}
                 </Pressable>
             </View>
-        </View>
+        </AnimatedWrapper>
     );
 }
 

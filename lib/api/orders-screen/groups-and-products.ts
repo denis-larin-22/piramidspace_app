@@ -23,7 +23,7 @@ export interface ISubgroup {
     colors: Record<string, ColorPrice[]> | string[];
     nacenki: Nacenka[];
     nacenkiTkaniCat: NacenkaTkaniCat[];
-    tkani: Tkan[];
+    products: Tkan[];
     options: Record<string, OptionPrice[]> | string[];
 }
 
@@ -55,14 +55,15 @@ export interface NacenkaTkaniCat {
 }
 
 export interface Tkan {
-    name: string;
-    short_name: string;
-    category_id: number;
-    unit: string;
-    price: number;
-    max_width: number;
-    max_height: number;
-    max_area: number;
+    category_fabric: number,
+    code: string,
+    h_max: number,
+    w_max: number
+    name: string,
+    presence: string,
+    price: number,
+    sale_tk: boolean,
+    square_max: number,
 }
 
 export interface OptionPrice {
@@ -74,7 +75,6 @@ export interface OptionPrice {
 
 // get all subgroups (by group)
 export async function getGroupsStructure(groupCode: MainGroupsCode, login: string): Promise<IProductGroupsStructureResponse | null> {
-
     try {
         const response = await fetch(`${BASE_URL}/api/piramid/product-groups?login=${login}&group=${groupCode}`);
 

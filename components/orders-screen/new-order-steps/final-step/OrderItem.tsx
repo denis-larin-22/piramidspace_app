@@ -23,6 +23,7 @@ function OrderItem({
     deleteHandler: (itemId: string) => void,
 }) {
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const isComponentsOrAdsGroup = orderObject.group.code === 'components' || orderObject.group.code === 'ads';
 
     const itemRows = [
         { label: "↔️ Ширина (габарит)", value: orderObject.width_gab },
@@ -30,10 +31,15 @@ function OrderItem({
         { label: "↔️ Ширина (по штапику)", value: orderObject.width_shtapik },
         { label: "↕️ Висота (по штапику)", value: orderObject.height_shtapik, dashedBorder: true },
 
-        { label: "⚙ Управління", value: orderObject.controlType === 'L' ? "ліворуч" : "праворуч" },
+        {
+            label: "⚙ Управління", value: isComponentsOrAdsGroup ? ""
+                : orderObject.controlType === 'L' ? "ліворуч" : "праворуч"
+        },
         { label: "🔧 Фіксація", value: orderObject.fixation_type?.name },
         { label: "🎨 Колір", value: orderObject.color_system },
+        { label: "📋 Группа", value: isComponentsOrAdsGroup ? `${orderObject.subgroup.name}` : "" },
         { label: "🔢 Кількість", value: `${orderObject.count_number} шт.`, dashedBorder: true },
+
 
         {
             label: "Вартість", value: usdPrice ? usdPrice.toFixed(2) + "$" : "❌",
@@ -67,7 +73,11 @@ function OrderItem({
                     <View style={styles.previewRow}>
                         <View style={styles.previewColumn}>
                             <Text style={styles.previewBox}>
-                                {orderObject.width_gab}x{orderObject.height_gab}
+                                {isComponentsOrAdsGroup ?
+                                    orderObject.subgroup.name
+                                    :
+                                    orderObject.width_gab + "x" + orderObject.height_gab
+                                }
                             </Text>
                             <Text style={styles.previewBox}>
                                 {orderObject.count_number} шт.
@@ -101,7 +111,13 @@ function OrderItem({
             {isOpen ? (
                 <View style={styles.expandedContainer}>
                     {itemRows.map(({ label, value, dashedBorder }, index) => (
-                        <RowItem key={index} label={label} value={value} dashedBorder={dashedBorder} index={index} />
+                        <RowItem
+                            key={index}
+                            label={label}
+                            value={value}
+                            dashedBorder={dashedBorder}
+                            index={index}
+                        />
                     ))}
 
                     {isOpen && <DetailsSwitcher
@@ -135,7 +151,7 @@ const RowItem: React.FC<{
                 dashedBorder && styles.rowItemDashed
             ]}>
             <Text style={styles.rowLabel}>{label}</Text>
-            <Text style={styles.rowValue}>{value}</Text>
+            <Text style={[styles.rowValue, { textAlign: 'right' }]}>{value}</Text>
         </AnimatedWrapper>
     )
 };
@@ -225,8 +241,8 @@ const styles = StyleSheet.create({
         fontSize: 14,
         textAlign: 'center',
         borderRadius: 8,
-        // backgroundColor: Colors.pale,
         color: 'black',
+        maxWidth: 120
     },
     expandedContainer: {
         backgroundColor: 'white',

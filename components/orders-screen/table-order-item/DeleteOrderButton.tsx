@@ -3,6 +3,9 @@ import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { fetchDeleteOrder } from "../../../lib/api/orders-screen/ordersList";
 import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
+import { SuccessMessage } from "../../ui/SuccessMessage";
+import { ErrorMessage } from "../../ui/ErrorMessage";
+import { useState } from "react";
 
 function DeleteOrderButton({
     isDeleteModalOpen,
@@ -17,6 +20,54 @@ function DeleteOrderButton({
     loginValue: string | undefined,
     triggerRefetch: () => void
 }) {
+    const initDeletingResult: {
+        isVissible: null | 'success' | 'error',
+        title: string,
+        text: string
+    } = {
+        isVissible: null,
+        title: "",
+        text: ""
+    }
+
+    const [deletingResult, setDeletingResult] = useState(initDeletingResult);
+
+    async function deleteHandler() {
+        if (!loginValue) return;
+
+        const result = await fetchDeleteOrder({
+            login: loginValue,
+            order_N: idOrder.toString(),
+            userType: 'manager'
+        });
+
+        if (result === null) {
+            setDeletingResult({
+                isVissible: "error",
+                title: "Помилка видалення",
+                text: `Помилка видалення замовлення №${idOrder}`
+            });
+
+            setTimeout(() => {
+                setDeletingResult(initDeletingResult);
+                setIsDeleteModalOpen(false);
+            }, 2500);
+        } else {
+            setDeletingResult({
+                isVissible: "success",
+                title: "Видалено",
+                text: `Замовлення №${idOrder} видалено`
+            });
+
+            setTimeout(() => {
+                setDeletingResult(initDeletingResult);
+
+                triggerRefetch();
+                setIsDeleteModalOpen(false);
+            }, 1500);
+        }
+    }
+
     return (
         <>
             <Pressable
@@ -44,39 +95,46 @@ function DeleteOrderButton({
                         duration={200}
                         style={styles.modalContent}
                     >
-                        <Image
-                            source={require("../../../assets/orders-screen/warning.png")}
-                            style={styles.warningIcon}
-                            resizeMode="contain"
-                        />
-                        <Text style={styles.modalTitle}>Видалити замовлення?</Text>
-                        <Text style={styles.modalSubtitle}>Видалення замовлення №{idOrder}</Text>
+                        {/* CONFIRM */}
+                        <>
+                            <Image
+                                source={require("../../../assets/orders-screen/warning.png")}
+                                style={styles.warningIcon}
+                                resizeMode="contain"
+                            />
+                            <Text style={styles.modalTitle}>Видалити замовлення?</Text>
+                            <Text style={styles.modalSubtitle}>Видалення замовлення №{idOrder}</Text>
 
-                        <View style={styles.modalButtons}>
-                            <Pressable
-                                style={styles.cancelButton}
-                                onPress={() => setIsDeleteModalOpen(false)}
-                            >
-                                <Text style={styles.cancelButtonText}>Відмінити</Text>
-                            </Pressable>
-                            <Pressable
-                                style={styles.deleteConfirmButton}
-                                onPress={async () => {
-                                    if (!loginValue) return;
+                            {deletingResult.isVissible === null && <View style={styles.modalButtons}>
+                                <Pressable
+                                    style={styles.cancelButton}
+                                    onPress={() => setIsDeleteModalOpen(false)}
+                                >
+                                    <Text style={styles.cancelButtonText}>Відмінити</Text>
+                                </Pressable>
+                                <Pressable
+                                    style={styles.deleteConfirmButton}
+                                    onPress={deleteHandler}
+                                >
+                                    <Text style={styles.deleteConfirmButtonText}>Видалити</Text>
+                                </Pressable>
+                            </View>}
+                        </>
 
-                                    const result = await fetchDeleteOrder({
-                                        login: loginValue,
-                                        order_N: idOrder.toString(),
-                                        userType: 'менеджер'
-                                    });
-
-                                    triggerRefetch();
-                                    setIsDeleteModalOpen(false);
-                                }}
-                            >
-                                <Text style={styles.deleteConfirmButtonText}>Видалити</Text>
-                            </Pressable>
-                        </View>
+                        {/* Success result */}
+                        {deletingResult.isVissible === "success" &&
+                            <SuccessMessage
+                                title={deletingResult.title}
+                                text={deletingResult.text}
+                            />}
+                        {/* Error result */}
+                        {deletingResult.isVissible === "error" &&
+                            <ErrorMessage
+                                errorTitle={deletingResult.title}
+                                errorText={deletingResult.text}
+                                styles={{ top: 30 }}
+                            />
+                        }
                     </AnimatedWrapper>
                 </AnimatedWrapper>
             </Modal>

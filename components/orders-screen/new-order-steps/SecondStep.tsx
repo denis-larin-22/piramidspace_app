@@ -33,7 +33,7 @@ function SecondStep({ rateValue, balanceValue, stepHandler }: {
                 if (groupsStructure.groups.length === 0) {
                     setSubGroupsList(null);
                 } else {
-                    const subgroups = groupsStructure.groups[0].subgroups;
+                    const subgroups = groupsStructure.groups[0].subgroups.filter((subgroup) => subgroup.name !== 'Готові вироби');
                     setSubGroupsList(subgroups);
                 }
             } else {

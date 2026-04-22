@@ -1,6 +1,9 @@
 import { Colors } from "../theme/colors";
+import { IUserInfo, UnitsTypes } from "./api/auth";
 import { BASE_URL } from "./api/base-url";
 import { IAddressValuesNP, IAddressValuesPrivat } from "./api/orders-screen/address";
+import { getDataFromAcyncStorage } from "./async-storage/acyncStorage";
+import { ASYNC_STORAGE_USER_INFO_OBJECT } from "./async-storage/asyncStorageKeys";
 
 export function getAvailabilityTextColor(availabilityValue: string) {
     const value = availabilityValue.toLowerCase();
@@ -197,6 +200,8 @@ export function getFormatedOrderType(type: string) {
             return 'вертикальні жалюзі';
         case 'roler':
             return 'рулонні жалюзі';
+        case 'roller':
+            return 'рулонні жалюзі';
         case 'components':
             return 'комплектуючі';
         case 'ads':
@@ -248,4 +253,13 @@ export function formatAddressPrivat(addressObj: IAddressValuesPrivat): string {
         ", " +
         addressObj["appart_np"]
     );
-}
+};
+
+// getting actual units from user object
+export async function getActiveUnits(): Promise<UnitsTypes> {
+    const userInfoFromAS = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT);
+    if (!userInfoFromAS) return "см"; // Default value
+
+    const data = JSON.parse(userInfoFromAS) as IUserInfo;
+    return data.units;
+};

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
-import { ImageBackground, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ImageBackground, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, useWindowDimensions, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { useDollarRate } from "../../lib/hooks/useDollarRate";
@@ -14,6 +14,8 @@ import { INewOrderObject, initCreateOrderParams, useCreateOrder } from "./NewOrd
 import { CloseButton } from "../ui/CloseButton";
 
 function AddNewOrder({ triggerRefetch }: { triggerRefetch: () => void }) {
+    const { height: screenHeight } = useWindowDimensions();
+
     const { isConnected } = useNetworkStatus();
     const { rate } = useDollarRate(isConnected);
     const { balance } = useBalanceValue(isConnected);
@@ -72,72 +74,86 @@ function AddNewOrder({ triggerRefetch }: { triggerRefetch: () => void }) {
                     useOpacity
                     duration={200}
                 >
-                    <AnimatedWrapper
-                        useOpacity
-                        useScale
-                        offsetY={100}
-                        delay={100}
-                        duration={200}
-                        style={styles.modalContent}
+                    <KeyboardAvoidingView
+                        style={{ flex: 1 }}
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                     >
-                        {/* Steps */}
-                        {activeStep === 1 ?
-                            // #1
-                            <FirstStep stepHandler={() => setActiveStep(2)} />
-                            :
-                            activeStep === 2 ?
-                                // #2
-                                <SecondStep
-                                    balanceValue={balance}
-                                    rateValue={rate}
-                                    stepHandler={() => setActiveStep(3)}
-                                />
-                                :
-                                activeStep === 3 ?
-                                    // #3
-                                    <ThirdStep
-                                        stepHandler={() => setActiveStep(4)}
-                                    />
-                                    :
-                                    // #4
-                                    <FinalStep
-                                        balanceValue={balance}
-                                        rateValue={rate}
-                                        closeHandler={() => {
-                                            setOrderParams(initCreateOrderParams);
-                                            setIsModalVissible(false);
-                                            setActiveStep(1);
-                                            triggerRefetch();
-                                        }}
-                                        stepHandler={() => {
-                                            const oneMoreItem: INewOrderObject = {
-                                                ...initCreateOrderParams.newOrderObject,
-                                                group: orderParams.newOrderObject.group,
-                                                subgroup: orderParams.newOrderObject.subgroup,
-                                                id: generateId()
-                                            }
+                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                            <View style={styles.contentWrap}>
+                                <AnimatedWrapper
+                                    useOpacity
+                                    useScale
+                                    offsetY={100}
+                                    delay={100}
+                                    duration={200}
+                                    style={styles.modalContent}
+                                >
+                                    {/* Steps */}
+                                    {activeStep === 1 ?
+                                        // #1
+                                        <FirstStep stepHandler={() => setActiveStep(2)} />
+                                        :
+                                        activeStep === 2 ?
+                                            // #2
+                                            <SecondStep
+                                                balanceValue={balance}
+                                                rateValue={rate}
+                                                stepHandler={() => setActiveStep(3)}
+                                            />
+                                            :
+                                            activeStep === 3 ?
+                                                // #3
+                                                <ThirdStep
+                                                    stepHandler={() => setActiveStep(4)}
+                                                />
+                                                :
+                                                // #4
+                                                <FinalStep
+                                                    balanceValue={balance}
+                                                    rateValue={rate}
+                                                    closeHandler={() => {
+                                                        setOrderParams(initCreateOrderParams);
+                                                        setIsModalVissible(false);
+                                                        setActiveStep(1);
+                                                        triggerRefetch();
+                                                    }}
+                                                    stepHandler={() => {
+                                                        const oneMoreItem: INewOrderObject = {
+                                                            ...initCreateOrderParams.newOrderObject,
+                                                            group: orderParams.newOrderObject.group,
+                                                            subgroup: orderParams.newOrderObject.subgroup,
+                                                            id: generateId()
+                                                        }
 
-                                            setOrderParams({
-                                                ...orderParams,
-                                                newOrderObject: oneMoreItem
-                                            });
-                                            setActiveStep(3);
-                                        }}
-                                        buttonsHideHandler={setIsControlButtonsHidden}
-                                    />
-                        }
+                                                        setOrderParams({
+                                                            ...orderParams,
+                                                            newOrderObject: oneMoreItem
+                                                        });
 
-                        {/* Back and close */}
-                        {!isControlButtonsHidden && <View style={{ zIndex: -1 }}>
-                            {!(activeStep === 1 || (activeStep === 3 && orderParams.ordersList.length !== 0)) && (
-                                <BackButton backHandler={backButtonHandler} />
-                            )}
-                            <CloseButton
-                                style={styles.closeButton}
-                                closeHandler={closeButtonHandler}
-                            />
-                        </View>}
-                    </AnimatedWrapper>
+                                                        if (orderParams.activeGroup === "components") {
+                                                            setActiveStep(2);
+                                                        } else {
+                                                            setActiveStep(3);
+                                                        }
+                                                    }}
+                                                    buttonsHideHandler={setIsControlButtonsHidden}
+                                                />
+                                    }
+
+                                    {/* Back and close */}
+                                    {!isControlButtonsHidden && <View style={{ zIndex: -1 }}>
+                                        {!(activeStep === 1 || (activeStep === 3 && orderParams.ordersList.length !== 0)) && (
+                                            <BackButton backHandler={backButtonHandler} />
+                                        )}
+                                        <CloseButton
+                                            style={styles.closeButton}
+                                            closeHandler={closeButtonHandler}
+                                        />
+                                    </View>}
+                                </AnimatedWrapper>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </KeyboardAvoidingView>
                 </AnimatedWrapper>
             </Modal>
         </>
@@ -169,7 +185,7 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end',
         borderRadius: 50,
         overflow: "hidden",
-        // marginBottom: 10,
+        marginBottom: 4,
         backgroundColor: Colors.blue
     },
     addButtonText: {
@@ -182,22 +198,24 @@ const styles = StyleSheet.create({
         paddingVertical: 9
     },
     modalOverlay: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 20,
         position: "relative",
-        height: "100%",
         width: "100%",
+        height: "100%",
         backgroundColor: "#00000080",
     },
     modalContent: {
         backgroundColor: Colors.pale,
-        paddingVertical: 20,
+        paddingVertical: 12,
         paddingHorizontal: 12,
         borderRadius: 13,
         width: '100%',
         position: 'relative',
-        top: '-5%',
+    },
+    contentWrap: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20,
     },
     button: {
         width: 59,
@@ -207,12 +225,12 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         position: 'absolute',
-        bottom: -90,
+        bottom: -82,
         right: 0
     },
     backButton: {
         position: 'absolute',
-        bottom: -90,
+        bottom: -82,
         left: 0,
     },
     buttonBg: {

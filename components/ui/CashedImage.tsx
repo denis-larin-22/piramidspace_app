@@ -13,7 +13,13 @@ export const CachedImage = ({ source, style }: CachedImageProps) => {
 
     if (isLoading) {
         return (
-            <View style={[{ justifyContent: 'flex-start', alignItems: 'center', paddingTop: 35, backgroundColor: Colors.pale }, style]}>
+            <View style={[{
+                justifyContent: 'center',
+                alignItems: 'center',
+                // paddingTop: 35,
+                backgroundColor: Colors.pale
+            },
+                style]}>
                 <Loader />
             </View>
         )

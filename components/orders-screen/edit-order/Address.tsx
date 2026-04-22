@@ -52,7 +52,10 @@ function Address({
 
     return (
         <View style={styles.wrap}>
-            <Text style={styles.detailsText}>Адреса </Text>
+            <View style={styles.titleWrap}>
+                <Text style={styles.detailsText}>Адреса</Text>
+                <View style={styles.line}></View>
+            </View>
 
             <AnimatedWrapper useOpacity offsetY={20} delay={150}>
                 <Text style={[styles.textArea, {
@@ -121,6 +124,10 @@ const styles = StyleSheet.create({
     wrap: {
         position: 'relative',
     },
+    titleWrap: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     detailsText: {
         marginTop: 5,
         fontFamily: Fonts.comfortaa600,
@@ -178,7 +185,7 @@ const styles = StyleSheet.create({
         color: "black",
     },
     textArea: {
-        minHeight: 100,
+        minHeight: 80,
         backgroundColor: 'white',
         borderRadius: 12,
         padding: 10,
@@ -186,5 +193,13 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: 'black',
         marginTop: 5,
+    },
+    line: {
+        height: 2,
+        flexGrow: 1,
+        backgroundColor: Colors.grayLight,
+        top: 3,
+        marginLeft: 5,
+        borderRadius: 50
     },
 });

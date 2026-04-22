@@ -63,6 +63,7 @@ function AddForm({
     subgroupData: ISubgroup;
     addItemHandler: (newItem: IOrderItemToAdd) => void
 }) {
+
     const initNewItem: IOrderItemToAdd = {
         action: "add",
         product_code: "",
@@ -85,9 +86,9 @@ function AddForm({
     useEffect(() => {
         const isFull =
             newItem.product_code.trim() !== "" &&
-            newItem.side.trim() !== "" &&
-            newItem.system_color.trim() !== "" &&
-            newItem.fixation_type.trim() !== "" &&
+            (newItem.side.trim() !== "" || subgroupData.control.length === 0) &&
+            (newItem.system_color.trim() !== "" || Object.keys(subgroupData.colors).length === 0) &&
+            (newItem.fixation_type.trim() !== "" || subgroupData.fixations.length === 0) &&
             newItem.width > 0 &&
             newItem.height > 0 &&
             newItem.quantity > 0;
@@ -117,14 +118,14 @@ function AddForm({
                     >
                         <View style={styles.headerContainer}>
                             <Text style={styles.headerTitle}>Додавання тканини</Text>
-                            <Text style={styles.headerSubtitle}>{subgroupData.name}</Text>
                         </View>
 
                         <TkanList
                             activeTkan={newItem.product_code}
-                            tkanList={subgroupData.tkani}
+                            tkanList={subgroupData.products}
                             tkanHandler={(tkan: Tkan) => {
-                                setNewItem(prev => ({ ...prev, product_code: tkan.short_name }));
+                                setNewItem(prev => ({ ...prev, product_code: tkan.name }));
+
                                 setActiveTkan(tkan);
                             }}
                         />
@@ -134,11 +135,11 @@ function AddForm({
                                 subgroupCode={newItem.subgroup_code}
 
                                 height={newItem.height}
-                                maxHeight={activeTkan?.max_height ?? 0}
+                                maxHeight={activeTkan?.h_max ?? 999999}
                                 heightHandler={(value) => setNewItem(prev => ({ ...prev, height: value }))}
 
                                 width={newItem.width}
-                                maxWidth={activeTkan?.max_width ?? 0}
+                                maxWidth={activeTkan?.w_max ?? 999999}
                                 widthHandler={(value) => setNewItem(prev => ({ ...prev, width: value }))}
                             />
 
@@ -213,11 +214,14 @@ function TkanList({
     const [isTkanListOpen, setIsTkanListOpen] = useState<boolean>(false);
 
     return (
-        <View style={{ marginBottom: 10 }}>
+        <View style={{ marginBottom: 5 }}>
             <Text style={formStyles.detailsText}>Оберіть тканину</Text>
 
             <Pressable onPress={() => setIsTkanListOpen(!isTkanListOpen)}>
-                <Text style={[formStyles.selectField, styles.tkanSelectField]}>{activeTkan.length !== 0 ? activeTkan : "Оберіть тканину"}</Text>
+                <Text
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={[formStyles.selectField, styles.tkanSelectField]}>{activeTkan.length !== 0 ? activeTkan : "Оберіть тканину"}</Text>
             </Pressable>
             <ArrowDown isRotate={isTkanListOpen} style={formStyles.arrowIcon} />
 
@@ -240,14 +244,14 @@ function TkanList({
                                     <Pressable
                                         style={[
                                             formStyles.productItem,
-                                            (activeTkan === tkan.short_name) && styles.activeProductItem,
+                                            (activeTkan === tkan.name) && styles.activeProductItem,
                                         ]}
                                         onPress={() => {
                                             tkanHandler(tkan);
                                             setIsTkanListOpen(false);
                                         }}
                                     >
-                                        <Text style={formStyles.productItemText}>{tkan.short_name}</Text>
+                                        <Text style={formStyles.productItemText}>{tkan.name}</Text>
                                     </Pressable>
                                 </AnimatedWrapper>
                             ))
@@ -314,6 +318,7 @@ const styles = StyleSheet.create({
         width: '92%',
         maxHeight: '90%',
         minHeight: 300,
+        top: '4%'
     },
     headerContainer: {
         paddingBottom: 5,
@@ -323,18 +328,10 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         fontFamily: Fonts.comfortaa700,
-        fontSize: 20,
+        fontSize: 18,
         textTransform: 'uppercase',
         color: Colors.gray
     },
-    headerSubtitle: {
-        fontFamily: Fonts.comfortaa700,
-        fontSize: 16,
-        color: Colors.blueLight,
-        textTransform: 'uppercase',
-        alignSelf: 'flex-end'
-    },
-
     rowWithGap: {
         flexDirection: 'row',
         gap: 20,

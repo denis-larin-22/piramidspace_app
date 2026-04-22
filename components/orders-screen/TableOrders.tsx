@@ -324,22 +324,25 @@ export const tableStyles = StyleSheet.create({
     },
     column1: {
         width: COLUMN_WIDTH.col1,
+        verticalAlign: 'middle'
     },
     column2: {
         width: COLUMN_WIDTH.col2,
         textAlign: 'center',
+        verticalAlign: 'middle',
         marginHorizontal: 5
     },
     column3: {
         width: COLUMN_WIDTH.col3,
         borderRadius: 6,
         textAlign: 'center',
-        paddingVertical: 20,
-        marginVertical: 3,
+        paddingVertical: 10,
+        marginVertical: 13,
     },
     column4: {
         width: COLUMN_WIDTH.col4,
         textAlign: 'center',
+        verticalAlign: 'middle',
         marginHorizontal: 10,
     },
     column5: {

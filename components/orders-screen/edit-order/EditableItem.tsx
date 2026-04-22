@@ -2,10 +2,12 @@ import { Dimensions, Image, Pressable, StyleSheet, Text, View } from "react-nati
 import { ISubgroup } from "../../../lib/api/orders-screen/groups-and-products";
 import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IOrderItemToDelete, IOrderItemToUpdate } from "../../../lib/api/orders-screen/edit-order";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import EditItemForm from "./EditItemForm";
+import { UnitsTypes } from "../../../lib/api/auth";
+import { getActiveUnits } from "../../../lib/utils";
 
 function EditableItem({
     item,
@@ -33,8 +35,19 @@ function EditableItem({
 
     // ========================================= //
     // UPDATE MARK MODE
-    // ВНИМАНИЕ: ТОЛЬКО ЗДЕСЬ мы уверены, что это IOrderItemToUpdate
+    // ВНИМАНИЕ: ТОЛЬКО ЗДЕСЬ гарантия, что это IOrderItemToUpdate
     const currentItem = editableItem as IOrderItemToUpdate;
+
+    // см/мм ////////////////////////////////////////
+    const [units, setUnits] = useState<UnitsTypes | null>(null); // actual units value
+
+    useEffect(() => {
+        async function getUnits() {
+            const actualUnits = await getActiveUnits();
+            setUnits(actualUnits);
+        };
+        getUnits();
+    }, [item]);
 
     function editHandler(updatedItem: IOrderItemToUpdate) {
         setEditableItem(updatedItem);
@@ -55,6 +68,7 @@ function EditableItem({
             {/* info */}
             <OrderItem
                 item={currentItem}
+                units={units}
             />
 
             <DeleteItemButton
@@ -77,24 +91,30 @@ export default EditableItem;
 
 
 // UI
-function OrderItem({ item }: { item: IOrderItemToUpdate }) {
+function OrderItem({ item, units }: { item: IOrderItemToUpdate, units: UnitsTypes }) {
+    const widthValue = (units === "мм" ? item.width * 10 : item.width) + ` ${units}`;
+    const heightValue = (units === "мм" ? item.height * 10 : item.height) + ` ${units}`;
+
     return (
         <View style={[styles.itemCard, styles.shadow]}>
             <Text style={styles.itemTitle} numberOfLines={2}>
                 {item.product_code || 'Без назви'}
             </Text>
 
-            <Detail label="Кількість:" value={item.quantity} borderBottom />
-            <Detail label="Ширина:" value={item.width + " см"} />
-            <Detail label="Висота:" value={item.height + " см"} borderBottom />
-            <Detail label="Керування:" value={(item.side === "right" || item.side === "R") ? "праворуч" : "ліворуч"} />
-            <Detail label="Колір:" value={item.system_color} />
-            <Detail label="Фіксація:" value={item.fixation_type} />
+            <Detail label="🔢Кількість:" value={item.quantity} borderBottom />
+            <Detail label="📏Ширина:" value={widthValue} />
+            <Detail label="📐Висота:" value={heightValue} borderBottom />
+            <Detail label="⚙️Керування:" value={(item.side === "right" || item.side === "R" || item.side === "праворуч") ? "праворуч" : "ліворуч"} />
+            <Detail label="🎨Колір:" value={item.system_color} />
+            <Detail label="📎Фіксація:" value={item.fixation_type} />
         </View>
     )
 };
 
 function Detail({ label, value, borderBottom = false }: { label: string, value: string | number | null, borderBottom?: boolean }) {
+    if (value === '—' || String(value) === ' ' || !value) return null;
+
+
     return (
         <View style={[styles.detailRow, borderBottom && styles.bordeBottom]}>
             <Text style={styles.detailLabel}>{label}</Text>

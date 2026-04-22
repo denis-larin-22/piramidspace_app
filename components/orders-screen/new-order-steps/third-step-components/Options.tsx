@@ -23,7 +23,10 @@ export default function Options({
 
     return (
         <View style={formStyles.colorContainer}>
-            <Text style={formStyles.detailsText}>Оберіть опцію</Text>
+            <View style={formStyles.dropdownWrap}>
+                <Text style={formStyles.detailsText}>Оберіть опцію</Text>
+                <View style={formStyles.line}></View>
+            </View>
 
             <Pressable onPress={toggleOptionList}>
                 <Text style={[
@@ -45,7 +48,7 @@ export default function Options({
                 >
                     <ScrollView style={formStyles.scrollModal}>
                         {optionsList.length ?
-                            optionsList.map((option, index) => (
+                            [...optionsList, "без опцій"].map((option, index) => (
                                 <AnimatedWrapper
                                     key={index}
                                     useOpacity

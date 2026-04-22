@@ -7,6 +7,9 @@ import {
     ViewToken,
     Pressable,
     Modal,
+    Animated,
+    PanResponder,
+    Easing
 } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
 import AnimatedWrapper from '../animation/AnimatedWrapper';
@@ -85,7 +88,7 @@ export function Banner() {
             </View>
 
             <FullScreenBanner
-                imagesList={bannersImages}
+                activeBanner={bannersImages[currentIndex]}
                 isOpen={isModalOpen}
                 setIsOpen={setIsModalOpen}
             />
@@ -93,69 +96,134 @@ export function Banner() {
     );
 }
 
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+
 function FullScreenBanner({
-    imagesList,
+    activeBanner,
     isOpen,
     setIsOpen,
 }: {
-    imagesList: IBanner[];
+    activeBanner: IBanner;
     isOpen: boolean;
     setIsOpen: (value: boolean) => void;
 }) {
-    const [currentIndexValue, setCurrentIndexValue] = useState(0);
-    const flatListRef = useRef<FlatList<IBanner>>(null);
+    const fixedImageRef = useRef<IBanner | null>(null);
 
-    const onViewRef = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
-        if (viewableItems.length > 0) {
-            setCurrentIndexValue(viewableItems[0].index ?? 0);
+    useEffect(() => {
+        if (!fixedImageRef.current) {
+            fixedImageRef.current = activeBanner;
+            return;
         }
-    });
+        if (activeBanner.id !== fixedImageRef.current.id) {
+            fixedImageRef.current = activeBanner;
+        }
+    }, [activeBanner]);
 
-    const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
+    // Берём либо зафиксированное значение, либо текущее (на случай первого рендера)
+    const displayImage = fixedImageRef.current ?? activeBanner;
+
+    const translateY = useRef(new Animated.Value(0)).current;
+
+    // PanResponder на Overlay (не на FlatList) для свайпа вверх
+    const panResponder = useRef(
+        PanResponder.create({
+            onStartShouldSetPanResponder: () => true,
+            onMoveShouldSetPanResponder: (_, gesture) => {
+                const { dx, dy } = gesture;
+                // свайп вверх (почти вертикальный)
+                return dy < -10 && Math.abs(dy) > Math.abs(dx);
+            },
+            onPanResponderMove: (_, gesture) => {
+                if (gesture.dy < 0) {
+                    translateY.setValue(gesture.dy * 0.7);
+                }
+            },
+            onPanResponderRelease: (_, gesture) => {
+                const { dy, vy } = gesture;
+                const shouldClose = dy < -120 || vy < -0.8;
+
+                if (shouldClose) {
+                    Animated.timing(translateY, {
+                        toValue: -SCREEN_HEIGHT,
+                        duration: 200,
+                        easing: Easing.out(Easing.cubic),
+                        useNativeDriver: true,
+                    }).start(() => {
+                        translateY.setValue(0);
+                        setIsOpen(false);
+                    });
+                } else {
+                    Animated.timing(translateY, {
+                        toValue: 0,
+                        duration: 260,
+                        easing: Easing.out(Easing.cubic),
+                        useNativeDriver: true,
+                    }).start();
+                }
+            },
+        })
+    ).current;
+
+    if (!isOpen) return null;
 
     return (
-        <Modal visible={isOpen} transparent animationType="none">
-            <AnimatedWrapper useScale duration={500} style={styles.modalContainer}>
-                <Pressable style={styles.closeButton} onPress={() => setIsOpen(false)}>
-                    <Image
-                        source={require('../../assets/main-screen/close-icon.png')}
-                        style={styles.closeIcon}
-                    />
-                </Pressable>
-
-                <FlatList
-                    ref={flatListRef}
-                    data={imagesList}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <View style={styles.fullImageWrapper}>
-                            <Image
-                                source={{ uri: item.banner_url }}
-                                style={styles.fullBannerImage}
-                                resizeMode="contain"
-                            />
-                        </View>
-                    )}
-                    horizontal
-                    pagingEnabled
-                    showsHorizontalScrollIndicator={false}
-                    onViewableItemsChanged={onViewRef.current}
-                    viewabilityConfig={viewConfigRef.current}
-                    style={styles.flatList}
-                />
-
-                <View style={styles.fullscreenPagination}>
-                    {imagesList.map((_, index) => (
-                        <View
-                            key={index}
-                            style={[
-                                styles.fullscreenDot,
-                                index === currentIndexValue && styles.fullscreenActiveDot,
-                            ]}
+        <Modal
+            visible={true}
+            transparent
+            animationType="none"
+        >
+            {/* Overlay с PanResponder */}
+            <Animated.View
+                style={{ flex: 1, transform: [{ translateY }] }}
+                {...panResponder.panHandlers}
+            >
+                <AnimatedWrapper
+                    duration={500}
+                    useOpacity
+                    useScale
+                >
+                    {/* Кнопка закрытия сверху */}
+                    <Pressable
+                        style={styles.closeButton}
+                        onPress={() => setIsOpen(false)}
+                    >
+                        <Image
+                            source={require('../../assets/main-screen/close-icon.png')}
+                            style={styles.closeIcon}
                         />
-                    ))}
-                </View>
-            </AnimatedWrapper>
+                    </Pressable>
+
+                    {/* Контент FlatList */}
+                    <View style={styles.modalContainer} pointerEvents="box-none">
+                        <Image
+                            source={{ uri: displayImage.banner_url }}
+                            style={styles.fullBannerImage}
+                            resizeMode="contain"
+                        />
+                    </View>
+
+
+                    <AnimatedWrapper
+                        useOpacity
+                        offsetY={30}
+                        delay={350}
+                    >
+                        <Image
+                            source={require('../../assets/arrow-back.png')}
+                            resizeMode='contain'
+                            style={{
+                                width: 50,
+                                height: 50,
+                                position: 'absolute',
+                                bottom: 15,
+                                alignSelf: 'center',
+                                transform: [{ rotate: '90deg' }],
+                                opacity: 0.1
+                            }}
+                        />
+                    </AnimatedWrapper>
+                </AnimatedWrapper>
+            </Animated.View>
         </Modal>
     );
 }
@@ -210,22 +278,27 @@ const styles = StyleSheet.create({
     },
     modalContainer: {
         position: 'relative',
-        height: '95%',
+        height: '100%',
         width: '100%',
         marginTop: 10,
-        backgroundColor: '#00000080',
-        borderRadius: 25,
+        backgroundColor: '#00000099',
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
         alignItems: 'center',
         justifyContent: 'center',
         padding: 20,
     },
     closeButton: {
-        width: 30,
-        height: 30,
+        width: 50,
+        height: 50,
         position: 'absolute',
-        top: 40,
-        right: 40,
-        zIndex: 52,
+        top: 30,
+        right: 20,
+        zIndex: 100,
+        backgroundColor: '#ffffff90',
+        borderRadius: 50,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     closeIcon: {
         width: 30,

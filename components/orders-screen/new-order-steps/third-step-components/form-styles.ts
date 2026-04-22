@@ -11,25 +11,24 @@ export const formStyles = StyleSheet.create({
         color: Colors.gray,
         top: -10
     },
+    titleWrap: {
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        borderBottomWidth: 2,
+        borderColor: Colors.blueLight,
+    },
     stepCategory: {
         fontFamily: Fonts.comfortaa700,
         fontSize: 30,
         textTransform: "uppercase",
-        marginBottom: 10,
         textAlign: "left",
         color: Colors.blue,
-        top: -10
     },
     stepSubCategory: {
         fontFamily: Fonts.comfortaa700,
         fontSize: 16,
         textAlign: 'right',
         color: '#3372F965',
-        borderBottomWidth: 2,
-        paddingBottom: 5,
-        borderColor: Colors.blueLight,
-        top: -25,
-        marginBottom: -25
     },
     detailsText: {
         marginTop: 5,
@@ -56,6 +55,10 @@ export const formStyles = StyleSheet.create({
         zIndex: 10,
         right: 10,
         bottom: 13,
+    },
+    dropdownWrap: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     dropdownMenu: {
         maxHeight: 321,
@@ -105,10 +108,10 @@ export const formStyles = StyleSheet.create({
     row: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginTop: 12,
+        // marginTop: 12,
     },
     inputContainer: {
-        width: "47%",
+        width: "46%",
         position: "relative",
     },
     rowLabel: {
@@ -186,5 +189,13 @@ export const formStyles = StyleSheet.create({
         lineHeight: 14,
         color: Colors.gray,
         marginLeft: 5
-    }
+    },
+    line: {
+        height: 2,
+        flexGrow: 1,
+        backgroundColor: Colors.grayLight,
+        top: 5,
+        marginLeft: 5,
+        borderRadius: 50
+    },
 });

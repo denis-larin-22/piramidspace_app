@@ -15,8 +15,10 @@ function Comment({
     return (
         <View style={styles.wrap}>
             <View style={styles.rowLabel}>
-                <Text style={styles.detailsText}>Коментарій </Text>
-                {/* <Text style={styles.labelNote}>(габарит)</Text> */}
+                <View style={styles.titleWrap}>
+                    <Text style={styles.detailsText}>Коментарій</Text>
+                    <View style={styles.line}></View>
+                </View>
             </View>
             <TextInput
                 keyboardType="default"
@@ -41,6 +43,18 @@ const styles = StyleSheet.create({
     wrap: {
         position: 'relative',
         zIndex: -2
+    },
+    titleWrap: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    line: {
+        height: 2,
+        flexGrow: 1,
+        backgroundColor: Colors.grayLight,
+        top: 3,
+        marginLeft: 5,
+        borderRadius: 50
     },
     rowLabel: {
         flexDirection: "row",

@@ -20,7 +20,7 @@ export const mainGroupsIcons: IMainGroupIcons[] = [
     { code: "ads", name: 'Рекламна продукція', icon: require('../../../assets/orders-screen/promotional-items.png') },
 ];
 
-function FirstStep({ stepHandler }: { stepHandler: () => void }) {
+function FirstStep({ stepHandler }: { stepHandler: (selectedGroup: MainGroupsCode) => void }) {
     const { orderParams, setOrderParams } = useCreateOrder();
 
     const selectHandler = (selectedGroup: { name: string, code: MainGroupsCode }) => {
@@ -38,7 +38,7 @@ function FirstStep({ stepHandler }: { stepHandler: () => void }) {
             activeGroup: selectedGroup.code,
             newOrderObject: updatedOrder
         });
-        stepHandler();
+        stepHandler(selectedGroup.code);
     };
 
     return (

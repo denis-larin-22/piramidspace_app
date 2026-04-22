@@ -6,10 +6,9 @@ import { formStyles } from "../new-order-steps/third-step-components/form-styles
 function Count({ count, countHandler }: { count: number, countHandler: (value: number) => void }) {
     return (
         <View style={styles.wrap}>
-            <View style={{ minWidth: '47%' }}>
+            <View style={{ minWidth: '46%' }}>
                 <View style={formStyles.rowLabel}>
                     <Text style={formStyles.detailsText}>Кількість </Text>
-                    {/* <Text style={styles.labelNote}>(габарит)</Text> */}
                 </View>
                 <TextInput
                     keyboardType="number-pad"

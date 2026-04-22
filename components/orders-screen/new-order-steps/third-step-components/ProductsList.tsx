@@ -24,6 +24,8 @@ export default function ProductsList({
         <View style={{ position: "relative" }}>
             <Pressable onPress={toggleProductsList}>
                 <Text
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
                     style={[formStyles.selectField, {
                         borderColor: isProductsListOpen ? Colors.blue : Colors.blueLight
                     }]}

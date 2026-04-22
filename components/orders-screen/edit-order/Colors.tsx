@@ -15,11 +15,16 @@ function Color({
     colorList: string[],
     colorHandler: (color: string) => void
 }) {
+    if (colorList.length === 0) return null;
+
     const [isColorListOpen, setIsColorListOpen] = useState<boolean>(false);
 
     return (
         <View>
-            <Text style={formStyles.detailsText}>Колір</Text>
+            <View style={formStyles.dropdownWrap}>
+                <Text style={formStyles.detailsText}>Колір</Text>
+                <View style={formStyles.line}></View>
+            </View>
 
             <Pressable onPress={() => setIsColorListOpen(!isColorListOpen)}>
                 <Text style={[

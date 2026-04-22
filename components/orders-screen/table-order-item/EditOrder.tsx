@@ -19,6 +19,7 @@ import { fetchAddressList, IAddress } from "../../../lib/api/orders-screen/addre
 import { SuccessMessage } from "../../ui/SuccessMessage";
 import { IUserInfo } from "../../../lib/api/auth";
 import AddNewItemButton from "../edit-order/AddNewItemButton";
+import { filterOrderFromOtherServices } from "../../../lib/api/orders-screen/utils";
 
 function EditOrder({
     currentOrder,
@@ -68,8 +69,10 @@ function EditOrder({
             const { "логин": login } = JSON.parse(userInfo) as IUserInfo;
 
             // products list
-            const dataByGroup = await getGroupsStructure(groupCode, login);
+            const dataByGroup = await getGroupsStructure(groupCode, login)
+
             const dataBySubgroup = dataByGroup.groups[0].subgroups.find((subgroup) => subgroup.code === subgroupCode);
+
 
             setSubgroupData(dataBySubgroup);
             // addresses list
@@ -77,11 +80,7 @@ function EditOrder({
             setAddressList(addressList);
 
             // filtering out unchangeable names ("Замер", "Доставка", "Установка")
-            const initItemsList: IOrderItem[] = currentOrder.items.map((item) => {
-                if (item['наименование'] === "Замер" || item['наименование'] === "Доставка" || item['наименование'] === "Установка") return null;
-
-                return item;
-            }).filter((item) => item !== null);
+            const initItemsList: IOrderItem[] = filterOrderFromOtherServices(currentOrder.items);
 
             // solving editable items 
             const editableItemsList: IOrderItemToUpdate[] = initItemsList.map((item) => {
@@ -98,7 +97,7 @@ function EditOrder({
                     height: Number(height),
                     quantity: +item['кол_во'],
                     side: controlSide,
-                    system_color: color,
+                    system_color: color === null ? "" : color,
                     units: "см",
                     fixation_type: fixation,
                     options: ""  // ОПЦИИ НА ДРУГИЕ ВИДЫ - ОПЦИОНАЛЬНО
@@ -240,8 +239,6 @@ function EditOrder({
                                                     if (updatedList.length === editItemsList.length) {
                                                         return;
                                                     } else {
-                                                        console.log('hi');
-
                                                         setEditItemsList([...editItemsList, newItem]);
                                                         setIsSubmitBtnHidden(false);
                                                     }
@@ -344,12 +341,12 @@ function EditOrder({
 export default EditOrder;
 
 // DETECT GROUP CODE
-function parseGroupCode(typeOrder: string): MainGroupsCode {
+export function parseGroupCode(typeOrder: string): MainGroupsCode {
     const type = typeOrder.toLowerCase().replace(/[^a-zA-Zа-яА-ЯёЁїЇєЄіІґҐ]/g, "");
 
     if (type === 'деньніч' || type === 'деньночь') {
         return 'day';
-    } else if (type === 'горизонтальныежалюзи') {
+    } else if (type === 'горизонтальныежалюзи' || type === 'горизонтальніжалюзі') {
         return 'horizontal';
     } else if (type === 'вертикальныежалюзи' || type === 'вертикальніжалюзі') {
         return 'vertical';
@@ -365,26 +362,6 @@ type SubgroupRule = {
     code: string;
     keywords: string[];
 };
-
-// Old rules
-// const subgroupRules: SubgroupRule[] = [
-//     { code: "day_mini", keywords: ["дн", "mini"] },
-//     { code: "magic25", keywords: ["magic", "25"] },
-//     { code: "day_uni_plosk", keywords: ["дн", "uni", "плоск"] },
-//     { code: "day_uni_p", keywords: ["дн", "uni", "п-образ"] },
-
-//     { code: "127mm", keywords: ["127 мм"] },
-//     { code: "89mm", keywords: ["89 мм"] },
-//     { code: "25mm_string", keywords: ["25 мм", "стру"] },
-//     { code: "25mm", keywords: ["25 мм"] },
-//     { code: "16mm_string", keywords: ["16 мм", "стру"] },
-//     { code: "16mm", keywords: ["16 мм"] },
-//     { code: "prishit", keywords: ["прис"] },
-//     { code: "mini", keywords: ["mini"] },
-//     { code: "magic30", keywords: ["magic", "30"] },
-//     { code: "uni_flat", keywords: ["uni", "плоск"] },
-//     { code: "uni_p", keywords: ["uni", "п-образ"] },
-// ];
 
 const subgroupRules: SubgroupRule[] = [
     { code: "day_mini", keywords: ["дн", "mini"] },
@@ -421,7 +398,7 @@ function normalize(value: string): string {
         .trim();
 }
 
-function parseSubgroupCode(productName: string): string | undefined {
+export function parseSubgroupCode(productName: string): string | undefined {
     const name = normalize(productName);
 
     for (const rule of subgroupRules) {
@@ -566,78 +543,5 @@ const styles = StyleSheet.create({
         fontSize: 14,
         lineHeight: 16,
         color: Colors.gray
-    },
-    deleteButton: {
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        width: 25,
-        height: 25,
-        backgroundColor: Colors.pale,
-        borderRadius: 50,
-        padding: 3
-    },
-    deleteIcon: {
-        width: '100%',
-        height: '100%',
-        opacity: 0.3,
-    },
-    deleteWrap: {
-        backgroundColor: Colors.pale,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        borderRadius: 13,
-        width: '100%',
-        position: 'absolute',
-        zIndex: 100,
-        top: 50,
-        alignItems: 'center',
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    warningIcon: {
-        width: 30,
-        height: 30,
-        marginBottom: 10
-    },
-    modalTitle: {
-        fontFamily: Fonts.comfortaa600,
-        fontSize: 14,
-        color: 'black',
-        marginBottom: 10
-    },
-    confirmButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: 10
-    },
-    cancelButton: {
-        padding: 5,
-        borderWidth: 1,
-        borderColor: Colors.blue,
-        borderRadius: 14,
-        width: 60,
-    },
-    cancelButtonText: {
-        fontFamily: Fonts.openSans400,
-        color: Colors.blue,
-        textAlign: 'center',
-        fontSize: 14,
-    },
-    deleteConfirmButton: {
-        padding: 5,
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: '#A2A2A870',
-        width: 60,
-    },
-    deleteConfirmButtonText: {
-        fontFamily: Fonts.openSans400,
-        fontSize: 14,
-        color: Colors.gray,
-        textAlign: 'center',
-    },
+    }
 });

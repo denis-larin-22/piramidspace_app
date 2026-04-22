@@ -6,6 +6,7 @@ import { OpenSans_400Regular, OpenSans_700Bold } from "@expo-google-fonts/open-s
 import { ActivityIndicator, View } from "react-native";
 import { Colors } from "./theme/colors";
 import SignupScreen from "./screens/SignupScreen";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function App() {
   let [fontsLoaded] = useFonts({
@@ -25,10 +26,12 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <AppStack />
-      {/* <SignupScreen /> */}
-    </NavigationContainer>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <AppStack />
+        {/* <SignupScreen /> */}
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
 

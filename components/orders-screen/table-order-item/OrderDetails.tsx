@@ -4,11 +4,23 @@ import { Colors } from "../../../theme/colors";
 import { IOrder, IOrderItem } from "../../../lib/api/orders-screen/ordersList";
 import { Status } from "./Order";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
-import { useState } from "react";
-import { getFormatedOrderType } from "../../../lib/utils";
+import { useEffect, useState } from "react";
+import { getActiveUnits, getFormatedOrderType } from "../../../lib/utils";
+import { MainGroupsCode } from "../../../lib/api/orders-screen/groups-and-products";
 import { UnitsTypes } from "../../../lib/api/auth";
+import { filterOrderFromOtherServices, isOrderItem } from "../../../lib/api/orders-screen/utils";
 
 function OrderDetails({ order }: { order: IOrder }) {
+    const [units, setUnits] = useState<UnitsTypes | null>(null); // actual units value
+
+    useEffect(() => {
+        async function getUnits() {
+            const actualUnits = await getActiveUnits();
+            setUnits(actualUnits);
+        };
+        getUnits();
+    }, [order]);
+
     const {
         ['N_заказа']: id,
         ['вид заказа']: group,
@@ -21,19 +33,17 @@ function OrderDetails({ order }: { order: IOrder }) {
         ["сумма"]: fullPrice,
         ['комментарий']: comment,
         ["комментарий менеджера"]: managerComment,
-        items: orderItems
+        items: orderItems,
     } = order;
-
-    const filteredItems = orderItems.map((item) => {
-        if (item['наименование'].toLowerCase() === "замер" || item['наименование'].toLowerCase() === "доставка" || item['наименование'].toLowerCase() === "установка" || item['наименование'].toLowerCase() === "магніт") return null;
-
-        return item;
-    }).filter((item) => item !== null);
 
     const fullArea = orderItems.reduce((acc, item) => {
         const area = parseFloat(item["площадь, м.кв."]);
         return acc + (isNaN(area) ? 0 : area);
     }, 0);
+
+    const sortedOrderItems = orderItems.sort(
+        (a, b) => Number(a["характерстика"] === null) - Number(b["характерстика"] === null)
+    );
 
     return (
         <View style={styles.detailsContainer}>
@@ -68,7 +78,7 @@ function OrderDetails({ order }: { order: IOrder }) {
             >
                 <View style={styles.itemsHeader}>
                     <Text style={styles.itemsLabel}>Позицій в замовленні: </Text>
-                    <Text style={styles.itemsCount}>{filteredItems.length}</Text>
+                    <Text style={styles.itemsCount}>{filterOrderFromOtherServices(orderItems).length}</Text>
                     <Arrows />
                 </View>
 
@@ -78,11 +88,13 @@ function OrderDetails({ order }: { order: IOrder }) {
                     contentContainerStyle={styles.itemsScrollContent}
                     style={styles.itemsScroll}
                 >
-                    {filteredItems.length ?
-                        filteredItems.map((item, index) => (
+                    {(sortedOrderItems.length || !units) ?
+                        sortedOrderItems.map((item, index) => (
                             <OrderItem
                                 key={item['N_заказа'] + index}
                                 item={item}
+                                group={group as MainGroupsCode}
+                                units={units}
                                 style={{ marginRight: ++index === orderItems.length ? 30 : 0 }}
                             />
                         ))
@@ -159,6 +171,8 @@ function CollapsibleText({ label, text }: { label: string, text?: string }) {
 }
 
 function Detail({ label, value, borderBottom = false }: { label: string, value: string | number | null, borderBottom?: boolean }) {
+    if (value === '—' || String(value) === ' ' || !value) return null;
+
     return (
         <View style={[styles.detailRow, borderBottom && styles.bordeBottom]}>
             <Text style={styles.detailLabel}>{label}</Text>
@@ -167,8 +181,16 @@ function Detail({ label, value, borderBottom = false }: { label: string, value: 
     );
 }
 
-function OrderItem({ item, style }: { item: IOrderItem, style?: StyleProp<ViewStyle> }) {
+function OrderItem({ item, group, units, style }: { item: IOrderItem, group: MainGroupsCode, units: UnitsTypes, style?: StyleProp<ViewStyle> }) {
+
+    const isOrder = isOrderItem(item);
+    if (!isOrder) return <ServiceItem item={item} />
+
     const { width, height, controlSide, color, fixation } = formatCharacteristicsString(item['характерстика']);
+    const widthValue = (units === "мм" ? Number(width) * 10 : Number(width)) + " " + units;
+    const heightValue = (units === "мм" ? Number(height) * 10 : Number(height)) + " " + units;;
+
+    const isComponentsOrAdsGroup = group === 'components' || group === 'ads';
 
     return (
         <View style={[styles.itemCard, styles.shadow, style]}>
@@ -177,18 +199,47 @@ function OrderItem({ item, style }: { item: IOrderItem, style?: StyleProp<ViewSt
             </Text>
 
             <Detail label="Кількість:" value={parseFloat(item['кол_во'])} />
-            <Detail label="Площа:" value={item['площадь, м.кв.']} />
-            <Detail label="Ширина:" value={(width ? width.trim() : width) + " " + 'см'} />
-            <Detail label="Висота:" value={height + " " + 'см'} />
-            <Detail label="Керування:" value={controlSide} />
-            <Detail label="Колір:" value={color} />
-            <Detail label="Фіксація:" value={fixation} borderBottom />
-
+            {!isComponentsOrAdsGroup &&
+                <>
+                    <Detail label="Площа:" value={item['площадь, м.кв.'] + " м²"} />
+                    <Detail label="Ширина:" value={widthValue} />
+                    <Detail label="Висота:" value={heightValue} />
+                    <Detail label="Керування:" value={controlSide} />
+                    <Detail label="Колір:" value={color} />
+                    <Detail label="Фіксація:" value={fixation} borderBottom />
+                </>
+            }
 
             <Detail label="Вартість:" value={parseFloat(item['стоим']) + "$"} />
         </View>
     )
 };
+
+function ServiceItem({ item }: { item: IOrderItem }) {
+    const title = item['наименование'].toLowerCase();
+    if (title === "замер" || title === "доставка" || title === "установка") {
+        return (
+            <View style={[styles.itemCardService, styles.shadow]}>
+                <Text style={[styles.itemTitle, styles.itemServiceTitle]} numberOfLines={2}>
+                    {item['наименование'] || 'Без названия'}
+                </Text>
+
+                <Detail label="Вартість:" value={parseFloat(item['стоим']) + "$"} />
+            </View>
+        )
+    } else {
+        return (
+            <View style={[styles.itemCard, { height: 100 }, styles.shadow]}>
+
+                <Text style={styles.itemTitle} numberOfLines={2}>
+                    {'Фіксація: ' + (item['наименование'] || 'Без названия')}
+                </Text>
+
+                <Detail label="Вартість:" value={parseFloat(item['стоим']) + "$"} />
+            </View>
+        )
+    }
+}
 
 export function Arrows() {
     return (
@@ -230,7 +281,7 @@ export function formatCharacteristicsString(value: string) {
     return {
         width: dimensions[0],
         height: dimensions[1],
-        controlSide: separate[1].trim() === 'left' ? "ліворуч" : "праворуч",
+        controlSide: separate[1],
         color: separate[2],
         fixation: separate[3]
     };
@@ -256,8 +307,8 @@ const styles = StyleSheet.create({
     orderId: {
         position: 'absolute',
         top: -45,
-        paddingTop: 2,
-        paddingBottom: 5,
+        paddingTop: 5,
+        paddingBottom: 3,
         paddingHorizontal: 5,
         borderRadius: 10,
         backgroundColor: Colors.blue,
@@ -265,7 +316,9 @@ const styles = StyleSheet.create({
         width: 100,
         fontFamily: Fonts.comfortaa700,
         fontSize: 16,
+        lineHeight: 18,
         textAlign: 'center',
+
     },
     headerRow: {
         flexDirection: 'row',
@@ -379,6 +432,14 @@ const styles = StyleSheet.create({
         maxWidth: Dimensions.get('window').width - 60,
         overflow: 'hidden',
     },
+    itemCardService: {
+        backgroundColor: Colors.pale,
+        padding: 12,
+        borderRadius: 12,
+        width: 180,
+        height: 80,
+        overflow: 'hidden',
+    },
     itemTitle: {
         fontFamily: Fonts.comfortaa600,
         fontSize: 14,
@@ -391,6 +452,9 @@ const styles = StyleSheet.create({
         top: -12,
         left: -12,
         width: '115%',
+    },
+    itemServiceTitle: {
+        backgroundColor: '#1CBCD7',
     },
     itemSpecs: {
         fontFamily: Fonts.comfortaa600,
@@ -420,11 +484,11 @@ const styles = StyleSheet.create({
         marginRight: 25,
     },
     shadow: {
+        elevation: 4,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
-        elevation: 4,
     },
     // collapseble text
     collapdeImage: {

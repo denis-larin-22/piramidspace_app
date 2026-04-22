@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ColorPrice, Fixation, getProductsByGroupCodes, IProductByCodes, OptionPrice } from "../../../lib/api/orders-screen/groups-and-products";
-import { ImageBackground, Pressable, Text, View } from "react-native";
+import { ImageBackground, Pressable, StyleSheet, Text, View } from "react-native";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { Keyboard } from 'react-native';
 import WidthAndHeight from "./third-step-components/WidthAndHeight";
@@ -16,6 +16,7 @@ import Options from "./third-step-components/Options";
 import { ErrorMessage } from "../../ui/ErrorMessage";
 import { IUserInfo, UnitsTypes } from "../../../lib/api/auth";
 import { formStyles } from "./third-step-components/form-styles";
+import { Colors } from "../../../theme/colors";
 
 export interface IErrorStateMessage {
     state: boolean,
@@ -109,6 +110,29 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
         getProducts();
     }, [orderParams.newOrderObject]);
 
+    const [isParamsFieldsVissible, setIsParamsFieldsVissible] = useState(false);
+
+    function checkWHvalues() {
+        if (orderParams.activeGroup === 'components' || orderParams.activeGroup === 'ads') {
+            setIsParamsFieldsVissible(false);
+            return;
+        }
+
+        if (orderParams.newOrderObject.width_gab === null ||
+            orderParams.newOrderObject.width_gab === '' ||
+            orderParams.newOrderObject.height_gab === null ||
+            orderParams.newOrderObject.height_gab === ''
+        ) {
+            setIsParamsFieldsVissible(true);
+        } else {
+            setIsParamsFieldsVissible(false);;
+        }
+    }
+
+    useEffect(() => {
+        checkWHvalues();
+    }, [orderParams.newOrderObject.width_gab, orderParams.newOrderObject.height_gab]);
+
     // Dropdown togglers
     function toggleProductsList() {
         Keyboard.dismiss();
@@ -155,7 +179,7 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
         if (product.presence === "нет") {
             setIsError({
                 state: true,
-                text: "⚠️ Цїєї тканини немає в наявності!",
+                text: "Цїєї тканини немає в наявності!",
                 errorFieldNumber: null
             });
             setTimeout(() => setIsError(initErrorObject), 3000);
@@ -225,34 +249,38 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
 
     // Final form order CHECK befor sending
     function foldOrder() {
-        if (!height_gab || !width_gab) {
+        if (
+            (!height_gab || !width_gab)
+            && orderParams.newOrderObject.group.code !== "components"
+            && orderParams.newOrderObject.group.code !== "ads"
+        ) {
             setIsError({
                 state: true,
-                text: "⚠️ Введіть усі значення ширини та висоти",
+                text: "Введіть усі значення ширини та висоти",
                 errorFieldNumber: 2
             });
         } else if (cotrolTypesList.length !== 0 && controlType === null) {
             setIsError({
                 state: true,
-                text: "⚠️ Оберіть тип керування",
+                text: "Оберіть тип керування",
                 errorFieldNumber: 3
             });
-        } else if (!count_number) {
+        } else if (count_number === null || count_number === '0' || count_number === '') {
             setIsError({
                 state: true,
-                text: "⚠️ Вкажіть кількість",
+                text: "Вкажіть кількість",
                 errorFieldNumber: 4
             });
         } else if (colorsList.length !== 0 && color_system === null) {
             setIsError({
                 state: true,
-                text: "⚠️ Оберіть колір системи",
+                text: "Оберіть колір системи",
                 errorFieldNumber: 5
             });
         } else if (fixationTypeList.length !== 0 && fixation_type === null) {
             setIsError({
                 state: true,
-                text: "⚠️ Оберіть тип фіксації",
+                text: "Оберіть тип фіксації",
                 errorFieldNumber: 6
             });
         } else {
@@ -280,40 +308,41 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
         }, 3000);
     }
 
+
+    const isComponentsGroupCode = orderParams.newOrderObject.group.code === "components";
+
     return (
         <>
-            {/* Titles */}
-            <AnimatedWrapper
-                useOpacity
-                offsetY={20}
-                delay={100}
-            >
-                <Text style={formStyles.stepSubtitle}>Оформлення Замовлення</Text>
-            </AnimatedWrapper>
+            <View style={formStyles.titleWrap}>
+                <AnimatedWrapper
+                    useOpacity
+                    offsetY={20}
+                    delay={150}
+                >
+                    <Text style={formStyles.stepCategory}>{orderObject.group.name}</Text>
+                </AnimatedWrapper>
 
-            <AnimatedWrapper
-                useOpacity
-                offsetY={20}
-                delay={150}
-            >
-                <Text style={formStyles.stepCategory}>{orderObject.group.name}</Text>
-            </AnimatedWrapper>
-
-            <AnimatedWrapper
-                useOpacity
-                offsetY={20}
-                delay={200}
-            >
-                <Text style={formStyles.stepSubCategory}>{subgroup.name}</Text>
-            </AnimatedWrapper>
+                <AnimatedWrapper
+                    useOpacity
+                    offsetY={20}
+                    delay={200}
+                >
+                    <Text style={formStyles.stepSubCategory}>{subgroup.name}</Text>
+                </AnimatedWrapper>
+            </View>
 
             {/* Error message */}
-            {isError.state && <ErrorMessage errorText={isError.text} />}
+            {isError.state && <ErrorMessage
+                errorTitle="Майже готово"
+                errorText={isError.text}
+                styles={{ top: 120 }}
+            />}
 
             {/* Product selection */}
             <AnimatedWrapper useOpacity offsetY={30} delay={300}>
                 {/* Product list */}
-                <Text style={formStyles.detailsText}>Оберіть тканину</Text>
+                <Text
+                    style={formStyles.detailsText}>{isComponentsGroupCode ? "Оберіть наіменування" : "Оберіть тканину"}</Text>
                 <ProductsList
                     activeProduct={activeProduct}
                     productsList={products}
@@ -333,59 +362,60 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
                         errorFieldNumber={isError.errorFieldNumber}
                     />
 
-                    {/* Управление и Количество */}
-                    <View style={formStyles.row}>
-                        {cotrolTypesList.length !== 0 ? <ControlType
-                            isControlTypeListOpen={isControlTypeListOpen}
-                            toggleControlTypeList={toggleControlTypeList}
-                            activeControlType={activeControlType}
-                            cotrolTypesList={cotrolTypesList}
-                            controlTypesListHandler={controlTypesListHandler}
+                    <View
+                        style={{
+                            opacity: isParamsFieldsVissible ? 0.4 : 1,
+                            pointerEvents: isParamsFieldsVissible ? 'none' : 'auto'
+                        }}
+                    >
+
+                        {/* Управление и Количество */}
+                        <View style={formStyles.row}>
+                            {cotrolTypesList.length !== 0 ? <ControlType
+                                isControlTypeListOpen={isControlTypeListOpen}
+                                toggleControlTypeList={toggleControlTypeList}
+                                activeControlType={activeControlType}
+                                cotrolTypesList={cotrolTypesList}
+                                controlTypesListHandler={controlTypesListHandler}
+                                isError={isError}
+                            /> : null}
+
+                            {/* UI Separator */}
+                            <View style={styles.separator}></View>
+
+                            <CountValue errorFieldNumber={isError.errorFieldNumber} />
+                        </View>
+
+                        {/* Цвет системы */}
+                        {colorsList.length !== 0 ? <Color
+                            activeColor={activeColor}
+                            colorsList={colorsList}
+                            isColorListOpen={isColorListOpen}
                             isError={isError}
+                            toggleColorList={toggleColorList}
+                            colorsListHandler={colorsListHandler}
                         /> : null}
 
-                        <CountValue errorFieldNumber={isError.errorFieldNumber} />
+                        {/* Фиксация */}
+                        {fixationTypeList.length !== 0 ? <FixationType
+                            activeFixationType={activeFixationType}
+                            fixationTypeList={fixationTypeList}
+                            fixationTypesListHandler={fixationTypesListHandler}
+                            isError={isError}
+                            isFixationTypeListOpen={isFixationTypeListOpen}
+                            toggleFixationTypeList={toggleFixationTypeList}
+                        /> : null}
+
+                        {optionsList.length !== 0 ? <Options
+                            activeOption={activeOption}
+                            optionsList={optionsList}
+                            optionsListHandler={optionsListHandler}
+                            isError={isError}
+                            isOptionsListOpen={isOptionsListOpen}
+                            toggleOptionList={toggleOptionsList}
+                        /> : null}
                     </View>
 
-                    {/* Цвет системы */}
-                    {colorsList.length !== 0 ? <Color
-                        activeColor={activeColor}
-                        colorsList={colorsList}
-                        isColorListOpen={isColorListOpen}
-                        isError={isError}
-                        toggleColorList={toggleColorList}
-                        colorsListHandler={colorsListHandler}
-                    /> : null}
-
-                    {/* Фиксация */}
-                    {fixationTypeList.length !== 0 ? <FixationType
-                        activeFixationType={activeFixationType}
-                        fixationTypeList={fixationTypeList}
-                        fixationTypesListHandler={fixationTypesListHandler}
-                        isError={isError}
-                        isFixationTypeListOpen={isFixationTypeListOpen}
-                        toggleFixationTypeList={toggleFixationTypeList}
-                    /> : null}
-
-                    {optionsList.length !== 0 ? <Options
-                        activeOption={activeOption}
-                        optionsList={optionsList}
-                        optionsListHandler={optionsListHandler}
-                        isError={isError}
-                        isOptionsListOpen={isOptionsListOpen}
-                        toggleOptionList={toggleOptionsList}
-                    /> : null}
-                    {/* Цена / Разом */}
-                    {/* <View style={formStyles.row}>
-                        <View style={formStyles.inputContainer}>
-                            <Text style={formStyles.detailsText}>Ціна</Text>
-                            <Text style={formStyles.input} >0</Text>
-                        </View>
-                        <View style={formStyles.inputContainer}>
-                            <Text style={formStyles.detailsText}>Разом</Text>
-                            <Text style={formStyles.input} >0</Text>
-                        </View>
-                    </View> */}
                 </View>
             </AnimatedWrapper>
 
@@ -409,3 +439,13 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
 }
 
 export default ThirdStep;
+
+
+const styles = StyleSheet.create({
+    separator: {
+        height: '90%',
+        width: 2,
+        backgroundColor: Colors.grayLight,
+        alignSelf: 'center'
+    }
+});

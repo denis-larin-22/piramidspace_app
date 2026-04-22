@@ -3,7 +3,7 @@ import AnimatedWrapper from "../animation/AnimatedWrapper";
 import { Fonts } from "../../theme/fonts";
 import { Colors } from "../../theme/colors";
 
-export function SuccessMessage({ text, styles }: { text: string, styles?: ViewStyle }) {
+export function SuccessMessage({ title = "Успіх", text, styles }: { title?: string, text: string, styles?: ViewStyle }) {
     return (
         <AnimatedWrapper style={[style.message, styles]} useOpacity offsetY={20}>
             <View style={style.iconWrap}>
@@ -13,7 +13,7 @@ export function SuccessMessage({ text, styles }: { text: string, styles?: ViewSt
                 />
             </View>
             <View>
-                <Text style={style.title}>Успіх!</Text>
+                <Text style={style.title}>{title}</Text>
                 <Text style={style.messageText}>{text}</Text>
             </View>
         </AnimatedWrapper>

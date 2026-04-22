@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     },
     linkText: {
         fontSize: 36,
-        lineHeight: 36,
+        lineHeight: 39,
         fontFamily: Fonts.comfortaa700,
         textTransform: 'uppercase',
         color: Colors.blue,

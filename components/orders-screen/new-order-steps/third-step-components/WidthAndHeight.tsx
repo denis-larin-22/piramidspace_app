@@ -1,4 +1,4 @@
-import { Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import { useEffect, useState } from "react";
 import { Colors } from "../../../../theme/colors";
 import {
@@ -30,6 +30,8 @@ function WidthAndHeight({ errorFieldNumber }: { errorFieldNumber: number | null 
                 errorFieldNumber={errorFieldNumber}
             />
         );
+    } else if (orderParams.newOrderObject.group.code === "components" || orderParams.newOrderObject.group.code === "ads") {
+        return null;
     } else {
         return (
             <AnotherGroupsWH
@@ -79,11 +81,11 @@ function AnotherGroupsWH({
     const [warningInput, setWarningInput] = useState<number | null>(null);
     const [isMm, setIsMm] = useState(false);
 
-    const w_max = orderObject.product?.w_max;
-    const h_max = orderObject.product?.h_max;
+    const w_max = orderObject.product?.w_max ?? 999;
+    const h_max = orderObject.product?.h_max ?? 999;
 
-    const WIDTH_DIFFERENCE = isHorizontal ? 1 : 3; // см
-    const HEIGHT_DIFFERENCE = isHorizontal ? 1 : 5; // см
+    const WIDTH_DIFFERENCE = isHorizontal ? 4 : 3; // см
+    const HEIGHT_DIFFERENCE = isHorizontal ? 4 : 5; // см
 
     const showWarning = (id: number) => {
         setWarningInput(id);
@@ -144,7 +146,7 @@ function AnotherGroupsWH({
 
     return (
         <>
-            <View style={[formStyles.row, { marginTop: 30 }]}>
+            <View style={[styles.row, { marginTop: 40 }]}>
                 <Switcher
                     option1="см"
                     option2="мм"
@@ -152,8 +154,8 @@ function AnotherGroupsWH({
                     switchHandler={setIsMm}
                     styles={{
                         position: "absolute",
-                        top: -33,
-                        zIndex: 10
+                        top: -38,
+                        zIndex: 10,
                     }}
                 />
 
@@ -209,6 +211,9 @@ function AnotherGroupsWH({
                     </Text>
                 </View>
 
+                {/* UI Separator */}
+                <View style={styles.separator}></View>
+
                 {/* ====== ВИСОТА (ГАБАРИТ) ====== */}
                 <View style={formStyles.inputContainer}>
                     <View style={formStyles.rowLabel}>
@@ -262,7 +267,7 @@ function AnotherGroupsWH({
                 </View>
             </View>
 
-            {withShtapik && <View style={formStyles.row}>
+            {withShtapik && <View style={styles.row}>
                 {/* ====== ШИРИНА ПО ШТАПИКУ ====== */}
                 <View style={formStyles.inputContainer}>
                     <View style={formStyles.rowLabel}>
@@ -315,6 +320,9 @@ function AnotherGroupsWH({
                         {isMm ? "мм" : "см"}
                     </Text>
                 </View>
+
+                {/* UI Separator */}
+                <View style={styles.separator}></View>
 
                 {/* ====== ВИСОТА ПО ШТАПИКУ ====== */}
                 <View style={formStyles.inputContainer}>
@@ -392,8 +400,8 @@ function UniPloskiWH({
     const [widthText, setWidthText] = useState("");
     const [heightText, setHeightText] = useState("");
 
-    const w_max = orderObject.product?.w_max ?? 0;
-    const h_max = orderObject.product?.h_max ?? 0;
+    const w_max = orderObject.product?.w_max ?? 999;
+    const h_max = orderObject.product?.h_max ?? 999;
 
     const showWarning = (id: number) => {
         setWarningInput(id);
@@ -471,7 +479,7 @@ function UniPloskiWH({
 
     return (
         <>
-            <View style={[formStyles.row, { marginTop: 30, flexDirection: 'column' }]}>
+            <View style={[styles.row, { marginTop: 40, flexDirection: 'column' }]}>
                 <Switcher
                     option1="см"
                     option2="мм"
@@ -479,7 +487,7 @@ function UniPloskiWH({
                     switchHandler={setIsMm}
                     styles={{
                         position: "absolute",
-                        top: -33,
+                        top: -38,
                         zIndex: 10
                     }}
                 />
@@ -574,3 +582,27 @@ function UniPloskiWH({
         </>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        marginTop: 30,
+        gap: 8,
+    },
+    row: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        gap: 12,
+        marginTop: 5,
+        padding: 5,
+        borderWidth: 2,
+        borderColor: Colors.grayLight,
+        backgroundColor: Colors.pale,
+        borderRadius: 12,
+    },
+    separator: {
+        height: '90%',
+        width: 2,
+        backgroundColor: Colors.grayLight,
+        alignSelf: 'center'
+    }
+});

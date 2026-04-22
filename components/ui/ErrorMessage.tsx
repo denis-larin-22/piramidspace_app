@@ -2,10 +2,11 @@ import { Image, StyleSheet, Text, View, ViewStyle } from "react-native";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
 import { Fonts } from "../../theme/fonts";
 import { Colors } from "../../theme/colors";
+import { shadow } from "../../theme/shadow";
 
-export function ErrorMessage({ errorText, styles }: { errorText: string, styles?: ViewStyle }) {
+export function ErrorMessage({ errorTitle = "Помилка", errorText, styles }: { errorTitle?: string, errorText: string, styles?: ViewStyle }) {
     return (
-        <AnimatedWrapper style={[style.errorMessage, styles]} useOpacity offsetY={20}>
+        <AnimatedWrapper style={[style.errorMessage, shadow, styles]} useOpacity offsetY={20}>
             <View style={style.iconWrap}>
                 <Image
                     source={require('../../assets/orders-screen/error.webp')}
@@ -13,7 +14,7 @@ export function ErrorMessage({ errorText, styles }: { errorText: string, styles?
                 />
             </View>
             <View>
-                <Text style={style.errorTitle}>Помилка!</Text>
+                <Text style={style.errorTitle}>{errorTitle}</Text>
                 <Text style={style.errorMessageText}>{errorText}</Text>
             </View>
         </AnimatedWrapper>
@@ -25,19 +26,12 @@ const style = StyleSheet.create({
         overflow: 'hidden',
         position: "absolute",
         top: 20,
+        zIndex: 100,
         alignSelf: "center",
         backgroundColor: "#FF6B6B",
-        padding: 10,
+        padding: 12,
         borderRadius: 16,
         alignItems: 'center',
-        // iOS shadow
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-
-        // Android shadow
-        elevation: 5,
     },
     iconWrap: {
         width: 25,
@@ -56,14 +50,16 @@ const style = StyleSheet.create({
         fontFamily: Fonts.comfortaa700,
         fontSize: 16,
         marginBottom: 5,
+        marginTop: 10,
         textAlign: 'center',
         color: 'white'
     },
     errorMessageText: {
-        fontFamily: Fonts.openSans400,
+        fontFamily: Fonts.comfortaa700,
         fontSize: 13,
         lineHeight: 18,
         color: 'white',
+        textAlign: 'center'
     },
     errorMarker: {
         width: 22,

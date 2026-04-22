@@ -6,7 +6,7 @@ import {
     View
 } from "react-native";
 import { Colors } from "../theme/colors";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Fonts } from "../theme/fonts";
 import OrdersHeader from "../components/orders-screen/OrdersHeader";
 import NumberAndStatus from "../components/orders-screen/NumberAndStatus";
@@ -20,6 +20,9 @@ import { RootStackParamList } from "../navigation/AppStack";
 import AddNewOrder from "../components/orders-screen/AddNewOrder";
 import { CreateOrderProvider } from "../components/orders-screen/NewOrderProvider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getAuth } from "../lib/api/auth";
+import { getDataFromAcyncStorage, saveDataToAcyncStorage } from "../lib/async-storage/acyncStorage";
+import { ASYNC_STORAGE_USER_INFO_OBJECT, ASYNC_STORAGE_USER_LOGIN, ASYNC_STORAGE_USER_PHONE_NUMBER } from "../lib/async-storage/asyncStorageKeys";
 
 export interface IStatusColors {
     color: string;
@@ -45,6 +48,8 @@ const ORDERS_PER_PAGE = 25;
 
 function OrdersScreen({ navigation }: { navigation: OrdersScreenNavigationProp }) {
     const { isConnected } = useNetworkStatus();
+
+    useEffect(() => { updateUserInfoObject() }, []); // updating user info object
 
     const [activePage, setActivePage] = useState(0);
     const [searchOrderId, setSearchOrderId] = useState("");
@@ -111,6 +116,26 @@ function OrdersScreen({ navigation }: { navigation: OrdersScreenNavigationProp }
 
 export default OrdersScreen;
 
+// Utils
+export async function updateUserInfoObject() {
+    const login = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
+    const phoneNumber = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_PHONE_NUMBER);
+
+    if (!login || !phoneNumber) {
+        console.error("Error updating user info object! No login|phoneNumber values!");
+        return;
+    };
+
+    const actualUserInfoObject = await getAuth(login, phoneNumber);
+    if (!actualUserInfoObject) {
+        console.error("Error updating user info object! API request error!");
+        return;
+    }
+
+    const updatedUserInfoObject = JSON.stringify(actualUserInfoObject);
+    saveDataToAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT, updatedUserInfoObject);
+    console.log("User data is updated!");
+}
 
 // UI
 function Warning() {
@@ -136,7 +161,7 @@ function Warning() {
             </Text>
         </AnimatedWrapper>
     );
-}
+};
 
 // styles
 const styles = StyleSheet.create({

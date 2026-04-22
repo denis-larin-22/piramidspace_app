@@ -15,10 +15,12 @@ function ControlType({
     controlTypesList: string[]
     controlHandler: (string) => void
 }) {
+    if (controlTypesList.length === 0) return null;
+
     const [isControlListOpen, setIsControlListOpen] = useState<boolean>(false);
 
     return (
-        <View style={{ flexGrow: 1 }}>
+        <View style={{ flexGrow: 1, width: '46%' }}>
             <Text style={formStyles.detailsText}>Керування</Text>
 
             <Pressable onPress={() => setIsControlListOpen(!isControlListOpen)} >
@@ -76,6 +78,6 @@ function ParseSideValue(value: string, isReverse: boolean = false) {
     if (isReverse) {
         return value === "L" ? "left" : "right"
     } else {
-        return (value === "left") ? "L" : "R"
+        return (value === "left" || value === "ліворуч") ? "L" : "R"
     }
 }

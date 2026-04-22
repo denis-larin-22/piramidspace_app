@@ -10,6 +10,8 @@ import { fetchOrderById, IOrder } from "../../../lib/api/orders-screen/ordersLis
 import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
 import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
 import Loader from "../../ui/Loader";
+import RestoreOrder from "../restore-order/RestoreOrder";
+import { updateUserInfoObject } from "../../../screens/OrdersScreen";
 
 function ModalOrder({
     isOpen,
@@ -22,6 +24,8 @@ function ModalOrder({
     closeHandler: () => void,
     triggerRefetch: () => void
 }) {
+    updateUserInfoObject(); // updating user info object for actual units value (см/мм)
+
     const [order, setOrder] = useState<null | IOrder>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
     const [loginValue, setLoginValue] = useState<string | undefined>(undefined);
@@ -37,7 +41,15 @@ function ModalOrder({
         setLoginValue(login);
 
         const orderResponse = await fetchOrderById(login, idOrder, 1);
-        const orderObject = orderResponse.data[0];
+        const orderObjectData = orderResponse.data[0];
+
+
+        // Filtration from "Замер", "Установка", "Фиксация" and another services except tkan list
+        const orderObject: IOrder = {
+            ...orderObjectData,
+            items: orderObjectData.items
+        }
+
         setOrder(orderObject);
     }
 
@@ -45,6 +57,8 @@ function ModalOrder({
         getData(orderId.toFixed(0));
         setHasUpdates(true);
     }
+
+
 
     return (
         <Modal
@@ -78,15 +92,20 @@ function ModalOrder({
                                     null
                                     :
                                     <>
-                                        <AnimatedWrapper offsetY={20} delay={400}>
-                                            <EditOrder
-                                                currentOrder={order}
-                                                updateAfterEditHandler={() => {
-                                                    updateAfterEditHandler();
-                                                }}
-                                            />
-                                        </AnimatedWrapper>
+                                        {/* Edit button */}
+                                        {(order["вид заказа"] === 'components' || order["вид заказа"] === 'ads') ?
+                                            null
+                                            :
+                                            <AnimatedWrapper offsetY={20} delay={400}>
+                                                <EditOrder
+                                                    currentOrder={order}
+                                                    updateAfterEditHandler={() => {
+                                                        updateAfterEditHandler();
+                                                    }}
+                                                />
+                                            </AnimatedWrapper>}
 
+                                        {/* Delete button */}
                                         <AnimatedWrapper offsetY={20} delay={300}>
                                             <DeleteOrderButton
                                                 isDeleteModalOpen={isDeleteModalOpen}
@@ -98,7 +117,17 @@ function ModalOrder({
                                         </AnimatedWrapper>
                                     </>
                                 }
-                                <AnimatedWrapper offsetY={20} delay={200}>
+                                {/* Restore button */}
+                                {order['статус'] === "удален" &&
+                                    <AnimatedWrapper offsetY={20} delay={200}>
+                                        <RestoreOrder
+                                            currentOrder={order}
+                                            updateAfterRestoreHandler={triggerRefetch}
+                                        />
+                                    </AnimatedWrapper>
+                                }
+                                {/* Close button */}
+                                <AnimatedWrapper offsetY={20} delay={220}>
                                     <CloseButton closeHandler={() => {
                                         if (hasUpdates) {
                                             triggerRefetch();
@@ -138,6 +167,7 @@ const styles = StyleSheet.create({
         borderRadius: 13,
         width: '92%',
         maxHeight: '92%',
+        top: -30
     },
     buttonsWrap: {
         flexDirection: 'row',

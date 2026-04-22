@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { IErrorStateMessage } from "../ThirdStep";
 import AnimatedWrapper from "../../../animation/AnimatedWrapper";
 import { Colors } from "../../../../theme/colors";
@@ -32,7 +32,10 @@ export default function FixationType({
 
     return (
         <View style={formStyles.colorContainer}>
-            <Text style={formStyles.detailsText}>Фіксація</Text>
+            <View style={formStyles.dropdownWrap}>
+                <Text style={formStyles.detailsText}>Фіксація</Text>
+                <View style={formStyles.line}></View>
+            </View>
 
             <Pressable onPress={toggleFixationTypeList}>
                 <Text style={[
@@ -48,11 +51,9 @@ export default function FixationType({
                     useOpacity
                     useScale
                     offsetY={-20}
-                    style={[formStyles.dropdownMenu, {
-                        minHeight: 80,
-                    }]}
+                    style={styles.wrap}
                 >
-                    <ScrollView style={formStyles.scrollModal}>
+                    <ScrollView style={{ maxHeight: 200 }}>
                         {fullList.map((fixationType, index) => (
                             <AnimatedWrapper
                                 key={index}
@@ -80,3 +81,26 @@ export default function FixationType({
     )
 
 }
+
+const styles = StyleSheet.create({
+    wrap: {
+        maxHeight: 105,
+        width: "100%",
+        backgroundColor: "white",
+        borderRadius: 17,
+        position: "absolute",
+        top: "105%",
+        zIndex: 50,
+        padding: 8,
+        paddingBottom: 4,
+
+        // iOS shadow
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+
+        // Android shadow
+        elevation: 5,
+    }
+});

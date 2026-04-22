@@ -4,8 +4,12 @@ import Warning from "../../ui/Warning";
 import { useEffect, useState } from "react";
 import { formStyles } from "../new-order-steps/third-step-components/form-styles";
 import Switcher from "../../ui/Switcher";
+import { MainGroupsCode } from "../../../lib/api/orders-screen/groups-and-products";
+import { UnitsTypes } from "../../../lib/api/auth";
+import { getActiveUnits } from "../../../lib/utils";
 
 interface IProps {
+    groupCode?: MainGroupsCode;
     subgroupCode?: string;
 
     width: number;        // ВСЕГДА В СМ
@@ -28,6 +32,7 @@ const fromCm = (value: number, isMm: boolean) =>
 const toStr = (v: number) => (v > 0 ? String(v) : "");
 
 function WidthAndHeight({
+    groupCode,
     subgroupCode,
     width: widthGabCm,
     height: heightGabCm,
@@ -36,6 +41,18 @@ function WidthAndHeight({
     widthHandler,
     heightHandler,
 }: IProps) {
+    const isHorisontal = groupCode === "horizontal";
+
+    const [units, setUnits] = useState<UnitsTypes | null>(null); // actual units value
+
+    useEffect(() => {
+        async function getUnits() {
+            const actualUnits = await getActiveUnits();
+            setUnits(actualUnits);
+        };
+        getUnits();
+    }, []);
+
     if (subgroupCode === "day_uni_plosk") {
         return <UniPloskiWH
             width={widthGabCm}
@@ -44,6 +61,7 @@ function WidthAndHeight({
             maxHeight={maxHeight}
             widthHandler={widthHandler}
             heightHandler={heightHandler}
+            units={units}
         />
     } else if (subgroupCode === "day_uni_p") {
         return <OtherGroupsWH
@@ -53,6 +71,7 @@ function WidthAndHeight({
             maxHeight={maxHeight}
             widthHandler={widthHandler}
             heightHandler={heightHandler}
+            units={units}
 
             withShtapik={false}
         />
@@ -64,6 +83,7 @@ function WidthAndHeight({
             maxHeight={maxHeight}
             widthHandler={widthHandler}
             heightHandler={heightHandler}
+            units={units}
 
             withShtapik={false}
         />
@@ -75,8 +95,10 @@ function WidthAndHeight({
             maxHeight={maxHeight}
             widthHandler={widthHandler}
             heightHandler={heightHandler}
+            units={units}
 
             withShtapik
+            isHorisontal={isHorisontal}
         />
     }
 }
@@ -90,13 +112,16 @@ function OtherGroupsWH({
     maxHeight,
     widthHandler,
     heightHandler,
-    withShtapik = false
-}: IProps & { withShtapik?: boolean }) {
-    const [isMm, setIsMm] = useState(false);
+    units,
+    // options
+    withShtapik = false,
+    isHorisontal = false
+}: IProps & { units: UnitsTypes, withShtapik?: boolean, isHorisontal?: boolean }) {
+    const [isMm, setIsMm] = useState(units !== 'мм');
     const [warningInput, setWarningInput] = useState<number | null>(null);
 
-    const WIDTH_DIFF = 3;   // см
-    const HEIGHT_DIFF = 5;  // см
+    const WIDTH_DIFF = isHorisontal ? 4 : 3;   // см
+    const HEIGHT_DIFF = isHorisontal ? 4 : 5;  // см
 
     /* ===== вычисляем значения по штапику (в СМ) ===== */
     const widthShtapikCm = Math.max(0, widthGabCm - WIDTH_DIFF);
@@ -173,7 +198,8 @@ function OtherGroupsWH({
                 styles={{
                     position: "absolute",
                     top: -32,
-                    left: 0,
+                    // left: '50%',
+                    alignSelf: 'center'
                 }}
                 option1="см"
                 option2="мм"
@@ -182,7 +208,7 @@ function OtherGroupsWH({
             />
 
             {/* ===== ГАБАРИТ ===== */}
-            <View style={styles.row}>
+            <View style={[styles.row, { marginTop: 10 }]}>
                 {/* Ширина (габарит) */}
                 <View style={formStyles.inputContainer}>
                     <View style={formStyles.rowLabel}>
@@ -213,6 +239,9 @@ function OtherGroupsWH({
                         {isMm ? "мм" : "см"}
                     </Text>
                 </View>
+
+                {/* UI Separator */}
+                <View style={styles.separator}></View>
 
                 {/* Высота (габарит) */}
                 <View style={formStyles.inputContainer}>
@@ -281,6 +310,9 @@ function OtherGroupsWH({
                     </Text>
                 </View>
 
+                {/* UI Separator */}
+                <View style={styles.separator}></View>
+
                 {/* Высота по штапику */}
                 <View style={formStyles.inputContainer}>
                     <View style={formStyles.rowLabel}>
@@ -325,8 +357,9 @@ function UniPloskiWH({
     maxHeight,
     widthHandler,
     heightHandler,
-}: IProps) {
-    const [isMm, setIsMm] = useState(false);
+    units
+}: IProps & { units: UnitsTypes }) {
+    const [isMm, setIsMm] = useState(units !== 'мм');
     const [warningInput, setWarningInput] = useState<number | null>(null);
 
     const showWarning = (id: number) => {
@@ -448,14 +481,27 @@ function UniPloskiWH({
     );
 }
 
+
 const styles = StyleSheet.create({
     container: {
-        marginTop: 20,
+        marginTop: 30,
         gap: 8,
     },
     row: {
         flexDirection: "row",
         justifyContent: "space-between",
         gap: 12,
+        marginTop: 5,
+        padding: 5,
+        borderWidth: 2,
+        borderColor: Colors.grayLight,
+        backgroundColor: Colors.pale,
+        borderRadius: 12,
     },
+    separator: {
+        height: '90%',
+        width: 2,
+        backgroundColor: Colors.grayLight,
+        alignSelf: 'center'
+    }
 });

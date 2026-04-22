@@ -1,15 +1,23 @@
-import { useState, useEffect } from "react";
-import { Colors } from "../../theme/colors";
+import { useEffect, useRef } from "react";
 import {
-    StyleProp,
-    StyleSheet,
-    Switch,
-    Text,
     View,
+    Text,
+    StyleSheet,
+    Pressable,
+    Animated,
+    LayoutChangeEvent,
     ViewStyle
 } from "react-native";
+import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
-import AnimatedWrapper from "../animation/AnimatedWrapper";
+
+interface Props {
+    styles: ViewStyle
+    option1: string;
+    option2: string;
+    switchState: boolean;
+    switchHandler: (state: boolean) => void;
+}
 
 function Switcher({
     styles,
@@ -17,98 +25,102 @@ function Switcher({
     option2,
     switchState,
     switchHandler
-}: {
-    styles?: StyleProp<ViewStyle>,
-    option1: string,
-    option2: string,
-    switchState: boolean,
-    switchHandler: (state: boolean) => void
-}) {
-    const [showTooltip, setShowTooltip] = useState(false);
-    const [prevState, setPrevState] = useState(switchState);
+}: Props) {
+
+    const translateX = useRef(new Animated.Value(switchState ? 1 : 0)).current;
+    const widthRef = useRef(0);
 
     useEffect(() => {
-        if (switchState !== prevState) {
-            setPrevState(switchState);
-            setShowTooltip(true);
-
-            const timer = setTimeout(() => {
-                setShowTooltip(false);
-            }, 1000);
-
-            return () => clearTimeout(timer);
-        }
+        Animated.spring(translateX, {
+            toValue: switchState ? 1 : 0,
+            useNativeDriver: true,
+            friction: 8,
+            tension: 80
+        }).start();
     }, [switchState]);
 
-    return (
-        <View style={[s.container, styles]}>
-            <Text style={s.label}>{option1}</Text>
+    const onLayout = (e: LayoutChangeEvent) => {
+        widthRef.current = e.nativeEvent.layout.width;
+    };
 
-            <Switch
-                trackColor={{ false: "#3372F950", true: "#A2A2A850" }}
-                thumbColor={Colors.blue}
-                ios_backgroundColor={Colors.blueLight}
-                onValueChange={switchHandler}
-                value={switchState}
+    const sliderTranslate = translateX.interpolate({
+        inputRange: [0, 1],
+        outputRange: [4, widthRef.current / 2]
+    });
+
+    return (
+        <Pressable
+            style={[s.wrapper, styles]}
+            onPress={() => switchHandler(!switchState)}
+            onLayout={onLayout}
+        >
+            <Animated.View
+                style={[
+                    s.slider,
+                    { transform: [{ translateX: sliderTranslate }] }
+                ]}
             />
 
-            <Text style={s.label}>{option2}</Text>
+            <Text style={[
+                s.label,
+                !switchState && s.activeLabel
+            ]}>
+                {option1}
+            </Text>
 
-            {showTooltip && (
-                <AnimatedWrapper
-                    offsetY={10}
-                    style={s.tooltip}
-                >
-                    <Text style={s.tooltipText}>
-                        {switchState ? option2 : option1}
-                    </Text>
-                </AnimatedWrapper>
-            )}
-        </View>
+            <Text style={[
+                s.label,
+                switchState && s.activeLabel
+            ]}>
+                {option2}
+            </Text>
+        </Pressable>
     );
 }
 
 const s = StyleSheet.create({
-    container: {
+    wrapper: {
+        width: 160,
+        height: 32,
+        borderRadius: 22,
+        backgroundColor: "#F2F5FB",
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "space-between",
+        padding: 4,
+
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
+        elevation: 4
+    },
+
+    slider: {
+        position: "absolute",
+        width: "50%",
+        height: 24,
+        borderRadius: 18,
+        backgroundColor: Colors.blue,
+
+        shadowColor: Colors.blue,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 10,
+        elevation: 6
     },
 
     label: {
+        flex: 1,
+        textAlign: "center",
         fontFamily: Fonts.comfortaa600,
-        fontSize: 14,
-        lineHeight: 16,
-        color: Colors.gray
+        fontSize: 12,
+        lineHeight: 14,
+        color: "#7A869A"
     },
 
-    tooltip: {
-        backgroundColor: "white",
-        paddingVertical: 5,
-        paddingHorizontal: 20,
-        borderRadius: 12,
-        position: "absolute",
-        top: -30,
-        zIndex: 100,
-
-        // iOS shadow
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-
-        // Android shadow
-        elevation: 5,
-
-        borderWidth: 1,
-        borderColor: Colors.blueLight
-    },
-
-    tooltipText: {
-        fontFamily: Fonts.comfortaa600,
-        fontSize: 14,
-        lineHeight: 18,
-        color: Colors.gray
+    activeLabel: {
+        color: "white"
     }
 });
 

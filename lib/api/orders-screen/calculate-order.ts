@@ -61,6 +61,7 @@ export async function calculateOrderPriceDayNight(orderObject: ICalculateOrderOb
 
         if (!response.ok) {
             console.error(`Error fetching calculate order price: ${response.status}`);
+
             return null;
         }
 

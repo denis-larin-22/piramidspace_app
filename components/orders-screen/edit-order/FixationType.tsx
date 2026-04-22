@@ -1,5 +1,4 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { Fonts } from "../../../theme/fonts";
 import { Colors } from "../../../theme/colors";
 import { useState } from "react";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
@@ -16,6 +15,8 @@ function FixationType({
     fixationList: Fixation[],
     fixationHandler: (fixation: string) => void
 }) {
+    if (fixationList.length === 0) return null;
+
     const [isFixationTypeListOpen, setIsFixationTypeListOpen] = useState<boolean>(false);
 
     const fullList: Fixation[] = [
@@ -29,7 +30,10 @@ function FixationType({
 
     return (
         <View>
-            <Text style={formStyles.detailsText}>Фіксація</Text>
+            <View style={formStyles.dropdownWrap}>
+                <Text style={formStyles.detailsText}>Фіксація</Text>
+                <View style={formStyles.line}></View>
+            </View>
 
             <Pressable onPress={() => setIsFixationTypeListOpen(!isFixationTypeListOpen)}>
                 <Text style={[
@@ -44,9 +48,9 @@ function FixationType({
                     useOpacity
                     useScale
                     offsetY={-20}
-                    style={formStyles.dropdownMenu}
+                    style={[formStyles.dropdownMenu, { maxHeight: 130 }]}
                 >
-                    <ScrollView style={formStyles.scrollModal}>
+                    <ScrollView style={{ maxHeight: 130 }}>
                         {fullList.map((fixationType, index) => (
                             <AnimatedWrapper
                                 key={index}

@@ -22,7 +22,10 @@ export default function Color({
 }) {
     return (
         <View style={formStyles.colorContainer}>
-            <Text style={formStyles.detailsText}>Колір системи</Text>
+            <View style={formStyles.dropdownWrap}>
+                <Text style={formStyles.detailsText}>Колір системи</Text>
+                <View style={formStyles.line}></View>
+            </View>
 
             <Pressable onPress={toggleColorList}>
                 <Text style={[
