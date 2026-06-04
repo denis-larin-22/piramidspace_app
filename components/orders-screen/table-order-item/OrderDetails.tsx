@@ -30,9 +30,10 @@ function OrderDetails({ order }: { order: IOrder }) {
         // ['площадь, м.кв.']: fullArea,
         // ["дата готовности"]: finishDate,
         ["адрес доставки"]: deliveryAddress,
-        ["сумма"]: fullPrice,
+        ["розничная сумма"]: fullPrice,
         ['комментарий']: comment,
         ["комментарий менеджера"]: managerComment,
+        ["заказчик розница"]: retailData,
         items: orderItems,
     } = order;
 
@@ -57,6 +58,7 @@ function OrderDetails({ order }: { order: IOrder }) {
                 <View style={styles.headerRow}>
                     <Text style={styles.orderGroup}>{getFormatedOrderType(group).toUpperCase()}</Text>
                     <Status statusValue={status} style={styles.statusStyle} />
+                    {retailData !== null && <Text style={styles.retailTitle}>🛍️ Замовлення у роздріб</Text>}
                 </View>
             </AnimatedWrapper>
 
@@ -94,7 +96,7 @@ function OrderDetails({ order }: { order: IOrder }) {
                                 key={item['N_заказа'] + index}
                                 item={item}
                                 group={group as MainGroupsCode}
-                                units={units}
+                                units={units as UnitsTypes}
                                 style={{ marginRight: ++index === orderItems.length ? 30 : 0 }}
                             />
                         ))
@@ -119,7 +121,7 @@ function OrderDetails({ order }: { order: IOrder }) {
                 offsetY={20}
                 delay={360}
             >
-                <CollapsibleText label="Адреса" text={deliveryAddress} />
+                <CollapsibleText label="Адреса" text={deliveryAddress as string} />
             </AnimatedWrapper>
 
             <AnimatedWrapper
@@ -127,7 +129,7 @@ function OrderDetails({ order }: { order: IOrder }) {
                 useOpacity
                 offsetY={20}
                 delay={400}>
-                <Detail label="💰 Загальна вартість:" value={fullPrice + "$"} />
+                <Detail label="Загальна вартість:" value={fullPrice + " грн."} />
             </AnimatedWrapper>
         </View>
     )
@@ -204,13 +206,13 @@ function OrderItem({ item, group, units, style }: { item: IOrderItem, group: Mai
                     <Detail label="Площа:" value={item['площадь, м.кв.'] + " м²"} />
                     <Detail label="Ширина:" value={widthValue} />
                     <Detail label="Висота:" value={heightValue} />
-                    <Detail label="Керування:" value={controlSide} />
+                    <Detail label="Керування:" value={correctSide(controlSide)} />
                     <Detail label="Колір:" value={color} />
                     <Detail label="Фіксація:" value={fixation} borderBottom />
                 </>
             }
 
-            <Detail label="Вартість:" value={parseFloat(item['стоим']) + "$"} />
+            <Detail label="Вартість:" value={parseFloat(item['розничная_стоим']) + " грн."} />
         </View>
     )
 };
@@ -224,7 +226,7 @@ function ServiceItem({ item }: { item: IOrderItem }) {
                     {item['наименование'] || 'Без названия'}
                 </Text>
 
-                <Detail label="Вартість:" value={parseFloat(item['стоим']) + "$"} />
+                <Detail label="Вартість:" value={parseFloat(item['розничная_стоим']) + " грн."} />
             </View>
         )
     } else {
@@ -235,7 +237,7 @@ function ServiceItem({ item }: { item: IOrderItem }) {
                     {'Фіксація: ' + (item['наименование'] || 'Без названия')}
                 </Text>
 
-                <Detail label="Вартість:" value={parseFloat(item['стоим']) + "$"} />
+                <Detail label="Вартість:" value={parseFloat(item['розничная_стоим']) + " грн."} />
             </View>
         )
     }
@@ -286,6 +288,14 @@ export function formatCharacteristicsString(value: string) {
         fixation: separate[3]
     };
 };
+
+function correctSide(value: string): string {
+    if (value === " right" || value === "right") {
+        return "праворуч"
+    } else if (value === " left" || value === "left") {
+        return "ліворуч"
+    } else return value;
+}
 
 // STYLES
 
@@ -498,5 +508,15 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 5,
         right: -7
+    },
+    retailTitle: {
+        fontFamily: Fonts.comfortaa700,
+        fontSize: 12,
+        lineHeight: 14,
+        color: 'white',
+        backgroundColor: '#5488f9',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 6
     }
 });

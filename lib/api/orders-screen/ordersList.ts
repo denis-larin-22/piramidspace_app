@@ -41,6 +41,7 @@ export interface IOrder {
     "скидка": string;
     "предопл": number | null;
     "блок": string | null;
+    retailDataNormalized: string;
     sale_diler: number;
     seller: ISeller;
     bot_status: string | null;

@@ -10,7 +10,7 @@ export interface ICalculateOrderObject {
     delivery_adr: string,
     adrType: string,
     product_type: string,
-    retailData: string,
+    retailData: string | null,
     predopl: number
 }
 
@@ -34,7 +34,8 @@ export interface ICalculateResponce {
     items: ICalculateResponceItem[],
     order_number: string | null,
     total_usd: number,
-    total_uah: number
+    total_uah: number,
+    retailDataNormalized: string
 }
 
 export interface ICalculateResponceItem {
@@ -44,6 +45,7 @@ export interface ICalculateResponceItem {
     price_per_unit_uah: number,
     total_price: number,
     total_price_uah: number,
+    fixationMarkup_uah: number,
     details: {
         color_markup: string,
         fixation_markup: number,

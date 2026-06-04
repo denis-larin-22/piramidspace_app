@@ -35,9 +35,6 @@ function AddressAndComment({
             const mainAddress = list["основний"];
 
             const addressValue = mainAddress ? formatAddressNP(mainAddress) : "адреса не вказана";
-            const retailData = mainAddress ? mainAddress["фамилия"] + " " + mainAddress["имя"] + " " + mainAddress["отчество"] + ", " + mainAddress["тел.получателя"]
-                :
-                "дані користувача не вказані";
 
             setOrderParams({
                 ...orderParams,
@@ -45,13 +42,11 @@ function AddressAndComment({
                     ...orderParams.newOrderObject,
                     adrType: "основний",
                     delivery_adr: addressValue,
-                    retailData: retailData
                 },
                 ordersList: orderParams.ordersList.map((order) => ({
                     ...order,
                     adrType: "основний",
                     delivery_adr: addressValue,
-                    retailData: retailData
                 }))
             });
         }
@@ -74,29 +69,39 @@ function AddressAndComment({
                     }
                 ]}
             >
-                <Pressable onPress={() => setIsAddressOpen(true)}>
+                <Pressable
+                    onPress={() => setIsAddressOpen(true)}>
                     {!isAddressOpen && (
                         <>
-                            <Text style={styles.addressPreview}>
-                                🚚 Доставка: {' '}
-                                <Text style={styles.addressText}>
-                                    {orderParams.newOrderObject.adrType}
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Text style={styles.addressPreview}>
+                                    🚚 Доставка: {' '}
+                                    <Text style={styles.addressText}>
+                                        {orderParams.newOrderObject.adrType}
+                                    </Text>
                                 </Text>
-                            </Text>
-                            <Text numberOfLines={1} ellipsizeMode="tail" style={styles.addressPreview}>
-                                📝 Коментарій: {' '}
-                                <Text style={styles.addressText}>
-                                    {orderParams.newOrderObject.comment.length === 0 ?
-                                        'відсутній'
-                                        :
-                                        truncateText(orderParams.newOrderObject.comment, 10)
-                                    }
+                                <Image
+                                    source={require('../../../../assets/orders-screen/arrow.webp')}
+                                    style={styles.arrow}
+                                />
+                            </View>
+                            <View style={styles.separator}></View>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Text numberOfLines={1} ellipsizeMode="tail" style={styles.addressPreview}>
+                                    📝 Коментарій: {' '}
+                                    <Text style={styles.addressText}>
+                                        {orderParams.newOrderObject.comment.length === 0 ?
+                                            'відсутній'
+                                            :
+                                            truncateText(orderParams.newOrderObject.comment, 10)
+                                        }
+                                    </Text>
                                 </Text>
-                            </Text>
-                            <Image
-                                source={require('../../../../assets/orders-screen/touch.webp')}
-                                style={styles.touch}
-                            />
+                                <Image
+                                    source={require('../../../../assets/orders-screen/arrow.webp')}
+                                    style={styles.arrow}
+                                />
+                            </View>
                         </>
                     )}
 
@@ -353,13 +358,12 @@ const styles = StyleSheet.create({
     addressContainer: {
         backgroundColor: "white",
         borderRadius: 12,
-        padding: 5
+        padding: 7,
     },
     addressPreview: {
         fontFamily: Fonts.comfortaa700,
-        fontSize: 15,
-        lineHeight: 20,
-        marginBottom: 5,
+        fontSize: 14,
+        lineHeight: 16,
         color: Colors.gray,
     },
     addressText: {
@@ -405,12 +409,14 @@ const styles = StyleSheet.create({
         height: 60,
         marginTop: 10
     },
-    touch: {
-        width: 25,
-        height: 25,
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        opacity: 0.5
+    arrow: {
+        width: 7,
+        height: 12,
+        opacity: 0.7,
+    },
+    separator: {
+        height: 1,
+        backgroundColor: Colors.grayLight,
+        marginVertical: 5
     }
 })

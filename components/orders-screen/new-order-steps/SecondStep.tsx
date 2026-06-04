@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getGroupsStructure, ISubgroup } from "../../../lib/api/orders-screen/groups-and-products";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import Loader from "../../ui/Loader";
 import { Fonts } from "../../../theme/fonts";
@@ -8,6 +8,7 @@ import { Colors } from "../../../theme/colors";
 import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
 import { ASYNC_STORAGE_USER_LOGIN } from "../../../lib/async-storage/asyncStorageKeys";
 import { INewOrderObject, useCreateOrder } from "../NewOrderProvider";
+import RetailOrderButton from "./fourth-step/RetailOrderButton";
 
 function SecondStep({ rateValue, balanceValue, stepHandler }: {
     rateValue: string | null,
@@ -69,9 +70,12 @@ function SecondStep({ rateValue, balanceValue, stepHandler }: {
                 offsetY={25}
             >
                 <Text style={styles.stepCategory}>{name}</Text>
+                <RetailOrderButton
+                    style={{ alignSelf: "flex-start", marginBottom: 15 }}
+                />
             </AnimatedWrapper>
 
-            {rateValue && balanceValue && <AnimatedWrapper
+            {/* {rateValue && balanceValue && <AnimatedWrapper
                 useOpacity
                 offsetY={25}
                 delay={200}
@@ -80,7 +84,7 @@ function SecondStep({ rateValue, balanceValue, stepHandler }: {
                 <Text style={styles.detailsText}>{`Курс: ${rateValue} грн`}</Text>
                 <Text style={styles.detailsText}>{`Баланс: ${balanceValue} $`}</Text>
             </AnimatedWrapper>
-            }
+            } */}
 
             {subGroupsList !== null ?
                 <ScrollView
@@ -100,9 +104,10 @@ function SecondStep({ rateValue, balanceValue, stepHandler }: {
                                 <Text style={styles.categoryText}>
                                     {subGroup.name}
                                 </Text>
-                                {/* {subGroup.option && (
-                                <Text style={styles.categoryOptionText}>в коробі</Text>
-                            )} */}
+                                <Image
+                                    source={require('../../../assets/orders-screen/arrow.webp')}
+                                    style={styles.arrow}
+                                />
                             </Pressable>
                         </AnimatedWrapper>
                     ))}
@@ -128,7 +133,6 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.comfortaa400,
         fontSize: 16,
         textTransform: 'uppercase',
-        marginBottom: 7,
         textAlign: 'center',
         color: Colors.gray,
     },
@@ -136,7 +140,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.comfortaa700,
         fontSize: 30,
         textTransform: 'uppercase',
-        marginBottom: 15,
+        marginBottom: 5,
         marginLeft: 10,
         textAlign: 'left',
         color: Colors.blue,
@@ -158,9 +162,13 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 18,
         borderRadius: 32,
+        backgroundColor: 'white',
         marginVertical: 5,
-        borderWidth: 1,
-        borderColor: '#3372F923',
+        shadowColor: Colors.gray,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.04,
+        shadowRadius: 10,
+        elevation: 2,
     },
     categoryText: {
         fontFamily: Fonts.comfortaa400,
@@ -168,4 +176,10 @@ const styles = StyleSheet.create({
         lineHeight: 17,
         color: 'black',
     },
+    arrow: {
+        width: 5,
+        height: 10,
+        position: 'absolute',
+        right: 15,
+    }
 });

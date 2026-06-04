@@ -14,7 +14,7 @@ import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage
 import { useCreateOrder } from "../NewOrderProvider";
 import Options from "./third-step-components/Options";
 import { ErrorMessage } from "../../ui/ErrorMessage";
-import { IUserInfo, UnitsTypes } from "../../../lib/api/auth";
+import { IUserInfo } from "../../../lib/api/auth";
 import { formStyles } from "./third-step-components/form-styles";
 import { Colors } from "../../../theme/colors";
 
@@ -92,7 +92,7 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
     useEffect(() => {
         async function getProducts() {
             const userInfo = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT);
-            const { "логин": login } = JSON.parse(userInfo) as IUserInfo;
+            const { "логин": login } = JSON.parse(userInfo as string) as IUserInfo;
 
             // check needed values
             if (orderObject.group.code === null || orderObject.subgroup === null || login === undefined) {

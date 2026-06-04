@@ -10,7 +10,8 @@ export interface IEditableOrder {
         "ВидАдресаВЗаказе": string,
         "статус": string,
         "скидка": number,
-        "предопл": number
+        "предопл": number,
+        "retailData": string
     },
     items: (IOrderItemToAdd | IOrderItemToUpdate | IOrderItemToDelete)[]
 }

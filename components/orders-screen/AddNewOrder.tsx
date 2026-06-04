@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
-import { ImageBackground, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, useWindowDimensions, View } from "react-native";
+import { ImageBackground, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { useDollarRate } from "../../lib/hooks/useDollarRate";
@@ -12,10 +12,9 @@ import SecondStep from "./new-order-steps/SecondStep";
 import FinalStep from "./new-order-steps/FinalStep";
 import { INewOrderObject, initCreateOrderParams, useCreateOrder } from "./NewOrderProvider";
 import { CloseButton } from "../ui/CloseButton";
+import FourthStep from "./new-order-steps/FourthStep";
 
 function AddNewOrder({ triggerRefetch }: { triggerRefetch: () => void }) {
-    const { height: screenHeight } = useWindowDimensions();
-
     const { isConnected } = useNetworkStatus();
     const { rate } = useDollarRate(isConnected);
     const { balance } = useBalanceValue(isConnected);
@@ -79,7 +78,9 @@ function AddNewOrder({ triggerRefetch }: { triggerRefetch: () => void }) {
                         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                     >
                         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                            <View style={styles.contentWrap}>
+                            <View style={[styles.contentWrap, {
+                                top: activeStep === 3 ? -20 : 0,
+                            }]}>
                                 <AnimatedWrapper
                                     useOpacity
                                     useScale
@@ -107,37 +108,50 @@ function AddNewOrder({ triggerRefetch }: { triggerRefetch: () => void }) {
                                                     stepHandler={() => setActiveStep(4)}
                                                 />
                                                 :
-                                                // #4
-                                                <FinalStep
-                                                    balanceValue={balance}
-                                                    rateValue={rate}
-                                                    closeHandler={() => {
-                                                        setOrderParams(initCreateOrderParams);
-                                                        setIsModalVissible(false);
-                                                        setActiveStep(1);
-                                                        triggerRefetch();
-                                                    }}
-                                                    stepHandler={() => {
-                                                        const oneMoreItem: INewOrderObject = {
-                                                            ...initCreateOrderParams.newOrderObject,
-                                                            group: orderParams.newOrderObject.group,
-                                                            subgroup: orderParams.newOrderObject.subgroup,
-                                                            id: generateId()
-                                                        }
+                                                activeStep === 4 ?
+                                                    // #4
+                                                    <FinalStep
+                                                        balanceValue={balance}
+                                                        rateValue={rate}
+                                                        closeHandler={() => {
+                                                            setOrderParams(initCreateOrderParams);
+                                                            setIsModalVissible(false);
+                                                            setActiveStep(1);
+                                                            triggerRefetch();
+                                                        }}
+                                                        addItemToOrder={() => {
+                                                            const oneMoreItem: INewOrderObject = {
+                                                                ...initCreateOrderParams.newOrderObject,
+                                                                group: orderParams.newOrderObject.group,
+                                                                subgroup: orderParams.newOrderObject.subgroup,
+                                                                id: generateId(),
+                                                                retailData: orderParams.newOrderObject.retailData
+                                                            }
 
-                                                        setOrderParams({
-                                                            ...orderParams,
-                                                            newOrderObject: oneMoreItem
-                                                        });
+                                                            setOrderParams({
+                                                                ...orderParams,
+                                                                newOrderObject: oneMoreItem
+                                                            });
 
-                                                        if (orderParams.activeGroup === "components") {
-                                                            setActiveStep(2);
-                                                        } else {
-                                                            setActiveStep(3);
-                                                        }
-                                                    }}
-                                                    buttonsHideHandler={setIsControlButtonsHidden}
-                                                />
+                                                            if (orderParams.activeGroup === "components") {
+                                                                setActiveStep(2);
+                                                            } else {
+                                                                setActiveStep(3);
+                                                            }
+                                                        }}
+                                                        stepHandler={() => setActiveStep(5)}
+                                                        retailEditBtnHandler={() => setActiveStep(5)}
+                                                    />
+                                                    :
+                                                    <FourthStep
+                                                        buttonsHideHandler={setIsControlButtonsHidden}
+                                                        closeHandler={() => {
+                                                            setOrderParams(initCreateOrderParams);
+                                                            setIsModalVissible(false);
+                                                            setActiveStep(1);
+                                                            triggerRefetch();
+                                                        }}
+                                                    />
                                     }
 
                                     {/* Back and close */}
@@ -155,7 +169,7 @@ function AddNewOrder({ triggerRefetch }: { triggerRefetch: () => void }) {
                         </TouchableWithoutFeedback>
                     </KeyboardAvoidingView>
                 </AnimatedWrapper>
-            </Modal>
+            </Modal >
         </>
     );
 }
@@ -210,6 +224,7 @@ const styles = StyleSheet.create({
         borderRadius: 13,
         width: '100%',
         position: 'relative',
+        top: -10
     },
     contentWrap: {
         flex: 1,

@@ -20,7 +20,7 @@ function EditItemForm({
     subgroupData
 }: {
     itemToEdit: IOrderItemToUpdate,
-    editHandler: React.Dispatch<React.SetStateAction<IOrderItemToUpdate>>,
+    editHandler: (updatedItem: IOrderItemToUpdate) => void,
     subgroupData: ISubgroup
 }) {
     const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
@@ -42,7 +42,7 @@ function EditItemForm({
                 setIsOpen={setIsFormOpen}
 
                 itemToEdit={itemToEdit}
-                editHandler={editHandler}
+                editHandler={editHandler as React.Dispatch<React.SetStateAction<IOrderItemToUpdate | IOrderItemToAdd>>}
                 groupCode={itemToEdit.group_code}
                 subgroupData={subgroupData}
             />

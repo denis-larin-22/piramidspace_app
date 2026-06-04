@@ -3,7 +3,7 @@ import { Colors } from "../../../theme/colors";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { useEffect, useState } from "react";
 import { IOrder, IOrderItem } from "../../../lib/api/orders-screen/ordersList";
-import { getGroupsStructure, getProductsByGroupCodes, ISubgroup, MainGroupsCode } from "../../../lib/api/orders-screen/groups-and-products";
+import { getGroupsStructure, ISubgroup, MainGroupsCode } from "../../../lib/api/orders-screen/groups-and-products";
 import { formatCharacteristicsString } from "./OrderDetails";
 import { Fonts } from "../../../theme/fonts";
 import EditableItem from "../edit-order/EditableItem";
@@ -20,6 +20,9 @@ import { SuccessMessage } from "../../ui/SuccessMessage";
 import { IUserInfo } from "../../../lib/api/auth";
 import AddNewItemButton from "../edit-order/AddNewItemButton";
 import { filterOrderFromOtherServices } from "../../../lib/api/orders-screen/utils";
+import RetailOrderButton from "../new-order-steps/fourth-step/RetailOrderButton";
+import RetailOrderEditButton from "../new-order-steps/fourth-step/RetailOrderEditButton";
+import EditRetailOrderForm from "../edit-order/EditRetailOrderForm";
 
 function EditOrder({
     currentOrder,
@@ -35,7 +38,9 @@ function EditOrder({
     const [addressList, setAddressList] = useState<IAddress | null>(null);
     const [address, setAddress] = useState({ type: "", address: "" });
     const [responseResult, setResponseResult] = useState<boolean | null>(null);
-
+    // Режим роздрібу state
+    const [retailMode, setRetailMode] = useState({ isActive: false, isOpen: false });
+    // Submit button
     const [isSubmitBtnHidden, setIsSubmitBtnHidden] = useState<boolean>(true);
 
 
@@ -43,12 +48,13 @@ function EditOrder({
     const initEditOrderParams: IEditableOrder = {
         login: '',
         order: {
-            "ВидАдресаВЗаказе": currentOrder["ВидАдресаВЗаказе"],
-            "адрес доставки": currentOrder["адрес доставки"],
+            "ВидАдресаВЗаказе": currentOrder["ВидАдресаВЗаказе"] as string,
+            "адрес доставки": currentOrder["адрес доставки"] as string,
             "комментарий": currentOrder["комментарий"],
             "статус": currentOrder["статус"],
-            "предопл": currentOrder["предопл"],
-            "скидка": +currentOrder["скидка"]
+            "предопл": currentOrder["предопл"] as number,
+            "скидка": +currentOrder["скидка"],
+            retailData: currentOrder.retailDataNormalized
         },
         items: []
     }
@@ -66,15 +72,18 @@ function EditOrder({
             const subgroupCode = parseSubgroupCode(currentOrder.items[0]['наименование']);
 
             const userInfo = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT);
+            if (!userInfo) return null;
+
             const { "логин": login } = JSON.parse(userInfo) as IUserInfo;
 
             // products list
             const dataByGroup = await getGroupsStructure(groupCode, login)
+            if (!dataByGroup) return null;
 
             const dataBySubgroup = dataByGroup.groups[0].subgroups.find((subgroup) => subgroup.code === subgroupCode);
 
 
-            setSubgroupData(dataBySubgroup);
+            setSubgroupData(dataBySubgroup as ISubgroup);
             // addresses list
             const addressList = await fetchAddressList(login);
             setAddressList(addressList);
@@ -92,7 +101,7 @@ function EditOrder({
                     old_characteristic: item['характерстика'],
                     product_code: item['наименование'],
                     group_code: groupCode,
-                    subgroup_code: subgroupCode,
+                    subgroup_code: subgroupCode as string,
                     width: Number(width),
                     height: Number(height),
                     quantity: +item['кол_во'],
@@ -102,7 +111,7 @@ function EditOrder({
                     fixation_type: fixation,
                     options: ""  // ОПЦИИ НА ДРУГИЕ ВИДЫ - ОПЦИОНАЛЬНО
                 }
-            })
+            });
             // solving editable object
             const editOrderObject: IEditableOrder = {
                 ...editOrderParams,
@@ -110,19 +119,20 @@ function EditOrder({
                 order: {
                     ...editOrderParams.order,
                     "статус": currentOrder['статус'],
-                    "адрес доставки": currentOrder['адрес доставки'],
-                    "ВидАдресаВЗаказе": currentOrder['ВидАдресаВЗаказе'],
+                    "адрес доставки": currentOrder['адрес доставки'] as string,
+                    "ВидАдресаВЗаказе": currentOrder['ВидАдресаВЗаказе'] as string,
                     "комментарий": currentOrder['комментарий'],
-                    "предопл": currentOrder['предопл'],
-                    "скидка": +currentOrder['скидка']
+                    "предопл": currentOrder['предопл'] as number,
+                    "скидка": +currentOrder['скидка'],
+                    retailData: currentOrder.retailDataNormalized
                 },
                 items: editableItemsList
             }
 
             // current address by current order
             setAddress({
-                type: currentOrder['ВидАдресаВЗаказе'],
-                address: currentOrder['адрес доставки'],
+                type: currentOrder['ВидАдресаВЗаказе'] as string,
+                address: currentOrder['адрес доставки'] as string,
             });
             // set editable object state
             setEditOrderParams(editOrderObject);
@@ -159,7 +169,7 @@ function EditOrder({
                 updateAfterEditHandler();
             }, 2000);
         }
-    }
+    };
 
     return (
         <>
@@ -168,7 +178,7 @@ function EditOrder({
                 style={styles.editDetailBtn}
             >
                 <Image
-                    source={require('../../../assets/orders-screen/edit.png')}
+                    source={require('../../../assets/orders-screen/pencil.webp')}
                     style={styles.editDetailIcon}
                 />
             </Pressable >
@@ -223,6 +233,24 @@ function EditOrder({
                                             styles={styles.notification}
                                         />}
 
+                                    {/* Режим роздрібу */}
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            justifyContent: 'flex-end',
+                                        }}
+                                    >
+                                        <RetailOrderButton
+                                            style={{
+                                                width: '100%'
+                                            }}
+                                        />
+                                        <RetailOrderEditButton
+                                            btnHandler={() => {
+                                                setRetailMode({ ...retailMode, isOpen: true })
+                                            }} />
+                                    </View>
+
                                     {editItemsList.filter(item => { return (item.action === 'add' || item.action === 'update') }).length ?
                                         <ScrollView
                                             horizontal
@@ -233,7 +261,7 @@ function EditOrder({
                                             {/* ADD BUTTON */}
                                             <AddNewItemButton
                                                 groupCode={parseGroupCode(currentOrder['вид заказа'])}
-                                                subgroupData={subgroupData}
+                                                subgroupData={subgroupData as ISubgroup}
                                                 addItemHandler={(newItem: IOrderItemToAdd) => {
                                                     const updatedList = [...editItemsList, newItem];
                                                     if (updatedList.length === editItemsList.length) {
@@ -254,7 +282,7 @@ function EditOrder({
                                                         <EditableItem
                                                             key={index}
                                                             item={item as IOrderItemToUpdate}
-                                                            subgroupData={subgroupData}
+                                                            subgroupData={subgroupData as ISubgroup}
                                                             onItemChange={(updatedItem) => {
                                                                 setIsSubmitBtnHidden(false);
                                                                 setEditItemsList(prev =>
@@ -277,7 +305,7 @@ function EditOrder({
                                     <Address
                                         address={address.address}
                                         currentAddressType={address.type}
-                                        addressList={addressList}
+                                        addressList={addressList as IAddress}
                                         addressHandler={(type: string, address: string) => {
                                             setIsSubmitBtnHidden(false);
                                             setAddress({
@@ -306,6 +334,23 @@ function EditOrder({
                                             }}
                                         />
                                     </AnimatedWrapper>
+
+                                    <EditRetailOrderForm
+                                        isOpen={retailMode.isOpen}
+                                        currentOrder={currentOrder}
+                                        saveHandler={(updatedRetailData: string) => {
+                                            const updatedEditOrderParams = {
+                                                ...editOrderParams,
+                                                order: {
+                                                    ...editOrderParams.order,
+                                                    retailData: updatedRetailData,
+                                                }
+                                            }
+                                            setEditOrderParams(updatedEditOrderParams);
+                                            setIsSubmitBtnHidden(false);
+                                        }}
+                                        closeHandler={() => { setRetailMode({ isActive: true, isOpen: false }) }}
+                                    />
                                 </>
                                 :
                                 <View style={styles.loaderWrap}>
@@ -445,7 +490,7 @@ const styles = StyleSheet.create({
     },
     modalContent: {
         backgroundColor: Colors.pale,
-        paddingVertical: 20,
+        paddingVertical: 10,
         paddingHorizontal: 12,
         borderRadius: 13,
         width: '92%',
@@ -496,8 +541,8 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         marginHorizontal: -10,
         marginVertical: 10,
-        marginTop: 10,
-        paddingTop: 10,
+        marginTop: 2,
+        paddingTop: 7,
         borderTopWidth: 5,
         borderColor: Colors.blueLight,
         borderStyle: 'solid',
@@ -511,7 +556,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         zIndex: 0,
         right: 0,
-        bottom: -90,
+        bottom: -80,
     },
     notification: {
         zIndex: 1000,

@@ -68,7 +68,7 @@ function EditableItem({
             {/* info */}
             <OrderItem
                 item={currentItem}
-                units={units}
+                units={units as UnitsTypes}
             />
 
             <DeleteItemButton
@@ -101,12 +101,12 @@ function OrderItem({ item, units }: { item: IOrderItemToUpdate, units: UnitsType
                 {item.product_code || 'Без назви'}
             </Text>
 
-            <Detail label="🔢Кількість:" value={item.quantity} borderBottom />
-            <Detail label="📏Ширина:" value={widthValue} />
-            <Detail label="📐Висота:" value={heightValue} borderBottom />
-            <Detail label="⚙️Керування:" value={(item.side === "right" || item.side === "R" || item.side === "праворуч") ? "праворуч" : "ліворуч"} />
-            <Detail label="🎨Колір:" value={item.system_color} />
-            <Detail label="📎Фіксація:" value={item.fixation_type} />
+            <Detail label="Кількість:" value={item.quantity} borderBottom />
+            <Detail label="Ширина:" value={widthValue} />
+            <Detail label="Висота:" value={heightValue} borderBottom />
+            <Detail label="Керування:" value={(item.side === "right" || item.side === "R" || item.side === "праворуч") ? "праворуч" : "ліворуч"} />
+            <Detail label="Колір:" value={item.system_color} />
+            <Detail label="Фіксація:" value={item.fixation_type} />
         </View>
     )
 };

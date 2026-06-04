@@ -6,53 +6,61 @@ import { Fonts } from "../../../../theme/fonts";
 import { Colors } from "../../../../theme/colors";
 import Loader from "../../../ui/Loader";
 import { ErrorMessage } from "../../../ui/ErrorMessage";
+import { ISubgroup } from "../../../../lib/api/orders-screen/groups-and-products";
 
 function OrderItem({
     index,
     orderObject,
-    usdPrice,
+    price,
+    priceFixation,
     isLoading,
     isError = false,
     deleteHandler,
 }: {
     index: number,
     orderObject: INewOrderObject,
-    usdPrice: number | undefined,
+    price: number | undefined,
+    priceFixation: number | undefined,
     isLoading: boolean,
     isError?: boolean
     deleteHandler: (itemId: string) => void,
 }) {
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const subgroup = orderObject.subgroup as ISubgroup;
     const isComponentsOrAdsGroup = orderObject.group.code === 'components' || orderObject.group.code === 'ads';
 
     const itemRows = [
-        { label: "↔️ Ширина (габарит)", value: orderObject.width_gab },
-        { label: "↕️ Висота (габарит)", value: orderObject.height_gab },
-        { label: "↔️ Ширина (по штапику)", value: orderObject.width_shtapik },
-        { label: "↕️ Висота (по штапику)", value: orderObject.height_shtapik, dashedBorder: true },
+        { label: "Ширина (габарит)", value: orderObject.width_gab },
+        { label: "Висота (габарит)", value: orderObject.height_gab },
+        { label: "Ширина (по штапику)", value: orderObject.width_shtapik },
+        { label: "Висота (по штапику)", value: orderObject.height_shtapik, dashedBorder: true },
 
         {
-            label: "⚙ Управління", value: isComponentsOrAdsGroup ? ""
+            label: "Управління", value: isComponentsOrAdsGroup ? ""
                 : orderObject.controlType === 'L' ? "ліворуч" : "праворуч"
         },
-        { label: "🔧 Фіксація", value: orderObject.fixation_type?.name },
-        { label: "🎨 Колір", value: orderObject.color_system },
-        { label: "📋 Группа", value: isComponentsOrAdsGroup ? `${orderObject.subgroup.name}` : "" },
-        { label: "🔢 Кількість", value: `${orderObject.count_number} шт.`, dashedBorder: true },
+        { label: "Фіксація", value: orderObject.fixation_type?.name },
+        { label: "Колір", value: orderObject.color_system },
+        { label: "Группа", value: isComponentsOrAdsGroup ? `${subgroup.name}` : "" },
+        { label: "Кількість", value: `${orderObject.count_number} шт.`, dashedBorder: true },
 
 
+        { label: "Вартість Фіксації", value: priceFixation ? priceFixation.toFixed(2) + " грн." : "❌", },
         {
-            label: "Вартість", value: usdPrice ? usdPrice.toFixed(2) + "$" : "❌",
+            label: "Вартість", value: price ? price.toFixed(2) + " грн." : "❌",
             dashedBorder: true
         },
     ];
 
+    const paramsString = [
+        orderObject.controlType,
+        orderObject.color_system,
+        orderObject.fixation_type?.name
+    ].filter(Boolean).join('\n');
+
     return (
-        <AnimatedWrapper>
-            <Pressable
-                onPress={() => setIsOpen(!isOpen)}
-                style={styles.container}
-            >
+        <>
+            <Pressable onPress={() => setIsOpen(!isOpen)} style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.indexCircle}>{++index}</Text>
                     <Text style={styles.productName}>{orderObject.product?.name}</Text>
@@ -74,7 +82,7 @@ function OrderItem({
                         <View style={styles.previewColumn}>
                             <Text style={styles.previewBox}>
                                 {isComponentsOrAdsGroup ?
-                                    orderObject.subgroup.name
+                                    subgroup.name
                                     :
                                     orderObject.width_gab + "x" + orderObject.height_gab
                                 }
@@ -83,16 +91,14 @@ function OrderItem({
                                 {orderObject.count_number} шт.
                             </Text>
                         </View>
+                        <View style={styles.separator} />
                         <Text style={styles.previewBox}>
-                            {orderObject.controlType} {"\n"}
-                            {orderObject.color_system} {"\n"}
-                            {orderObject.fixation_type?.name}
+                            {paramsString}
                         </Text>
-
-
+                        <View style={styles.separator} />
                         {!isLoading ? <View style={styles.previewColumn}>
                             <Text style={styles.previewBox}>
-                                {usdPrice ? usdPrice.toFixed(2) + "$" : "❌"}
+                                {price ? price.toFixed(2) + " грн." : "❌"}
                             </Text>
                         </View>
                             :
@@ -126,7 +132,7 @@ function OrderItem({
                     />}
                 </View>
             ) : null}
-        </AnimatedWrapper>
+        </>
     )
 }
 
@@ -178,7 +184,9 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: 'white',
         borderRadius: 12,
-        marginBottom: 8
+        marginBottom: 4,
+        borderWidth: 2,
+        borderColor: Colors.grayLight
     },
     header: {
         flexDirection: 'row',
@@ -189,9 +197,9 @@ const styles = StyleSheet.create({
         borderColor: Colors.grayLight
     },
     indexCircle: {
-        fontFamily: Fonts.comfortaa700,
+        fontFamily: Fonts.openSans700,
         fontSize: 16,
-        lineHeight: 23,
+        lineHeight: 18,
         width: 25,
         height: 25,
         backgroundColor: Colors.blue,
@@ -199,25 +207,30 @@ const styles = StyleSheet.create({
         verticalAlign: 'middle',
         color: 'white',
         borderRadius: 50,
-        marginRight: 8
+        marginRight: 8,
+        top: -5,
     },
     productName: {
         fontFamily: Fonts.comfortaa600,
         fontSize: 15,
+        lineHeight: 17,
         color: 'black',
-        lineHeight: 19,
         maxWidth: 240
     },
     deleteBtn: {
         width: 30,
         height: 30,
-        backgroundColor: Colors.grayLight,
+        backgroundColor: 'white',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 50,
+        borderRadius: 12,
         position: 'absolute',
         right: 0,
-        top: -5
+        top: -5,
+        shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 0.12,
+        shadowRadius: 8,
+        elevation: 6,
     },
     deleteIcon: {
         width: 20,
@@ -230,26 +243,35 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         borderBottomWidth: 1,
         borderColor: Colors.grayLight,
-        paddingBottom: 7,
-        marginBottom: 5
+        paddingBottom: 5,
     },
     previewColumn: {
         gap: 5
     },
     previewBox: {
         fontFamily: Fonts.openSans400,
-        fontSize: 14,
+        fontSize: 13,
+        lineHeight: 15,
         textAlign: 'center',
-        borderRadius: 8,
+        verticalAlign: 'middle',
         color: 'black',
+        borderRadius: 8,
         maxWidth: 120
     },
     expandedContainer: {
         backgroundColor: 'white',
         padding: 5,
         top: -20,
-        borderRadius: 8,
-        paddingBottom: 12
+        width: '100%',
+        alignSelf: 'center',
+        borderBottomLeftRadius: 12,
+        borderBottomRightRadius: 12,
+        paddingBottom: 12,
+        borderLeftWidth: 2,
+        borderRightWidth: 2,
+        borderBottomWidth: 2,
+        borderColor: Colors.grayLight,
+        gap: 6
     },
     rowItem: {
         flexDirection: 'row',
@@ -264,28 +286,38 @@ const styles = StyleSheet.create({
     },
     rowLabel: {
         fontSize: 15,
+        lineHeight: 17,
         fontFamily: Fonts.comfortaa600,
         color: "#707070",
     },
     rowValue: {
         fontSize: 15,
+        lineHeight: 17,
         fontFamily: Fonts.comfortaa600,
         color: 'black',
         maxWidth: '70%'
     },
     detailSwitcherText: {
-        color: Colors.gray,
-        fontFamily: Fonts.openSans400,
-        fontSize: 16,
-        marginLeft: 15,
+        color: Colors.blue,
+        fontFamily: Fonts.comfortaa700,
+        fontSize: 13,
+        lineHeight: 15,
+        marginLeft: 5,
         opacity: 0.6,
+        paddingTop: 5
     },
     setailSwitcherArrow: {
         width: 10,
         height: 16,
         resizeMode: 'stretch',
         position: 'absolute',
-        right: 20,
-        top: 3
-    }
+        right: 30,
+        top: 8,
+        opacity: 0.7
+    },
+    separator: {
+        width: 1,
+        height: '70%',
+        backgroundColor: Colors.grayLight,
+    },
 });

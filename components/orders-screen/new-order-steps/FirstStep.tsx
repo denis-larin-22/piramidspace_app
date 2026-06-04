@@ -4,6 +4,7 @@ import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { Colors } from "../../../theme/colors";
 import { Fonts } from "../../../theme/fonts";
 import { INewOrderObject, useCreateOrder } from "../NewOrderProvider";
+import RetailOrderButton from "./fourth-step/RetailOrderButton";
 
 interface IMainGroupIcons {
     code: MainGroupsCode,
@@ -38,6 +39,7 @@ function FirstStep({ stepHandler }: { stepHandler: (selectedGroup: MainGroupsCod
             activeGroup: selectedGroup.code,
             newOrderObject: updatedOrder
         });
+
         stepHandler(selectedGroup.code);
     };
 
@@ -47,15 +49,25 @@ function FirstStep({ stepHandler }: { stepHandler: (selectedGroup: MainGroupsCod
                 offsetY={20}
                 useOpacity
                 delay={200}
+                style={{
+                    borderBottomWidth: 2,
+                    borderColor: Colors.grayLight,
+                    paddingBottom: 5,
+                    marginBottom: 5
+                }}
             >
                 <Text style={{
                     fontFamily: Fonts.comfortaa700,
                     color: 'black',
                     fontSize: 20,
                     textTransform: 'uppercase',
-                    marginBottom: 15,
+                    marginBottom: 5,
                     textAlign: 'center'
                 }}>Оформлення <Text style={{ color: Colors.blue }}>Замовлення</Text></Text>
+
+                <RetailOrderButton
+                    style={{ alignSelf: "flex-start" }}
+                />
             </AnimatedWrapper>
 
             {mainGroupsIcons.map((group, index) => (
@@ -78,6 +90,11 @@ function FirstStep({ stepHandler }: { stepHandler: (selectedGroup: MainGroupsCod
                         <Text style={styles.categoryText}>
                             {group.name}
                         </Text>
+
+                        <Image
+                            source={require('../../../assets/orders-screen/arrow.webp')}
+                            style={styles.arrow}
+                        />
                     </Pressable>
                 </AnimatedWrapper >
             ))
@@ -103,8 +120,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 18,
         borderRadius: 32,
         marginVertical: 5,
-        borderWidth: 1,
-        borderColor: Colors.blueLight,
+        backgroundColor: 'white',
+        shadowColor: Colors.gray,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.04,
+        shadowRadius: 10,
+        elevation: 2,
     },
     categoryIcon: {
         width: 21,
@@ -117,4 +138,10 @@ const styles = StyleSheet.create({
         lineHeight: 17,
         color: 'black',
     },
+    arrow: {
+        width: 5,
+        height: 10,
+        position: 'absolute',
+        right: 15,
+    }
 });

@@ -38,7 +38,7 @@ export interface INewOrderObject {
     comment: string,
     delivery_adr: string,
     product_type: string,
-    retailData: string,
+    retailData: string | null,
 }
 
 export const initCreateOrderParams: ICreateOrderParams = {
@@ -66,7 +66,7 @@ export const initCreateOrderParams: ICreateOrderParams = {
         comment: "",
         delivery_adr: "",
         product_type: "",
-        retailData: "",
+        retailData: null,
     },
     ordersList: [],
 };

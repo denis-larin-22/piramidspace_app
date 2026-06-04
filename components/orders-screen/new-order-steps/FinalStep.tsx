@@ -16,15 +16,17 @@ import { useEffect, useState } from "react";
 import { calculateOrderPriceDayNight, ICalculateOrderItem, ICalculateOrderObject, ICalculateResponce } from "../../../lib/api/orders-screen/calculate-order";
 import AddressAndComment from "./final-step/AddressAndComment";
 import { getDataFromAcyncStorage } from "../../../lib/async-storage/acyncStorage";
-import { ASYNC_STORAGE_USER_INFO_OBJECT } from "../../../lib/async-storage/asyncStorageKeys";
+import { ASYNC_STORAGE_RATE_VALUE_KEY, ASYNC_STORAGE_USER_INFO_OBJECT } from "../../../lib/async-storage/asyncStorageKeys";
 import { MainGroupsCode } from "../../../lib/api/orders-screen/groups-and-products";
 import Loader from "../../ui/Loader";
 import { formStyles } from "./third-step-components/form-styles";
 import { IUserInfo } from "../../../lib/api/auth";
 import { ErrorMessage } from "../../ui/ErrorMessage";
 import { shadow } from "../../../theme/shadow";
+import RetailOrderButton from "./fourth-step/RetailOrderButton";
+import RetailOrderEditButton from "./fourth-step/RetailOrderEditButton";
 
-interface IOrderCalculates {
+export interface IOrderCalculates {
     isLoading: boolean,
     result: ICalculateResponce | null | undefined
 }
@@ -32,19 +34,20 @@ interface IOrderCalculates {
 function FinalStep({
     rateValue,
     balanceValue,
+    addItemToOrder,
     stepHandler,
+    retailEditBtnHandler,
     closeHandler,
-    buttonsHideHandler
 }: {
     rateValue: string | null,
     balanceValue: number | null,
+    addItemToOrder: () => void,
     stepHandler: () => void,
+    retailEditBtnHandler: () => void,
     closeHandler: () => void,
-    buttonsHideHandler: (isHide: boolean) => void
 }) {
     const { orderParams, setOrderParams } = useCreateOrder();
     const [isAddressOpen, setIsAddressOpen] = useState<boolean>(false);
-    const [isCreateButtonHidden, setIsCreateButtonHidden] = useState<boolean>(false);
     const isComponentsGroup = orderParams.activeGroup === "components";
 
     const initReport = {
@@ -62,6 +65,7 @@ function FinalStep({
 
     // 1$ check
     const [oneDollarCheck, setOneDollarCheck] = useState(true);
+    const [isOneDollarCheckError, setIsOneDollarCheckError] = useState(false);
 
     // Getting first calculates
     useEffect(() => {
@@ -70,6 +74,7 @@ function FinalStep({
                 isLoading: true,
                 result: null
             });
+
 
             const calculates = await calculateCreateHandler(orderParams, false);
             if (calculates === null) {
@@ -86,12 +91,21 @@ function FinalStep({
                         result: undefined
                     });
                 }, 3500);
-            };
+            } else {
+                const resultSumm = Number(calculates.total_uah);
+                const dollarValue = rateValue ? Number(rateValue) : 0;
 
-            setOrderrCalculates({
-                isLoading: false,
-                result: calculates
-            });
+                if (resultSumm > dollarValue) {
+                    setOneDollarCheck(true);
+                } else {
+                    setOneDollarCheck(false);
+                }
+
+                setOrderrCalculates({
+                    isLoading: false,
+                    result: calculates
+                });
+            }
         };
 
         getCalculates();
@@ -136,52 +150,6 @@ function FinalStep({
         });
     }
 
-    async function calcCreate() {
-        buttonsHideHandler(true);
-        setIsCreateButtonHidden(true);
-
-        // CHECK 1$
-        if (isComponentsGroup && orderCalculates.result.total_usd <= 1) {
-            setOneDollarCheck(false);
-
-            setTimeout(() => {
-                setOneDollarCheck(true);
-                buttonsHideHandler(false);
-            }, 4000);
-
-            return;
-        }
-
-        const placeOrder = await calculateCreateHandler(orderParams, true);
-
-        if (placeOrder === null) {
-            setReport({
-                isVissible: true,
-                isError: true,
-                message: "Помилка при створенні замовлення  Ми вже працюємо над усуненням цієї проблеми"
-            });
-
-            setTimeout(() => {
-                setReport(initReport);
-                buttonsHideHandler(false);
-                setIsCreateButtonHidden(false);
-            }, 3500);
-        } else {
-            setReport({
-                isVissible: true,
-                isError: false,
-                message: `Створено попереднє замовлення №${placeOrder.order_number}`
-            });
-
-            setTimeout(() => {
-                setReport(initReport);
-                buttonsHideHandler(false);
-                setIsCreateButtonHidden(false);
-                closeHandler();
-            }, 3500);
-        }
-    }
-
     return (
         <View>
             {orderCalculates.result === undefined && <RessponceErrorMessage />}
@@ -209,16 +177,42 @@ function FinalStep({
                 delay={200}
                 style={styles.rateBalanceContainer}
             >
-                <Text style={styles.rateBalanceText}>Курс: {rateValue}</Text>
-                <Text style={styles.rateBalanceText}>Баланс: {balanceValue}</Text>
-                <Text style={styles.rateBalanceText}>Готовність на: -</Text>
+                <View style={styles.rateBalanceContainerText}>
+                    <View style={styles.alignCenter}>
+                        <Text style={styles.rateBalanceTitle}>Курс:</Text>
+                        <Text style={[styles.rateBalanceText, { color: 'black' }]}>{rateValue}</Text>
+                    </View>
+                    <View style={styles.separator} />
+                    <View style={styles.alignCenter}>
+                        <Text style={styles.rateBalanceTitle}>Баланс:</Text>
+                        <Text style={[styles.rateBalanceText, { color: (Number(balanceValue) > 0) ? "black" : Colors.redLight }]}>{balanceValue}</Text>
+                    </View>
+                    <View style={styles.separator} />
+                    <View style={styles.alignCenter}>
+                        <Text style={styles.rateBalanceTitle}>Готовність на:</Text>
+                        <Text style={[styles.rateBalanceText, { color: 'black' }]}>-</Text>
+                    </View>
+                </View>
+
+                {/* Retail mode */}
+                <View style={styles.retailButtonsContainer}>
+                    <RetailOrderButton
+                        style={{
+                            width: '95%',
+                        }}
+                    />
+                    <RetailOrderEditButton
+                        btnHandler={retailEditBtnHandler}
+                    />
+                </View>
+
             </AnimatedWrapper>
 
             <AnimatedWrapper
                 useOpacity
                 offsetY={20}
                 delay={300}
-                style={styles.rateBalanceContainer}
+                style={styles.sckrollContainer}
             >
                 <ScrollView
                     style={isAddressOpen ? styles.scrollViewHidden : styles.scrollViewVisible}
@@ -226,15 +220,16 @@ function FinalStep({
                     showsVerticalScrollIndicator={true}
                 >
                     {orderParams.ordersList.map((itemOrder, index) => {
-                        const usdPrice = orderCalculates.result?.items.find((item) => item.product_code === itemOrder.product?.name)?.total_price;
-
+                        const price = orderCalculates.result?.items.find((item) => item.product_code === itemOrder.product?.name)?.total_price_uah;
+                        const priceFixation = orderCalculates.result?.items.find((item) => item.product_code === itemOrder.product?.name)?.fixationMarkup_uah;
                         return (
                             <OrderItem
                                 key={itemOrder.id}
                                 index={index}
                                 orderObject={itemOrder}
                                 isLoading={orderCalculates.isLoading}
-                                usdPrice={usdPrice}
+                                price={price}
+                                priceFixation={priceFixation}
                                 isError={report.isError}
                                 deleteHandler={deleteItemHandler}
                             />
@@ -253,7 +248,7 @@ function FinalStep({
                     >
                         <Text style={styles.addSumm}>в корзині: {orderParams.ordersList.length}</Text>
 
-                        <Pressable onPress={stepHandler} style={[styles.addButton, shadow]}>
+                        <Pressable onPress={addItemToOrder} style={[styles.addButton, shadow]}>
                             <ImageBackground
                                 source={require("../../../assets/gradient-small.png")}
                                 style={styles.addButtonBcg}
@@ -274,8 +269,10 @@ function FinalStep({
             <AnimatedWrapper useOpacity offsetY={20} delay={600} style={styles.totalRow}>
                 <Text style={styles.totalAmount}>Сума</Text>
                 {orderCalculates.result ? (
-                    <Text style={styles.totalAmountText}>{orderCalculates.result.total_usd.toFixed(2)}$</Text>
-
+                    <View style={styles.totalAmountRow}>
+                        <Text style={styles.totalAmountText}>{orderCalculates.result.total_uah.toFixed(2)}</Text>
+                        <Text style={styles.totalAmountLabel}>грн.</Text>
+                    </View>
                 ) : (
                     <Loader />
                 )}
@@ -284,32 +281,32 @@ function FinalStep({
             </AnimatedWrapper>
             {isComponentsGroup && <Text style={styles.compLimitsText}>Зверніть увагу, що сума замовлення має бути більше 1$</Text>}
 
+            <AnimatedWrapper
+                style={[formStyles.submitButton, styles.createButtonWrapper]}
+                offsetY={-20}
+            >
+                <Pressable onPress={() => {
+                    if (oneDollarCheck) {
+                        stepHandler();
+                    } else {
+                        setIsOneDollarCheckError(true);
+                        setTimeout(() => { setIsOneDollarCheckError(false) }, 2500)
+                    }
+                }}>
+                    <ImageBackground
+                        source={require("../../../assets/gradient-small.png")}
+                        style={formStyles.submitButtonBg}
+                    >
+                        <Text style={formStyles.submitButtonText}>Сформувати</Text>
+                    </ImageBackground>
+                </Pressable>
+            </AnimatedWrapper>
 
-            {!isCreateButtonHidden && (
-                <AnimatedWrapper
-                    style={[formStyles.submitButton, styles.createButtonWrapper]}
-                    offsetY={-20}
-                >
-                    <Pressable onPress={calcCreate}>
-                        <ImageBackground
-                            source={require("../../../assets/gradient-small.png")}
-                            style={formStyles.submitButtonBg}
-                        >
-                            <Text style={formStyles.submitButtonText}>Створити</Text>
-                        </ImageBackground>
-                    </Pressable>
-                </AnimatedWrapper>
-            )}
-
-            {!oneDollarCheck && <ErrorMessage
+            {isOneDollarCheckError && <ErrorMessage
                 errorTitle="Зверніть увагу"
                 errorText="Для створення замовлення сума має бути більше 1$"
             />}
-            <Report
-                isVissible={report.isVissible}
-                isError={report.isError}
-                message={report.message}
-            />
+
         </View>
     );
 }
@@ -318,6 +315,8 @@ export default FinalStep;
 
 export async function calculateCreateHandler(orderParams: ICreateOrderParams, createOrder: boolean = false): Promise<ICalculateResponce | null> {
     const userInfo = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT);
+    if (!userInfo) return null;
+
     const { "логин": login } = JSON.parse(userInfo) as IUserInfo;
 
     const orderItems: ICalculateOrderItem[] = orderParams.ordersList.map((item) => {
@@ -343,49 +342,16 @@ export async function calculateCreateHandler(orderParams: ICreateOrderParams, cr
         comment: orderParams.newOrderObject.comment,
         adrType: orderParams.newOrderObject.adrType,
         delivery_adr: orderParams.newOrderObject.delivery_adr,
-        product_type: orderParams.activeGroup,
+        product_type: orderParams.activeGroup as string,
         retailData: orderParams.newOrderObject.retailData,
         predopl: 0
     }
-
 
     const calculatesResult = await calculateOrderPriceDayNight(requestParams);
     return calculatesResult;
 }
 
-// Report Component
-export function Report({ isVissible, message, isError = false }: { isVissible: boolean, message: string, isError?: boolean }) {
-    if (isVissible) {
-        return (
-            <View style={styles.reportOverlay}>
-                <AnimatedWrapper useOpacity useScale>
-                    {isError ? (
-                        <Image
-                            source={require("../../../assets/orders-screen/error.webp")}
-                            style={styles.reportIcon}
-                        />
-                    ) : (
-                        <Image
-                            source={require("../../../assets/orders-screen/success.webp")}
-                            style={styles.reportIcon}
-                        />
-                    )}
 
-                    <View style={[
-                        styles.reportProgressBar,
-                        isError ? styles.reportProgressBarError : styles.reportProgressBarSuccess
-                    ]}></View>
-
-                    {!isError && (
-                        <Text style={styles.reportThanks}>Дякуємо!</Text>
-                    )}
-                    <Text style={styles.reportMessage}>{message}</Text>
-                </AnimatedWrapper>
-            </View>
-        )
-    }
-    return null;
-}
 
 function RessponceErrorMessage() {
     return (
@@ -406,16 +372,18 @@ function RessponceErrorMessage() {
     )
 }
 
-// === Все стили вынесены сюда ===
 const styles = StyleSheet.create({
     orderHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-evenly',
-        paddingBottom: 8,
-        marginBottom: 8,
-        borderBottomWidth: 1,
-        borderColor: "#A2A2A870",
+        gap: 20,
+        paddingBottom: 18,
+        backgroundColor: "#23DCC830",
+        marginHorizontal: -10,
+        marginTop: -10,
+        paddingTop: 3,
+        paddingLeft: 20,
+        borderRadius: 12,
     },
     cartIcon: {
         width: 70,
@@ -426,14 +394,17 @@ const styles = StyleSheet.create({
         borderRadius: 50
     },
     title: {
-        fontSize: 16,
-        fontFamily: Fonts.comfortaa600,
-        textAlign: "center",
+        fontSize: 14,
+        lineHeight: 16,
+        marginBottom: 5,
+        fontFamily: Fonts.comfortaa700,
+        textAlign: "left",
         textTransform: "uppercase",
         color: Colors.gray,
     },
     subtitle: {
         fontSize: 24,
+        lineHeight: 26,
         fontFamily: Fonts.comfortaa700,
         color: Colors.blue,
         textAlign: "center",
@@ -441,22 +412,51 @@ const styles = StyleSheet.create({
         maxWidth: 250,
     },
     rateBalanceContainer: {
+        backgroundColor: 'white',
+        borderRadius: 12,
+        marginHorizontal: -10,
+        paddingVertical: 4,
+        marginTop: -10,
+        marginBottom: 5,
+    },
+    rateBalanceContainerText: {
         flexDirection: 'row',
         flexWrap: "wrap",
         gap: 10,
         alignItems: "center",
-        justifyContent: "center",
-        paddingBottom: 8,
-        marginBottom: 8,
-        borderBottomWidth: 1,
-        borderColor: "#A2A2A870",
+        justifyContent: "space-evenly",
+        marginBottom: 5
+    },
+    alignCenter: {
+        alignItems: 'center'
     },
     rateBalanceText: {
         fontFamily: Fonts.comfortaa700,
+        fontSize: 15,
+    },
+    rateBalanceTitle: {
+        fontFamily: Fonts.comfortaa700,
+        fontSize: 12,
         color: Colors.gray
     },
+    separator: {
+        width: 1,
+        height: '70%',
+        backgroundColor: Colors.grayLight,
+    },
+    retailButtonsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+    },
+    sckrollContainer: {
+        backgroundColor: 'white',
+        paddingHorizontal: 7,
+        borderRadius: 12,
+        marginHorizontal: -10,
+        overflow: 'hidden'
+    },
     scrollViewVisible: {
-        maxHeight: 370
+        maxHeight: 320,
     },
     scrollViewHidden: {
         maxHeight: 0
@@ -477,19 +477,20 @@ const styles = StyleSheet.create({
         width: '100%'
     },
     addSumm: {
-        fontFamily: Fonts.comfortaa700,
-        fontSize: 14,
-        lineHeight: 16,
+        marginTop: 2,
+        fontFamily: Fonts.comfortaa600,
+        fontSize: 12,
+        lineHeight: 14,
         color: Colors.gray,
     },
     addButton: {
         overflow: 'hidden',
         borderRadius: 50,
-        width: '100%'
+        width: '100%',
     },
     addButtonBcg: {
         flexDirection: 'row',
-        gap: 7,
+        gap: 15,
         backgroundColor: Colors.blue,
         paddingRight: 10,
         paddingLeft: 5,
@@ -519,15 +520,19 @@ const styles = StyleSheet.create({
     totalRow: {
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: 'center',
         padding: 5,
         backgroundColor: 'white',
         borderRadius: 12
     },
+    totalAmountRow: {
+        flexDirection: 'row',
+        gap: 3
+    },
     totalAmount: {
-        height: 28,
         fontFamily: Fonts.comfortaa700,
-        fontSize: 18,
-        lineHeight: 26,
+        fontSize: 16,
+        lineHeight: 18,
         color: Colors.gray
     },
     compLimitsText: {
@@ -540,62 +545,19 @@ const styles = StyleSheet.create({
     totalAmountText: {
         fontFamily: Fonts.comfortaa700,
         fontSize: 18,
-        lineHeight: 26,
+        lineHeight: 20,
         color: 'black'
+    },
+    totalAmountLabel: {
+        fontFamily: Fonts.comfortaa700,
+        fontSize: 16,
+        lineHeight: 18,
+        color: Colors.gray
     },
     createButtonWrapper: {
         bottom: -82,
         alignSelf: "center",
     },
-
-    // Report styles
-    reportOverlay: {
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-        zIndex: 100,
-        backgroundColor: Colors.pale,
-        justifyContent: 'center',
-    },
-    reportIcon: {
-        width: 70,
-        height: 70,
-        alignSelf: "center",
-        resizeMode: "contain",
-        alignItems: "center",
-    },
-    reportProgressBar: {
-        marginVertical: 30,
-        width: '70%',
-        alignSelf: 'center',
-        height: 16,
-        borderRadius: 20,
-        borderWidth: 7,
-    },
-    reportProgressBarError: {
-        backgroundColor: Colors.red,
-        borderColor: "#FF0A0A10",
-    },
-    reportProgressBarSuccess: {
-        backgroundColor: Colors.green,
-        borderColor: "#1EBF9150",
-    },
-    reportMessage: {
-        fontFamily: Fonts.comfortaa600,
-        fontSize: 16,
-        lineHeight: 22,
-        textAlign: 'center',
-        marginTop: 20,
-        color: Colors.gray
-    },
-    reportThanks: {
-        fontFamily: Fonts.comfortaa600,
-        fontSize: 18,
-        color: 'black',
-        textAlign: 'center',
-        opacity: 0.9
-    },
-
     resErrContainer: {
         position: 'absolute',
         top: -80,
