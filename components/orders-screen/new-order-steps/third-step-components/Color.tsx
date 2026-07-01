@@ -45,7 +45,12 @@ export default function Color({
                         minHeight: 50,
                     }]}
                 >
-                    <ScrollView style={formStyles.scrollModal}>
+                    <ScrollView
+                        persistentScrollbar={true}
+                        indicatorStyle="black"
+                        nestedScrollEnabled
+                        style={formStyles.scrollModal}
+                    >
                         {colorsList.length ?
                             colorsList.map((color, index) => (
                                 <AnimatedWrapper

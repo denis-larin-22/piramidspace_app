@@ -1,12 +1,14 @@
-import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { useEffect, useState } from "react";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
 import { Fonts } from "../../theme/fonts";
-import { getDataFromAcyncStorage, saveDataToAcyncStorage } from "../../lib/async-storage/acyncStorage";
-import { ASYNC_STORAGE_USER_SETTINGS_AVATAR } from "../../lib/async-storage/asyncStorageKeys";
+import { getDataFromAcyncStorage, removeData, saveDataToAcyncStorage } from "../../lib/async-storage/acyncStorage";
+import { ASYNC_STORAGE_USER_INFO_OBJECT, ASYNC_STORAGE_USER_LOGIN, ASYNC_STORAGE_USER_PHONE_NUMBER, ASYNC_STORAGE_USER_SETTINGS_AVATAR } from "../../lib/async-storage/asyncStorageKeys";
+import { HomeScreenNavigationProp } from "../../screens/MainScreen";
+import { CommonActions } from "@react-navigation/native";
 
-export function Avatar() {
+export function Avatar({ navigation }: { navigation: HomeScreenNavigationProp }) {
     const avatarList = [
         require('../../assets/avatars/avatar1.png'),
         require('../../assets/avatars/avatar2.png'),
@@ -41,6 +43,20 @@ export function Avatar() {
                 }
             }).catch(() => setActiveAvatar(avatarList[0]))
     }, []);
+
+    // exit
+    const exitHandler = () => {
+        removeData(ASYNC_STORAGE_USER_LOGIN);
+        removeData(ASYNC_STORAGE_USER_PHONE_NUMBER);
+        removeData(ASYNC_STORAGE_USER_INFO_OBJECT);
+
+        navigation.dispatch(
+            CommonActions.reset({
+                index: 0,
+                routes: [{ name: "LoginScreen" }],
+            })
+        );
+    };
 
     return (
         <>
@@ -93,6 +109,15 @@ export function Avatar() {
                                     />
                                 </TouchableOpacity>
                             ))}
+                        </View>
+
+                        <View style={styles.exitWrap}>
+                            <Pressable
+                                style={styles.exitButton}
+                                onPress={exitHandler}
+                            >
+                                <Text style={styles.exitButtonText}>Вийти з аккаунту</Text>
+                            </Pressable>
                         </View>
                     </View>
                 </AnimatedWrapper>
@@ -180,9 +205,28 @@ const styles = StyleSheet.create({
     avatarOptionImage: {
         width: '120%',
         height: '120%',
-        // resizeMode: 'center',
         position: 'absolute',
         top: -2,
         left: -5
+    },
+    exitWrap: {
+        marginTop: 20,
+        paddingHorizontal: 30,
+        paddingVertical: 20,
+        borderTopWidth: 1,
+        borderColor: Colors.grayLight
+    },
+    exitButton: {
+        paddingHorizontal: 10,
+        paddingVertical: 7,
+        backgroundColor: "#E63946",
+        borderRadius: 12,
+    },
+    exitButtonText: {
+        color: "white",
+        fontFamily: Fonts.comfortaa600,
+        fontSize: 12,
+        lineHeight: 14,
+        textAlign: 'center'
     },
 });

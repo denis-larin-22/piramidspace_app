@@ -370,7 +370,7 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
                     >
 
                         {/* Управление и Количество */}
-                        <View style={formStyles.row}>
+                        <View style={{ flexDirection: orderParams.activeGroup === 'vertical' ? 'column' : 'row', justifyContent: 'space-between' }}>
                             {cotrolTypesList.length !== 0 ? <ControlType
                                 isControlTypeListOpen={isControlTypeListOpen}
                                 toggleControlTypeList={toggleControlTypeList}
@@ -381,7 +381,7 @@ function ThirdStep({ stepHandler }: { stepHandler: () => void }) {
                             /> : null}
 
                             {/* UI Separator */}
-                            <View style={styles.separator}></View>
+                            {orderParams.activeGroup !== 'vertical' && <View style={styles.separator}></View>}
 
                             <CountValue errorFieldNumber={isError.errorFieldNumber} />
                         </View>

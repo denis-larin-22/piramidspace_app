@@ -48,7 +48,7 @@ function FixationType({
                     useOpacity
                     useScale
                     offsetY={-20}
-                    style={[formStyles.dropdownMenu, { maxHeight: 130 }]}
+                    style={[formStyles.dropdownMenu, { top: '-125%', maxHeight: 130 }]}
                 >
                     <ScrollView style={{ maxHeight: 130 }}>
                         {fullList.map((fixationType, index) => (

@@ -1,7 +1,6 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import AnimatedWrapper from "../../animation/AnimatedWrapper";
 import { Colors } from "../../../theme/colors";
-import { Fonts } from "../../../theme/fonts";
 import { useState } from "react";
 import { ArrowDown } from "../../ui/ArrowDown";
 import { formStyles } from "../new-order-steps/third-step-components/form-styles";
@@ -13,11 +12,20 @@ function ControlType({
 }: {
     control: string,
     controlTypesList: string[]
-    controlHandler: (string) => void
+    controlHandler: (value: string) => void
 }) {
     if (controlTypesList.length === 0) return null;
 
     const [isControlListOpen, setIsControlListOpen] = useState<boolean>(false);
+
+
+    const fixedValuesControlList = controlTypesList.map((value) => {
+        if (value.toLowerCase() === "l" || value.toLowerCase() === 'left') {
+            return 'ліворуч';
+        } else if (value.toLowerCase() === "r" || value.toLowerCase() === 'right') {
+            return 'праворуч';
+        } else return value;
+    });
 
     return (
         <View style={{ flexGrow: 1, width: '46%' }}>
@@ -39,7 +47,7 @@ function ControlType({
                 >
                     <ScrollView style={formStyles.scrollModal}>
                         {controlTypesList.length ?
-                            controlTypesList.map((type, index) => (
+                            fixedValuesControlList.map((type, index) => (
                                 <AnimatedWrapper
                                     key={index}
                                     useOpacity
@@ -76,8 +84,12 @@ export default ControlType;
 
 function ParseSideValue(value: string, isReverse: boolean = false) {
     if (isReverse) {
-        return value === "L" ? "left" : "right"
+        return value === "ліворуч" ? "left" : "right"
     } else {
-        return (value === "left" || value === "ліворуч") ? "L" : "R"
+        if (value.toLowerCase() === "l" || value.toLowerCase() === 'left' || value.toLowerCase() === ' left') {
+            return 'ліворуч';
+        } else if (value.toLowerCase() === "r" || value.toLowerCase() === 'right' || value.toLowerCase() === ' right') {
+            return 'праворуч';
+        } else return value;
     }
 }

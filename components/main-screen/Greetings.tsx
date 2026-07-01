@@ -3,8 +3,9 @@ import { Fonts } from "../../theme/fonts";
 import { getGreetingUA } from "../../lib/utils";
 import { Avatar } from "../ui/Avatar";
 import AnimatedWrapper from "../animation/AnimatedWrapper";
+import { HomeScreenNavigationProp } from "../../screens/MainScreen";
 
-function Greetings({ userName }: { userName: string, isOnline?: boolean }) {
+function Greetings({ userName, navigation }: { userName: string, isOnline?: boolean, navigation: HomeScreenNavigationProp }) {
     const greetingValue = getGreetingUA();
 
     return (
@@ -17,7 +18,7 @@ function Greetings({ userName }: { userName: string, isOnline?: boolean }) {
                 {greetingValue},
                 <Text style={styles.userName}> {userName}!</Text>
             </Text>
-            <Avatar />
+            <Avatar navigation={navigation} />
         </AnimatedWrapper>
     );
 }

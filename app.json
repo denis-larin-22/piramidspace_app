@@ -2,7 +2,7 @@
   "expo": {
     "name": "Piramid space",
     "slug": "first-app",
-    "version": "1.0.5",
+    "version": "1.0.11",
     "orientation": "portrait",
     "icon": "./assets/start-icon.png",
     "userInterfaceStyle": "light",
@@ -21,7 +21,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "piramid.test.app",
-      "versionCode": 29
+      "versionCode": 31
     },
     "web": {
       "favicon": "./assets/favicon.png"

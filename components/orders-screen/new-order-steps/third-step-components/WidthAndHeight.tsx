@@ -71,8 +71,8 @@ function AnotherGroupsWH({
 }: {
     orderParams: ICreateOrderParams;
     setOrderParams: (params: ICreateOrderParams) => void;
-    errorFieldNumber: number | null,
-    withShtapik: boolean
+    errorFieldNumber: number | null;
+    withShtapik: boolean;
 }) {
     const isHorizontal = orderParams.activeGroup === "horizontal";
     const orderObject = orderParams.newOrderObject;
@@ -81,16 +81,30 @@ function AnotherGroupsWH({
     const [warningInput, setWarningInput] = useState<number | null>(null);
     const [isMm, setIsMm] = useState(false);
 
+    // Локальные текстовые стейты для каждого инпута, чтобы ввод не «прыгал»
+    const [widthGabText, setWidthGabText] = useState("");
+    const [widthShtapikText, setWidthShtapikText] = useState("");
+    const [heightGabText, setHeightGabText] = useState("");
+    const [heightShtapikText, setHeightShtapikText] = useState("");
+
     const w_max = orderObject.product?.w_max ?? 999;
     const h_max = orderObject.product?.h_max ?? 999;
 
-    const WIDTH_DIFFERENCE = isHorizontal ? 4 : 3; // см
+    const WIDTH_DIFFERENCE = isHorizontal ? 1 : 3; // см
     const HEIGHT_DIFFERENCE = isHorizontal ? 4 : 5; // см
 
     const showWarning = (id: number) => {
         setWarningInput(id);
         setTimeout(() => setWarningInput(null), 3000);
     };
+
+    // Синхронизируем локальный текст с глобальным стейтом ТОЛЬКО при смене продукта или ед. измерения
+    useEffect(() => {
+        setWidthGabText(orderObject.width_gab ? fromCm(orderObject.width_gab, isMm) : "");
+        setWidthShtapikText(orderObject.width_shtapik ? fromCm(orderObject.width_shtapik, isMm) : "");
+        setHeightGabText(orderObject.height_gab ? fromCm(orderObject.height_gab, isMm) : "");
+        setHeightShtapikText(orderObject.height_shtapik ? fromCm(orderObject.height_shtapik, isMm) : "");
+    }, [orderObject.product, isMm]);
 
     const updateDimension = (
         field: keyof INewOrderObject,
@@ -101,45 +115,98 @@ function AnotherGroupsWH({
         warnId?: number,
         mode: "subtract" | "add" = "subtract"
     ) => {
-        const valueCm = toCm(valueFromInput, isMm);
+        // Поддержка запятых для мобильных клавиатур
+        const formattedText = valueFromInput.replace(",", ".");
 
-        if (!max) {
+        // Функция для обновления локального стейта нужного инпута
+        const setLocalText = (fieldName: typeof field, text: string) => {
+            if (fieldName === "width_gab") setWidthGabText(text);
+            if (fieldName === "width_shtapik") setWidthShtapikText(text);
+            if (fieldName === "height_gab") setHeightGabText(text);
+            if (fieldName === "height_shtapik") setHeightShtapikText(text);
+        };
+
+        // 1. ЕСЛИ ПОЛЕ ОЧИЩЕНО
+        if (formattedText === "") {
+            setLocalText(field, "");
+            setLocalText(pairField, "");
+
             setOrderParams({
                 ...orderParams,
                 newOrderObject: {
                     ...orderObject,
-                    [field]: valueCm,
-                    [pairField]: valueCm
-                        ? String(
-                            mode === "subtract"
-                                ? Math.max(0, +valueCm - diff)
-                                : +valueCm + diff
-                        )
-                        : ""
+                    [field]: "",
+                    [pairField]: ""
                 }
             });
             return;
         }
 
-        const limit = mode === "subtract" ? max : max - diff;
+        // Валидация на число
+        const numeric = +formattedText;
+        if (isNaN(numeric)) return;
 
-        if (+valueCm > limit) {
-            if (warnId) showWarning(warnId);
+        // Сохраняем текущий ввод в локальный стейт, чтобы точка не исчезала во время набора (например, "5.")
+        setLocalText(field, formattedText);
+
+        const valueCm = toCm(formattedText, isMm);
+
+        // 2. ЕСЛИ МАКСИМУМ НЕ ЗАДАН (на всякий случай)
+        if (!max) {
+            const calculatedPair = mode === "subtract"
+                ? Math.max(0, +valueCm - diff)
+                : +valueCm + diff;
+
+            setLocalText(pairField, fromCm(String(calculatedPair), isMm));
+            setOrderParams({
+                ...orderParams,
+                newOrderObject: {
+                    ...orderObject,
+                    [field]: valueCm,
+                    [pairField]: String(calculatedPair)
+                }
+            });
             return;
         }
 
+        // Вычисляем лимит в зависимости от того, какой инпут заполняют
+        const limit = mode === "subtract" ? max : max - diff;
+
+        // 3. ПРЕВЫШЕН МАКСИМУМ — ФИКСИРУЕМ LIMIT
+        if (+valueCm > limit) {
+            if (warnId) showWarning(warnId);
+
+            const fixedCurrentCm = limit;
+            const fixedPairCm = mode === "subtract"
+                ? Math.max(0, limit - diff)
+                : limit + diff;
+
+            setLocalText(field, fromCm(String(fixedCurrentCm), isMm));
+            setLocalText(pairField, fromCm(String(fixedPairCm), isMm));
+
+            setOrderParams({
+                ...orderParams,
+                newOrderObject: {
+                    ...orderObject,
+                    [field]: String(fixedCurrentCm),
+                    [pairField]: String(fixedPairCm)
+                }
+            });
+            return;
+        }
+
+        // 4. В ПРЕДЕЛАХ НОРМЫ
+        const calculatedPairCm = mode === "subtract"
+            ? Math.max(0, +valueCm - diff)
+            : +valueCm + diff;
+
+        setLocalText(pairField, fromCm(String(calculatedPairCm), isMm));
         setOrderParams({
             ...orderParams,
             newOrderObject: {
                 ...orderObject,
                 [field]: valueCm,
-                [pairField]: valueCm
-                    ? String(
-                        mode === "subtract"
-                            ? Math.max(0, +valueCm - diff)
-                            : +valueCm + diff
-                    )
-                    : ""
+                [pairField]: String(calculatedPairCm)
             }
         });
     };
@@ -168,47 +235,26 @@ function AnotherGroupsWH({
 
                     <Warning
                         isVissible={warningInput === 1}
-                        text={
-                            isMm
-                                ? `${w_max! * 10} мм`
-                                : `${w_max} см`
-                        }
+                        text={isMm ? `${w_max * 10} мм` : `${w_max} см`}
                     />
 
                     <TextInput
-                        keyboardType="number-pad"
+                        keyboardType="numeric" // Заменено на numeric для поддержки дробных чисел на iOS
                         style={[
                             formStyles.input,
-                            {
-                                borderColor:
-                                    focusedInput === 1
-                                        ? Colors.blue
-                                        : Colors.blueLight
-                            },
-                            (errorFieldNumber === 2 ||
-                                warningInput === 1) &&
-                            formStyles.borderRed
+                            { borderColor: focusedInput === 1 ? Colors.blue : Colors.blueLight },
+                            (errorFieldNumber === 2 || warningInput === 1) && formStyles.borderRed
                         ]}
                         placeholder="0"
-                        value={fromCm(orderObject.width_gab, isMm)}
+                        value={widthGabText}
                         onChangeText={(value) =>
-                            updateDimension(
-                                "width_gab",
-                                "width_shtapik",
-                                value,
-                                w_max,
-                                WIDTH_DIFFERENCE,
-                                1,
-                                "subtract"
-                            )
+                            updateDimension("width_gab", "width_shtapik", value, w_max, WIDTH_DIFFERENCE, 1, "subtract")
                         }
                         onFocus={() => setFocusedInput(1)}
                         onBlur={() => setFocusedInput(null)}
                         maxLength={6}
                     />
-                    <Text style={formStyles.unitLabel}>
-                        {isMm ? "мм" : "см"}
-                    </Text>
+                    <Text style={formStyles.unitLabel}>{isMm ? "мм" : "см"}</Text>
                 </View>
 
                 {/* UI Separator */}
@@ -223,160 +269,97 @@ function AnotherGroupsWH({
 
                     <Warning
                         isVissible={warningInput === 3}
-                        text={
-                            isMm
-                                ? `${h_max! * 10} мм`
-                                : `${h_max} см`
-                        }
+                        text={isMm ? `${h_max * 10} мм` : `${h_max} см`}
                     />
 
                     <TextInput
-                        keyboardType="number-pad"
+                        keyboardType="numeric"
                         style={[
                             formStyles.input,
-                            {
-                                borderColor:
-                                    focusedInput === 3
-                                        ? Colors.blue
-                                        : Colors.blueLight
-                            },
-                            (errorFieldNumber === 2 ||
-                                warningInput === 3) &&
-                            formStyles.borderRed
+                            { borderColor: focusedInput === 3 ? Colors.blue : Colors.blueLight },
+                            (errorFieldNumber === 2 || warningInput === 3) && formStyles.borderRed
                         ]}
                         placeholder="0"
-                        value={fromCm(orderObject.height_gab, isMm)}
+                        value={heightGabText}
                         onChangeText={(value) =>
-                            updateDimension(
-                                "height_gab",
-                                "height_shtapik",
-                                value,
-                                h_max,
-                                HEIGHT_DIFFERENCE,
-                                3,
-                                "subtract"
-                            )
+                            updateDimension("height_gab", "height_shtapik", value, h_max, HEIGHT_DIFFERENCE, 3, "subtract")
                         }
                         onFocus={() => setFocusedInput(3)}
                         onBlur={() => setFocusedInput(null)}
                         maxLength={6}
                     />
-                    <Text style={formStyles.unitLabel}>
-                        {isMm ? "мм" : "см"}
-                    </Text>
+                    <Text style={formStyles.unitLabel}>{isMm ? "мм" : "см"}</Text>
                 </View>
             </View>
 
-            {withShtapik && <View style={styles.row}>
-                {/* ====== ШИРИНА ПО ШТАПИКУ ====== */}
-                <View style={formStyles.inputContainer}>
-                    <View style={formStyles.rowLabel}>
-                        <Text style={formStyles.detailsText}>Ширина </Text>
-                        <Text style={formStyles.labelNoteSmall}>
-                            (по штапику)
-                        </Text>
+            {withShtapik && (
+                <View style={styles.row}>
+                    {/* ====== ШИРИНА ПО ШТАПИКУ ====== */}
+                    <View style={formStyles.inputContainer}>
+                        <View style={formStyles.rowLabel}>
+                            <Text style={formStyles.detailsText}>Ширина </Text>
+                            <Text style={formStyles.labelNoteSmall}>(по штапику)</Text>
+                        </View>
+
+                        <Warning
+                            isVissible={warningInput === 2}
+                            text={isMm ? `${(w_max - WIDTH_DIFFERENCE) * 10} мм` : `${w_max - WIDTH_DIFFERENCE} см`}
+                        />
+
+                        <TextInput
+                            keyboardType="numeric"
+                            style={[
+                                formStyles.input,
+                                { borderColor: focusedInput === 2 ? Colors.blue : Colors.blueLight },
+                                errorFieldNumber === 2 && formStyles.borderRed
+                            ]}
+                            placeholder="0"
+                            value={widthShtapikText}
+                            onChangeText={(value) =>
+                                updateDimension("width_shtapik", "width_gab", value, w_max, WIDTH_DIFFERENCE, 2, "add")
+                            }
+                            onFocus={() => setFocusedInput(2)}
+                            onBlur={() => setFocusedInput(null)}
+                            maxLength={6}
+                        />
+                        <Text style={formStyles.unitLabel}>{isMm ? "мм" : "см"}</Text>
                     </View>
 
-                    <Warning
-                        isVissible={warningInput === 2}
-                        text={
-                            isMm
-                                ? `${(w_max! - WIDTH_DIFFERENCE) * 10} мм`
-                                : `${w_max! - WIDTH_DIFFERENCE} см`
-                        }
-                    />
+                    {/* UI Separator */}
+                    <View style={styles.separator}></View>
 
-                    <TextInput
-                        keyboardType="number-pad"
-                        style={[
-                            formStyles.input,
-                            {
-                                borderColor:
-                                    focusedInput === 2
-                                        ? Colors.blue
-                                        : Colors.blueLight
-                            },
-                            errorFieldNumber === 2 &&
-                            formStyles.borderRed
-                        ]}
-                        placeholder="0"
-                        value={fromCm(orderObject.width_shtapik, isMm)}
-                        onChangeText={(value) =>
-                            updateDimension(
-                                "width_shtapik",
-                                "width_gab",
-                                value,
-                                w_max,
-                                WIDTH_DIFFERENCE,
-                                2,
-                                "add"
-                            )
-                        }
-                        onFocus={() => setFocusedInput(2)}
-                        onBlur={() => setFocusedInput(null)}
-                        maxLength={6}
-                    />
-                    <Text style={formStyles.unitLabel}>
-                        {isMm ? "мм" : "см"}
-                    </Text>
-                </View>
+                    {/* ====== ВИСОТА ПО ШТАПИКУ ====== */}
+                    <View style={formStyles.inputContainer}>
+                        <View style={formStyles.rowLabel}>
+                            <Text style={formStyles.detailsText}>Висота </Text>
+                            <Text style={formStyles.labelNoteSmall}>(по штапику)</Text>
+                        </View>
 
-                {/* UI Separator */}
-                <View style={styles.separator}></View>
+                        <Warning
+                            isVissible={warningInput === 4}
+                            text={isMm ? `${(h_max - HEIGHT_DIFFERENCE) * 10} мм` : `${h_max - HEIGHT_DIFFERENCE} см`}
+                        />
 
-                {/* ====== ВИСОТА ПО ШТАПИКУ ====== */}
-                <View style={formStyles.inputContainer}>
-                    <View style={formStyles.rowLabel}>
-                        <Text style={formStyles.detailsText}>Висота </Text>
-                        <Text style={formStyles.labelNoteSmall}>
-                            (по штапику)
-                        </Text>
+                        <TextInput
+                            keyboardType="numeric"
+                            style={[
+                                formStyles.input,
+                                { borderColor: focusedInput === 4 ? Colors.blue : Colors.blueLight },
+                                errorFieldNumber === 2 && formStyles.borderRed
+                            ]}
+                            placeholder="0"
+                            value={heightShtapikText}
+                            onChangeText={(value) =>
+                                updateDimension("height_shtapik", "height_gab", value, h_max, HEIGHT_DIFFERENCE, 4, "add")
+                            }
+                            onFocus={() => setFocusedInput(4)}
+                            onBlur={() => setFocusedInput(null)}
+                            maxLength={6}
+                        />
+                        <Text style={formStyles.unitLabel}>{isMm ? "мм" : "см"}</Text>
                     </View>
-
-                    <Warning
-                        isVissible={warningInput === 4}
-                        text={
-                            isMm
-                                ? `${(h_max! - HEIGHT_DIFFERENCE) * 10} мм`
-                                : `${h_max! - HEIGHT_DIFFERENCE} см`
-                        }
-                    />
-
-                    <TextInput
-                        keyboardType="number-pad"
-                        style={[
-                            formStyles.input,
-                            {
-                                borderColor:
-                                    focusedInput === 4
-                                        ? Colors.blue
-                                        : Colors.blueLight
-                            },
-                            errorFieldNumber === 2 &&
-                            formStyles.borderRed
-                        ]}
-                        placeholder="0"
-                        value={fromCm(orderObject.height_shtapik, isMm)}
-                        onChangeText={(value) =>
-                            updateDimension(
-                                "height_shtapik",
-                                "height_gab",
-                                value,
-                                h_max,
-                                HEIGHT_DIFFERENCE,
-                                4,
-                                "add"
-                            )
-                        }
-                        onFocus={() => setFocusedInput(4)}
-                        onBlur={() => setFocusedInput(null)}
-                        maxLength={6}
-                    />
-                    <Text style={formStyles.unitLabel}>
-                        {isMm ? "мм" : "см"}
-                    </Text>
                 </View>
-            </View>}
+            )}
         </>
     );
 }

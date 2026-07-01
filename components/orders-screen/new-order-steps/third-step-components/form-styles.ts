@@ -61,7 +61,7 @@ export const formStyles = StyleSheet.create({
         alignItems: 'center',
     },
     dropdownMenu: {
-        maxHeight: 321,
+        maxHeight: 120,
         width: "100%",
         backgroundColor: "white",
         borderRadius: 17,
@@ -108,7 +108,6 @@ export const formStyles = StyleSheet.create({
     row: {
         flexDirection: "row",
         justifyContent: "space-between",
-        // marginTop: 12,
     },
     inputContainer: {
         width: "46%",

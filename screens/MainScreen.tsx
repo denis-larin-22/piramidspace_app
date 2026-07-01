@@ -27,7 +27,7 @@ function MainScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
         async function updateUserObjectInfo() {
             const login = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_LOGIN);
             const telNumber = await getDataFromAcyncStorage(ASYNC_STORAGE_USER_PHONE_NUMBER);
-            const actualUserInfo = await getAuth(login, telNumber); // get actual user info object
+            const actualUserInfo = await getAuth(login as string, telNumber as string); // get actual user info object
 
             if (actualUserInfo !== undefined) {
                 saveDataToAcyncStorage(ASYNC_STORAGE_USER_INFO_OBJECT, JSON.stringify(actualUserInfo));
@@ -69,7 +69,7 @@ function MainScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
         };
     }, []);
 
-    if (userInfo === null) return <Text>Користувача не знайдено</Text>;
+    const userName = userInfo ? userInfo["Имя Фамилия"] : "";
 
     return (
         <View style={styles.container}>
@@ -90,8 +90,9 @@ function MainScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
                 <Header style={styles.header} />
 
                 <Greetings
-                    userName={userInfo["Имя Фамилия"]}
+                    userName={userName}
                     isOnline={isConnected}
+                    navigation={navigation}
                 />
 
                 <RateAndBalance />

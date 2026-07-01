@@ -53,7 +53,14 @@ export default function FixationType({
                     offsetY={-20}
                     style={styles.wrap}
                 >
-                    <ScrollView style={{ maxHeight: 200 }}>
+                    <ScrollView
+                        style={{ maxHeight: 105 }}
+                        persistentScrollbar={true}
+                        nestedScrollEnabled
+                        keyboardShouldPersistTaps="handled"
+                        showsVerticalScrollIndicator
+                        scrollIndicatorInsets={{ right: 2 }}
+                    >
                         {fullList.map((fixationType, index) => (
                             <AnimatedWrapper
                                 key={index}
@@ -89,7 +96,7 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         borderRadius: 17,
         position: "absolute",
-        top: "105%",
+        bottom: "62%",
         zIndex: 50,
         padding: 8,
         paddingBottom: 4,
